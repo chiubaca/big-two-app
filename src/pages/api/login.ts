@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { z } from "astro/zod";
-import pb from "../../libs/pocketbase"; // REMOVE ONCE MIDDLE WARE IS READY
+// import pb from "../../libs/pocketbase"; // REMOVE ONCE MIDDLE WARE IS READY
 
 export const POST: APIRoute = async ({ request, locals }) => {
   // const pb = locals.pb;
@@ -15,11 +15,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
       })
       .parse(json);
 
-    const authData = await pb
-      .collection("users")
-      .authWithPassword(email, password);
+    await locals.pb.collection("users").authWithPassword(email, password);
 
-    const pbAuthCookie = pb.authStore.exportToCookie({ httpOnly: false });
+    const pbAuthCookie = locals.pb.authStore.exportToCookie({
+      httpOnly: false,
+    });
 
     return new Response(
       JSON.stringify({

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import pb from "../libs/pocketbase";
+import pbClient from "../libs/pocketbase-client";
 import Cookies from "js-cookie";
 
 export const Login = () => {
@@ -9,11 +9,11 @@ export const Login = () => {
     const getAuth = async () => {
       const cookies = document.cookie;
 
-      const authStore = pb.authStore;
+      const authStore = pbClient.authStore;
       authStore.loadFromCookie(cookies || "");
 
       // best practice to refresh the auth after loading from cookie
-      authStore.isValid && (await pb.collection("users").authRefresh());
+      authStore.isValid && (await pbClient.collection("users").authRefresh());
 
       console.log("Got auth sotre", authStore);
       setIsLoggedIn(authStore.isValid);
@@ -47,9 +47,11 @@ export const Login = () => {
           });
 
           const cookies = document.cookie;
-          pb.authStore.loadFromCookie(cookies);
+          console.log("🚀 ~ onSubmit={ ~ cookies:", cookies);
 
-          setIsLoggedIn(pb.authStore.isValid);
+          pbClient.authStore.loadFromCookie(cookies);
+
+          setIsLoggedIn(pbClient.authStore.isValid);
           console.log("USER LOGGED IN");
         }}
       >
@@ -66,9 +68,9 @@ export const Login = () => {
 
       <button
         onClick={() => {
-          pb.authStore.clear();
+          pbClient.authStore.clear();
           Cookies.set("pb_auth", "");
-          setIsLoggedIn(pb.authStore.isValid);
+          setIsLoggedIn(pbClient.authStore.isValid);
           console.log("USER LOGGED OUT");
         }}
       >

@@ -1,11 +1,10 @@
 ---
+import { CreatePost } from "../components/CreatePost";
 import { Login } from "../components/Login";
 import { SignUp } from "../components/SignUp";
-import pb from "../libs/pocketbase";
-
 // const { pb } = Astro.locals;
 
-console.log("got auth store server", pb.authStore);
+// console.log("got auth store server", pb.authStore);
 ---
 
 <html lang="en">
@@ -22,5 +21,7 @@ console.log("got auth store server", pb.authStore);
     <SignUp client:load />
 
     <Login client:load />
+
+    <CreatePost client:load />
   </body>
 </html>
