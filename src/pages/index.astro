@@ -2,6 +2,7 @@
 import { CreatePost } from "../components/CreatePost";
 import { Login } from "../components/Login";
 import { SignUp } from "../components/SignUp";
+import { ViewPosts } from "../components/ViewPosts";
 // const { pb } = Astro.locals;
 
 // console.log("got auth store server", pb.authStore);
@@ -23,5 +24,7 @@ import { SignUp } from "../components/SignUp";
     <Login client:load />
 
     <CreatePost client:load />
+
+    <ViewPosts client:load />
   </body>
 </html>

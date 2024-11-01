@@ -9,8 +9,6 @@ export const CreatePost = () => {
         onSubmit={async (e) => {
           e.preventDefault();
           const formData = new FormData(e.target as HTMLFormElement);
-          const post = formData.get("post");
-          console.log("🚀 ~ onSubmit={ ~ post:", post);
           actions.createPost(formData);
         }}
       >

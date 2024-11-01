@@ -15,7 +15,6 @@ export const Login = () => {
       // best practice to refresh the auth after loading from cookie
       authStore.isValid && (await pbClient.collection("users").authRefresh());
 
-      console.log("Got auth sotre", authStore);
       setIsLoggedIn(authStore.isValid);
     };
 
