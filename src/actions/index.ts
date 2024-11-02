@@ -39,16 +39,16 @@ export const server = {
       }
     },
   }),
-  createPost: defineAction({
+  createRoom: defineAction({
     accept: "form",
     input: z.object({
-      post: z.string(),
+      roomName: z.string(),
     }),
     handler: async (input, context) => {
       console.log("🚀 ~ handler: ~ input:", input);
 
       try {
-        const { post } = input;
+        const { roomName } = input;
 
         if (!context.locals.pb.authStore.isValid) {
           console.log("user must be logged in to post");
@@ -58,19 +58,20 @@ export const server = {
         console.log("Ready to post...");
 
         const data = {
-          user: [context.locals.pb.authStore.model?.id],
-          content: post,
+          admin: context.locals.pb.authStore.model?.id,
+          players: [context.locals.pb.authStore.model?.id],
+          roomName,
         };
 
-        const record = await pbAdmin.collection("posts").create(data);
+        const record = await pbAdmin.collection("rooms").create(data);
         console.log("🚀 ~ handler: ~ record:", record);
 
-        return "hello";
+        return record;
       } catch (e) {
         console.log("Server Error", JSON.stringify(e));
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Server error trying to create user record",
+          message: "Server error trying to create a room",
           stack: JSON.stringify(e),
         });
       }

@@ -21,7 +21,7 @@ export const ViewPosts = () => {
     console.log("Subscribing...", pbClient.authStore);
 
     // Subscribe to changes in posts collection
-    pbClient.collection("posts").subscribe(
+    pbClient.collection("rooms").subscribe(
       "*",
       (e) => {
         console.log("Action:", e.action);
@@ -29,7 +29,7 @@ export const ViewPosts = () => {
 
         if (e.action === "create") {
           console.log("ACTION EVENT");
-          setPosts([...posts, e.record.content]);
+          setPosts([...posts, e.record.roomName]);
         }
 
         // Update posts state based on the action

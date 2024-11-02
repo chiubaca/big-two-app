@@ -1,6 +1,6 @@
 import { actions } from "astro:actions";
 
-export const CreatePost = () => {
+export const CreateRoom = () => {
   return (
     <>
       <hr />
@@ -9,14 +9,14 @@ export const CreatePost = () => {
         onSubmit={async (e) => {
           e.preventDefault();
           const formData = new FormData(e.target as HTMLFormElement);
-          actions.createPost(formData);
+          actions.createRoom(formData);
         }}
       >
         <label>
           add post
-          <textarea name="post" />
+          <textarea name="roomName" />
         </label>
-        <button>Add post</button>
+        <button>Create a room</button>
       </form>
     </>
   );
