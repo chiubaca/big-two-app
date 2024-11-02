@@ -1,0 +1,30 @@
+---
+import pbAdmin from "../../libs/pocketbase-admin";
+
+const { roomId } = Astro.params;
+
+if (!roomId) {
+  Astro.redirect("/");
+  return;
+}
+
+const currentUserId = Astro.locals.pb.authStore.model?.id;
+const userName = Astro.locals.pb.authStore.model?.name;
+
+// check players in this room
+const roomDetails = await pbAdmin.collection("rooms").getOne(roomId);
+console.log("🚀 ~ roomDetails:", roomDetails.players);
+
+if (!roomDetails.players.includes(currentUserId)) {
+  console.log("add user to this room");
+  await pbAdmin
+    .collection("rooms")
+    .update(roomId, { players: [...roomDetails.players, currentUserId] });
+}
+---
+
+<a href="/">Back to Home</a>
+
+<h1>Welcome to room {roomId}, {userName}</h1>
+
+<p>Players ({roomDetails.players.length})</p>
