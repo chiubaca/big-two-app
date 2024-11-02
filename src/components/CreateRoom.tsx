@@ -4,7 +4,7 @@ export const CreateRoom = () => {
   return (
     <>
       <hr />
-      <h1>Add a Post</h1>
+      <h1>Create a room</h1>
       <form
         onSubmit={async (e) => {
           e.preventDefault();
@@ -13,7 +13,7 @@ export const CreateRoom = () => {
         }}
       >
         <label>
-          add post
+          Create a room
           <textarea name="roomName" />
         </label>
         <button>Create a room</button>

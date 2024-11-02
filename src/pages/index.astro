@@ -3,7 +3,19 @@ import { CreateRoom } from "../components/CreateRoom";
 import { Login } from "../components/Login";
 import { SignUp } from "../components/SignUp";
 import { ViewPosts } from "../components/ViewPosts";
-// const { pb } = Astro.locals;
+
+const currentUserId = Astro.locals.pb.authStore.model?.id;
+const userName = Astro.locals.pb.authStore.model?.name;
+
+let rooms = [];
+
+if (currentUserId) {
+  rooms = await Astro.locals.pb
+    .collection("rooms")
+    .getFullList({ expand: "admin" });
+
+  console.dir(rooms, { depth: null });
+}
 
 // console.log("got auth store server", pb.authStore);
 ---
@@ -17,7 +29,7 @@ import { ViewPosts } from "../components/ViewPosts";
     <title>Astro</title>
   </head>
   <body>
-    <h1>Astro</h1>
+    <h1>Hello {userName}| {currentUserId}</h1>
 
     <SignUp client:load />
 
@@ -26,5 +38,21 @@ import { ViewPosts } from "../components/ViewPosts";
     <CreateRoom client:load />
 
     <ViewPosts client:load />
+
+    <hr />
+
+    <h1>Rooms({rooms?.length})</h1>
+
+    {
+      rooms?.map((room) => {
+        console.log("🚀 ~ rooms?.map ~ room:", room);
+        return (
+          <div>
+            <a href={`/${room.id}`}> {room.roomName}</a> | Room created by
+            <code>{room.expand.admin.username}</code>
+          </div>
+        );
+      })
+    }
   </body>
 </html>
