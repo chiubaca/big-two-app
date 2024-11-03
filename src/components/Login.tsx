@@ -5,30 +5,11 @@ import Cookies from "js-cookie";
 export const Login = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
 
-  useEffect(() => {
-    const getAuth = async () => {
-      const cookies = document.cookie;
-
-      const authStore = pbClient.authStore;
-      authStore.loadFromCookie(cookies || "");
-
-      // best practice to refresh the auth after loading from cookie
-      authStore.isValid && (await pbClient.collection("users").authRefresh());
-
-      setIsLoggedIn(authStore.isValid);
-    };
-
-    if (!isLoggedIn) {
-      getAuth();
-    }
-  }, [isLoggedIn]);
-
   return (
     <>
       <hr />
       {/* {error && <code>{error}</code>} */}
       <h1>Login</h1>
-      <div> User logged in status: {JSON.stringify(isLoggedIn)}</div>
       <form
         onSubmit={async (e) => {
           e.preventDefault();
@@ -65,7 +46,6 @@ export const Login = () => {
         </label>
         <button type="submit">Login</button>
       </form>
-
       <button
         type="button"
         onClick={() => {
