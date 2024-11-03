@@ -73,8 +73,14 @@ const JoinLeaveRoom = () => {
 };
 
 const Game = () => {
-  const { handleStartGame, gameState } = useContext(GameRoomContext);
+  const { handleStartGame, gameState, currentUserId } =
+    useContext(GameRoomContext);
   console.log("🚀 ~ Game ~ gameState:", gameState);
+
+  const currentPlayerIdTurn =
+    gameState.players[gameState.currentPlayerIndex].id;
+
+  const isCurrentPlayerTurn = currentPlayerIdTurn === currentUserId;
 
   return (
     <div>
@@ -83,6 +89,12 @@ const Game = () => {
       </button>
 
       <code>{JSON.stringify(gameState)}</code>
+
+      <div>
+        <button type="button">
+          {isCurrentPlayerTurn ? "play your turn" : "its not your turn"}
+        </button>
+      </div>
     </div>
   );
 };

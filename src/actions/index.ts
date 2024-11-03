@@ -5,6 +5,7 @@ import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import pbAdmin from "../libs/pocketbase-admin";
 import { createDeck } from "@chiubaca/big-two-utils";
+import { baseGameState, type GameState } from "../helpers/gameState";
 
 export const server = {
   signUp: defineAction({
@@ -46,7 +47,7 @@ export const server = {
       roomName: z.string(),
     }),
     handler: async (input, context) => {
-      console.log("🚀 ~ handler: ~ input:", input);
+      console.log("🚀 Create a room action", input);
 
       try {
         const { roomName } = input;
@@ -62,6 +63,10 @@ export const server = {
           admin: context.locals.pb.authStore.model?.id,
           players: [context.locals.pb.authStore.model?.id],
           roomName,
+          gameState: {
+            ...baseGameState,
+            players: [{ hand: [], id: context.locals.pb.authStore.model?.id }],
+          } satisfies GameState,
         };
 
         const record = await pbAdmin.collection("rooms").create(data);
@@ -88,11 +93,22 @@ export const server = {
       console.log("🚀 ~ start game handler");
       try {
         const pb = context.locals.pb;
-        const newDeck = createDeck();
+        // const newDeck = createDeck();
+
+        const roomRecord = await pb.collection("rooms").getOne(input.roomId);
+
         const record = await pb.collection("rooms").update(input.roomId, {
-          game_state: { deck: newDeck },
+          gameState: {
+            players: roomRecord.players.map((playerId) => {
+              return {
+                id: playerId,
+                hand: [],
+              };
+            }),
+            currentPlayerIndex: 0,
+            roundMode: "single",
+          } satisfies GameState,
         });
-        console.log("🚀 ~ record ~ record:", record.game_state);
 
         return record;
       } catch (e) {

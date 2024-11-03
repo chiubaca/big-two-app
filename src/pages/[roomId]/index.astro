@@ -12,19 +12,19 @@ if (!roomId) {
 const currentUserId = Astro.locals.pb.authStore.model?.id;
 const userName = Astro.locals.pb.authStore.model?.name;
 
-// check players in this room
+// // check players in this room
 const roomDetails = await pbAdmin.collection("rooms").getOne(roomId);
-console.log("🚀 ~ roomDetails:", roomDetails);
+// console.log("🚀 ~ roomDetails:", roomDetails);
 ---
 
 <a href="/">Back to Home</a>
 
-<h1>Welcome to room {roomId}, {userName}</h1>
+<h1>Welcome to room {roomId}, {userName} (<code>{currentUserId}</code>)</h1>
 
 <GameRoom
   currentUserId={currentUserId}
   roomId={roomId}
   players={roomDetails.players}
-  gameState={roomDetails.game_state}
+  gameState={roomDetails.gameState}
   client:load
 />

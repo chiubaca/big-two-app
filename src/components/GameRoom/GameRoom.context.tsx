@@ -8,12 +8,13 @@ import {
 import pbClient from "../../libs/pocketbase-client";
 import type { RecordModel } from "pocketbase";
 import { actions, type SafeResult } from "astro:actions";
+import { baseGameState, type GameState } from "../../helpers/gameState";
 
 type GameRoomContextType = {
   roomId: string;
   players: string[];
   currentUserId: string;
-  gameState: any;
+  gameState: GameState;
   handleStartGame: () => Promise<
     SafeResult<
       {
@@ -33,7 +34,7 @@ export const GameRoomContext = createContext<GameRoomContextType>({
   roomId: "",
   players: [],
   currentUserId: "",
-  gameState: {},
+  gameState: baseGameState,
   handleStartGame: () => {
     throw new Error("used outside of provider");
   },
@@ -76,7 +77,7 @@ const useSubscribeToPlayers = ({
 }: {
   roomId: string;
   initialPlayers: string[];
-  initialGameState: any;
+  initialGameState: GameState;
 }) => {
   const [players, setPlayers] = useState<string[]>(initialPlayers);
 
@@ -88,7 +89,7 @@ const useSubscribeToPlayers = ({
   };
 
   const handleNewGameState = (record: RecordModel) => {
-    setGameState(record.game_state);
+    setGameState(record.gameState);
   };
 
   useEffect(() => {
