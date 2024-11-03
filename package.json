@@ -13,6 +13,7 @@
   "dependencies": {
     "@astrojs/check": "^0.9.4",
     "@astrojs/react": "^3.6.2",
+    "@chiubaca/big-two-utils": "npm:@jsr/chiubaca__big-two-utils@^1.0.0",
     "@types/react": "npm:types-react@rc",
     "@types/react-dom": "npm:types-react-dom@rc",
     "astro": "^4.16.7",
