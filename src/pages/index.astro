@@ -10,7 +10,7 @@ const rooms = currentUserId
   ? await Astro.locals.pb.collection("rooms").getFullList({ expand: "admin" })
   : [];
 
-console.dir({ "🚀 rooms on home page": rooms }, { depth: null });
+// console.dir({ "🚀 rooms on home page": rooms }, { depth: null });
 ---
 
 <html lang="en">

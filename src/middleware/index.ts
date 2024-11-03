@@ -5,7 +5,11 @@ import { defineMiddleware } from "astro/middleware";
  * Upon every route we  initialise a new a pocket base instance and attach it our
  * Astro local context and website cookies.
  */
+
 export const onRequest = defineMiddleware(async ({ locals, request }, next) => {
+  // Needed for local dev in safari
+  const secureWhenInProduction = import.meta.env.PROD;
+
   locals.pb = new PocketBase("http://127.0.0.1:8090");
 
   // load the store data from the request cookie string
@@ -25,7 +29,10 @@ export const onRequest = defineMiddleware(async ({ locals, request }, next) => {
   // send back the default 'pb_auth' cookie to the client with the latest store state
   response.headers.append(
     "set-cookie",
-    locals.pb.authStore.exportToCookie({ httpOnly: false })
+    locals.pb.authStore.exportToCookie({
+      httpOnly: false,
+      secure: secureWhenInProduction,
+    })
   );
 
   return response;

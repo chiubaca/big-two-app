@@ -75,7 +75,6 @@ const JoinLeaveRoom = () => {
 const Game = () => {
   const { handleStartGame, gameState, currentUserId } =
     useContext(GameRoomContext);
-  console.log("🚀 ~ Game ~ gameState:", gameState);
 
   const currentPlayerIdTurn =
     gameState.players[gameState.currentPlayerIndex].id;

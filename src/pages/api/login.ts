@@ -3,7 +3,8 @@ import { z } from "astro/zod";
 // import pb from "../../libs/pocketbase"; // REMOVE ONCE MIDDLE WARE IS READY
 
 export const POST: APIRoute = async ({ request, locals }) => {
-  // const pb = locals.pb;
+  // Needed for local dev in safari
+  const secureWhenInProduction = import.meta.env.PROD;
   try {
     const json = await request.json();
     console.log("🚀 ~ constPOST:APIRoute= ~ request:", json);
@@ -19,6 +20,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     const pbAuthCookie = locals.pb.authStore.exportToCookie({
       httpOnly: false,
+      secure: secureWhenInProduction,
     });
 
     return new Response(
