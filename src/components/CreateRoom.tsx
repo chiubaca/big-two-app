@@ -16,7 +16,7 @@ export const CreateRoom = () => {
           Create a room
           <textarea name="roomName" />
         </label>
-        <button>Create a room</button>
+        <button type="button">Create a room</button>
       </form>
     </>
   );
