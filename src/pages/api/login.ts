@@ -6,15 +6,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
   // Needed for local dev in safari
   const secureWhenInProduction = import.meta.env.PROD;
   try {
-    const json = await request.json();
-    console.log("🚀 ~ constPOST:APIRoute= ~ request:", json);
+    const formData = await request.formData();
+
+    const credentials = {
+      email: formData.get("email"),
+      password: formData.get("password"),
+    };
 
     const { email, password } = z
       .object({
         email: z.string().email(),
         password: z.string(),
       })
-      .parse(json);
+      .parse(credentials);
 
     await locals.pb.collection("users").authWithPassword(email, password);
 
@@ -35,16 +39,11 @@ export const POST: APIRoute = async ({ request, locals }) => {
       }
     );
   } catch (error) {
-    console.log("🚀 ~ constPOST:APIRoute= ~ error:", error);
+    console.warn("❌ SERVER ERROR LOGGING USER IN: ", error);
     return new Response(
       JSON.stringify({
         error: "something went wrong",
-      }),
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
+      })
     );
   }
 };

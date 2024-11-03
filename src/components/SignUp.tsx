@@ -12,13 +12,19 @@ export const SignUp = () => {
         onSubmit={async (e) => {
           e.preventDefault();
           const formData = new FormData(e.target as HTMLFormElement);
-          console.log("🚀 ~ onSubmit={ ~ formData:", formData);
 
           const resp = await actions.signUp(formData);
 
           if (resp.error) {
             setError(JSON.stringify(resp.error.message));
+            return;
           }
+
+          await fetch("/api/login", {
+            method: "POST",
+            body: formData,
+          });
+          location.reload();
         }}
       >
         <label>
@@ -33,7 +39,7 @@ export const SignUp = () => {
           Password:
           <input type="password" name="password" />
         </label>
-        <button>Submit</button>
+        <button type="submit">Submit</button>
       </form>
     </>
   );
