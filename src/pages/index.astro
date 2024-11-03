@@ -2,7 +2,6 @@
 import { CreateRoom } from "../components/GameRoom/CreateRoom";
 import { Login } from "../components/Login";
 import { SignUp } from "../components/SignUp";
-import { ViewPosts } from "../components/ViewPosts";
 
 const currentUserId = Astro.locals.pb.authStore.model?.id;
 const userName = Astro.locals.pb.authStore.model?.name;
@@ -30,8 +29,6 @@ console.dir({ "🚀 rooms on home page": rooms }, { depth: null });
     <Login client:load />
 
     <CreateRoom client:load />
-
-    <ViewPosts client:load />
 
     <hr />
 
