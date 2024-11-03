@@ -52,6 +52,7 @@ export const Login = () => {
 
           setIsLoggedIn(pbClient.authStore.isValid);
           console.log("USER LOGGED IN");
+          location.reload();
         }}
       >
         <label>
@@ -62,15 +63,18 @@ export const Login = () => {
           Password:
           <input type="password" name="password" />
         </label>
-        <button>Login</button>
+        <button type="submit">Login</button>
       </form>
 
       <button
+        type="button"
         onClick={() => {
           pbClient.authStore.clear();
           Cookies.set("pb_auth", "");
           setIsLoggedIn(pbClient.authStore.isValid);
           console.log("USER LOGGED OUT");
+
+          location.reload();
         }}
       >
         Log out
