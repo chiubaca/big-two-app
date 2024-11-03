@@ -2,20 +2,27 @@ import { useContext } from "react";
 import {
   GameRoomContext,
   GameRoomProvider,
-  type GameRoomContextType,
+  type InitialGameRoomContextProps,
 } from "./GameRoom/GameRoom.context";
 import pbClient from "../libs/pocketbase-client";
 
-interface GameRoomProps extends GameRoomContextType {}
+interface GameRoomProps extends InitialGameRoomContextProps {}
 
-export const GameRoom = ({ currentUserId, roomId, players }: GameRoomProps) => {
+export const GameRoom = ({
+  currentUserId,
+  roomId,
+  players,
+  gameState,
+}: GameRoomProps) => {
   return (
     <GameRoomProvider
       roomId={roomId}
+      gameState={gameState}
       players={players}
       currentUserId={currentUserId}
     >
       <Player />
+      <Game />
       <JoinLeaveRoom />
     </GameRoomProvider>
   );
@@ -23,9 +30,12 @@ export const GameRoom = ({ currentUserId, roomId, players }: GameRoomProps) => {
 
 const Player = () => {
   const { players } = useContext(GameRoomContext);
-  console.log("🚀 ~ GameRoom ~ players:", players);
 
-  return <> Players in this room: {JSON.stringify(players)}</>;
+  return (
+    <>
+      <div>Players in this room: {JSON.stringify(players)}</div>
+    </>
+  );
 };
 
 const JoinLeaveRoom = () => {
@@ -59,5 +69,20 @@ const JoinLeaveRoom = () => {
     <button type="button" onClick={handleJoinRoom}>
       Join room
     </button>
+  );
+};
+
+const Game = () => {
+  const { handleStartGame, gameState } = useContext(GameRoomContext);
+  console.log("🚀 ~ Game ~ gameState:", gameState);
+
+  return (
+    <div>
+      <button type="button" onClick={() => handleStartGame()}>
+        Start Game
+      </button>
+
+      <code>{JSON.stringify(gameState)}</code>
+    </div>
   );
 };

@@ -4,6 +4,7 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import pbAdmin from "../libs/pocketbase-admin";
+import { createDeck } from "@chiubaca/big-two-utils";
 
 export const server = {
   signUp: defineAction({
@@ -72,6 +73,33 @@ export const server = {
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Server error trying to create a room",
+          stack: JSON.stringify(e),
+        });
+      }
+    },
+  }),
+
+  startGame: defineAction({
+    accept: "json",
+    input: z.object({
+      roomId: z.string(),
+    }),
+    handler: async (input, context) => {
+      console.log("🚀 ~ start game handler");
+      try {
+        const pb = context.locals.pb;
+        const newDeck = createDeck();
+        const record = await pb.collection("rooms").update(input.roomId, {
+          game_state: { deck: newDeck },
+        });
+        console.log("🚀 ~ record ~ record:", record.game_state);
+
+        return record;
+      } catch (e) {
+        console.log("Server Error", JSON.stringify(e));
+        throw new ActionError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Server error starting game",
           stack: JSON.stringify(e),
         });
       }
