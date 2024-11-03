@@ -1,4 +1,5 @@
 ---
+import { GameRoom } from "../../components/GameRoom";
 import pbAdmin from "../../libs/pocketbase-admin";
 
 const { roomId } = Astro.params;
@@ -13,18 +14,15 @@ const userName = Astro.locals.pb.authStore.model?.name;
 
 // check players in this room
 const roomDetails = await pbAdmin.collection("rooms").getOne(roomId);
-console.log("🚀 ~ roomDetails:", roomDetails.players);
-
-if (!roomDetails.players.includes(currentUserId)) {
-  console.log("add user to this room");
-  await pbAdmin
-    .collection("rooms")
-    .update(roomId, { players: [...roomDetails.players, currentUserId] });
-}
 ---
 
 <a href="/">Back to Home</a>
 
 <h1>Welcome to room {roomId}, {userName}</h1>
 
-<p>Players ({roomDetails.players.length})</p>
+<GameRoom
+  currentUserId={currentUserId}
+  roomId={roomId}
+  players={roomDetails.players}
+  client:load
+/>
