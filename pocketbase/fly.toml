@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for pocketbase-snowy-meadow-4019 on 2024-11-04T18:24:28Z
+# fly.toml app configuration file generated for big-two-pb on 2024-11-05T19:24:45Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -7,6 +7,10 @@ app = 'big-two-pb'
 primary_region = 'lhr'
 
 [build]
+
+[[mounts]]
+source = 'pb_data'
+destination = '/pb/pb_data'
 
 [http_service]
 internal_port = 8080
@@ -20,7 +24,3 @@ processes = ['app']
 memory = '1gb'
 cpu_kind = 'shared'
 cpus = 1
-
-[mounts]
-destination = "/pb/pb_data"
-source = "pb_data"
