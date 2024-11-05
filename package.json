@@ -8,7 +8,7 @@
     "build": "astro check && astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "db:start": "./_pocketbase serve"
+    "db:start": "./pocketbase/_pocketbase serve"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
@@ -29,6 +29,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
+    "@flydotio/dockerfile": "^0.5.9",
     "@types/js-cookie": "^3.0.6"
   }
 }
