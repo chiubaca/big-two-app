@@ -1,5 +1,5 @@
 import PocketBase from "pocketbase";
-const pbAdmin = new PocketBase("http://127.0.0.1:8090");
+const pbAdmin = new PocketBase(import.meta.env.PB_ENDPOINT);
 
 pbAdmin.admins.authWithPassword(
   "test@test.com",
