@@ -3,8 +3,6 @@ import { actions } from "astro:actions";
 export const CreateRoom = () => {
   return (
     <>
-      <hr />
-      <h1>Create a room</h1>
       <form
         onSubmit={async (e) => {
           e.preventDefault();
@@ -15,9 +13,14 @@ export const CreateRoom = () => {
       >
         <label>
           Create a room
-          <textarea name="roomName" />
+          <input
+            className="input input-bordered w-full max-w-xs"
+            name="roomName"
+          />
         </label>
-        <button type="submit">Create a room</button>
+        <button className="btn" type="submit">
+          Create a room
+        </button>
       </form>
     </>
   );

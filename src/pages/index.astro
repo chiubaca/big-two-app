@@ -22,17 +22,30 @@ const rooms = currentUserId
     <title>Astro</title>
   </head>
   <body>
-    <h1>Hello {userName}| {currentUserId}</h1>
+    <h1></h1>
 
-    <SignUp client:load />
+    <div class="navbar bg-base-100">
+      <a class="btn btn-ghost text-xl"
+        >Hello {userName} | <code>{currentUserId}</code>
+      </a>
+    </div>
 
-    <Login client:load />
+    <div class="flex w-full flex-col border-opacity-50">
+      <div class="card bg-base-300 rounded-box grid h-20 place-items-center">
+        <Login client:load />
+      </div>
+      <div class="divider">OR</div>
+      <div class="card bg-base-300 rounded-box grid h-20 place-items-center">
+        Sign Up
+        <SignUp client:load />
+      </div>
+    </div>
+
+    <div class="divider divider-accent">Create a room</div>
 
     <CreateRoom client:load />
 
-    <hr />
-
-    <h1>Rooms({rooms?.length})</h1>
+    <div class="divider divider-accent"><h1>Rooms({rooms?.length})</h1></div>
 
     {
       rooms?.map((room) => {
