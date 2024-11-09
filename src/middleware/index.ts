@@ -10,7 +10,7 @@ export const onRequest = defineMiddleware(async ({ locals, request }, next) => {
   // Needed for local dev in safari
   const secureWhenInProduction = import.meta.env.PROD;
 
-  locals.pb = new PocketBase(import.meta.env.PB_ENDPOINT);
+  locals.pb = new PocketBase(import.meta.env.PUBLIC_PB_ENDPOINT);
 
   // load the store data from the request cookie string
   locals.pb.authStore.loadFromCookie(request.headers.get("cookie") || "");
