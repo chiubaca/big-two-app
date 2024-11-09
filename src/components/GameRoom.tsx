@@ -5,6 +5,7 @@ import {
   type InitialGameRoomContextProps,
 } from "./GameRoom/GameRoom.context";
 import pbClient from "../libs/pocketbase-client";
+import type { Card } from "@chiubaca/big-two-utils";
 
 interface GameRoomProps extends InitialGameRoomContextProps {}
 
@@ -33,7 +34,9 @@ const Player = () => {
 
   return (
     <>
-      <div>Players in this room: {JSON.stringify(players)}</div>
+      <div className="m-3 text-lg">
+        Players in this room: {JSON.stringify(players)}
+      </div>
     </>
   );
 };
@@ -51,7 +54,7 @@ const JoinLeaveRoom = () => {
 
   const handleJoinRoom = async () => {
     const updatedPlayersList = [...players, currentUserId];
-    console.log("🚀 ~ JoinLeaveRoom ~ updatedPlayersList:", updatedPlayersList);
+
     await pbClient
       .collection("rooms")
       .update(roomId, { players: updatedPlayersList });
@@ -59,17 +62,39 @@ const JoinLeaveRoom = () => {
 
   if (players.includes(currentUserId)) {
     return (
-      <button type="button" onClick={handleLeaveRoom}>
+      <button
+        className="btn btn-warning m-3"
+        type="button"
+        onClick={handleLeaveRoom}
+      >
         Leave room
       </button>
     );
   }
 
   return (
-    <button type="button" onClick={handleJoinRoom}>
+    <button
+      className="btn btn-primary m-3"
+      type="button"
+      onClick={handleJoinRoom}
+    >
       Join room
     </button>
   );
+};
+
+const suitIconMapper = (suit: Card["suit"]) => {
+  const mapper: Record<Card["suit"], string> = {
+    DIAMOND: "♦️",
+    CLUB: "️♣️",
+    HEART: "♥️",
+    SPADE: "♠️",
+  };
+  return mapper[suit];
+};
+
+const cardColourMapper = (suit: Card["suit"]) => {
+  return suit === "HEART" || suit === "DIAMOND" ? "text-red-500" : "text-black";
 };
 
 const Game = () => {
@@ -83,11 +108,33 @@ const Game = () => {
 
   return (
     <div>
-      <button type="button" onClick={() => handleStartGame()}>
+      <button className="btn" type="button" onClick={() => handleStartGame()}>
         Start Game
       </button>
 
-      <code>{JSON.stringify(gameState)}</code>
+      <div>
+        <div className="flex flex-col gap-5">
+          {gameState.players.map((player, idx) => {
+            return (
+              <div key={player.id}>
+                {player.id}:
+                <div className="flex flex-wrap gap-2">
+                  {player.hand.map((card) => {
+                    return (
+                      <div
+                        key={card.value + card.suit}
+                        className={`card card-bordered shadow-sm  p-4 ${cardColourMapper(card.suit)}`}
+                      >
+                        {suitIconMapper(card.suit)} {card.value}
+                      </div>
+                    );
+                  })}{" "}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       <div>
         <button type="button">

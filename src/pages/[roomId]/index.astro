@@ -25,7 +25,9 @@ const roomDetails = await pbAdmin.collection("rooms").getOne(roomId);
 
 <a href="/">Back to Home</a>
 
-<h1>Welcome to room {roomId}, {userName} (<code>{currentUserId}</code>)</h1>
+<h1 class="m-3 text-2xl">
+  Welcome to room {roomId}, {userName} (<code>{currentUserId}</code>)
+</h1>
 
 <GameRoom
   currentUserId={currentUserId}
