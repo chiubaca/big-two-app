@@ -1,8 +1,10 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import pbAdmin from "../libs/pocketbase-admin";
-import { createDeck } from "@chiubaca/big-two-utils";
+import { createDeck, sortCards } from "@chiubaca/big-two-utils";
 import { baseGameState, type GameState } from "../helpers/gameState";
+import type { RoomSchema } from "../schemas/rooms";
+import { dealArray, shuffleArray } from "../helpers/deck";
 
 export const server = {
   signUp: defineAction({
@@ -13,7 +15,6 @@ export const server = {
       password: z.string(),
     }),
     handler: async (input, context) => {
-      console.log("🚀 ~ handler: ~ input:", input);
       try {
         const { email, name, password } = input;
 
@@ -54,8 +55,6 @@ export const server = {
           return null;
         }
 
-        console.log("Ready to post...");
-
         const data = {
           admin: context.locals.pb.authStore.model?.id,
           players: [context.locals.pb.authStore.model?.id],
@@ -90,21 +89,29 @@ export const server = {
       console.log("🚀 ~ start game handler");
       try {
         const pb = context.locals.pb;
-        // const newDeck = createDeck();
+        const newDeck = createDeck();
 
-        const roomRecord = await pb.collection("rooms").getOne(input.roomId);
+        const roomRecord = await pb
+          .collection("rooms")
+          .getOne<RoomSchema>(input.roomId);
+
+        const shuffledDeck = shuffleArray(newDeck);
+        const dealtCards = dealArray(shuffledDeck, roomRecord.players.length);
+
+        const updatedGameState = {
+          players: roomRecord.players.map((playerId, index) => {
+            return {
+              id: playerId,
+              hand: sortCards(dealtCards[index]),
+            };
+          }),
+          currentPlayerIndex: 0,
+          roundMode: "single",
+        } satisfies GameState;
+        console.dir(updatedGameState, { depth: null });
 
         const record = await pb.collection("rooms").update(input.roomId, {
-          gameState: {
-            players: roomRecord.players.map((playerId) => {
-              return {
-                id: playerId,
-                hand: [],
-              };
-            }),
-            currentPlayerIndex: 0,
-            roundMode: "single",
-          } satisfies GameState,
+          gameState: updatedGameState,
         });
 
         return record;
