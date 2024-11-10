@@ -5,8 +5,8 @@ import {
   type FC,
   type PropsWithChildren,
 } from "react";
-import pbClient from "@libs/pocketbase/pocketbase-client";
 import type { RecordModel } from "pocketbase";
+import pbClient from "~libs/pocketbase/pocketbase-client";
 import { actions, type SafeResult } from "astro:actions";
 import { baseGameState, type GameState } from "../../helpers/gameState";
 
