@@ -5,7 +5,7 @@ import { createDeck, sortCards } from "@chiubaca/big-two-utils";
 import { dealArray, shuffleArray } from "~libs/helpers/deck";
 import { type GameState, baseGameState } from "~libs/helpers/gameState";
 import pbAdmin from "~libs/pocketbase/pocketbase-admin";
-import type { RoomSchema } from "../schemas/rooms";
+import type { RoomSchema } from "~libs/schemas/rooms";
 
 export const server = {
   signUp: defineAction({
