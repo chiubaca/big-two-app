@@ -5,7 +5,7 @@ import {
   GameRoomContext,
   GameRoomProvider,
   type InitialGameRoomContextProps,
-} from "./GameRoom/GameRoom.context";
+} from "./GameRoom.context";
 
 interface GameRoomProps extends InitialGameRoomContextProps {}
 
