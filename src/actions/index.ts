@@ -2,9 +2,9 @@ import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { createDeck, sortCards } from "@chiubaca/big-two-utils";
 
+import { dealArray, shuffleArray } from "~libs/helpers/deck";
+import { type GameState, baseGameState } from "~libs/helpers/gameState";
 import pbAdmin from "~libs/pocketbase/pocketbase-admin";
-import { dealArray, shuffleArray } from "../helpers/deck";
-import { type GameState, baseGameState } from "../helpers/gameState";
 import type { RoomSchema } from "../schemas/rooms";
 
 export const server = {

@@ -7,8 +7,8 @@ import {
   useEffect,
   useState,
 } from "react";
+import { type GameState, baseGameState } from "~libs/helpers/gameState";
 import pbClient from "~libs/pocketbase/pocketbase-client";
-import { type GameState, baseGameState } from "../../helpers/gameState";
 
 type GameRoomContextType = {
   roomId: string;
