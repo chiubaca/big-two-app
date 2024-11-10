@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { userSchema } from "./user";
 
 export const roomSchema = z.object({
   admin: z.string(),
@@ -12,4 +13,9 @@ export const roomSchema = z.object({
   updated: z.string(),
 });
 
+export const roomExpandedSchema = roomSchema.extend({
+  expand: z.object({ admin: userSchema }),
+});
+
 export type RoomSchema = z.infer<typeof roomSchema>;
+export type RoomExpandedSchema = z.infer<typeof roomExpandedSchema>;
