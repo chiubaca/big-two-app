@@ -111,17 +111,17 @@ const Game = () => {
   const isCurrentPlayerTurn = currentPlayerIdTurn === currentUserId;
 
   return (
-    <div>
+    <div className="p-5">
       <button className="btn" type="button" onClick={() => handleStartGame()}>
         Start Game
       </button>
 
       <div>
-        <div className="flex flex-col gap-5">
+        <div className="flex flex-col gap-5 py-10">
           {gameState.players.map((player, idx) => {
             return (
               <div key={player.id}>
-                {player.id}:
+                {player.name}'s cards:
                 <div className="flex flex-wrap gap-2">
                   {player.hand.map((card) => {
                     return (
@@ -132,7 +132,7 @@ const Game = () => {
                         {suitIconMapper(card.suit)} {card.value}
                       </div>
                     );
-                  })}{" "}
+                  })}
                 </div>
               </div>
             );
@@ -140,11 +140,13 @@ const Game = () => {
         </div>
       </div>
 
-      <div>
-        <button type="button">
-          {isCurrentPlayerTurn ? "play your turn" : "its not your turn"}
-        </button>
-      </div>
+      <button
+        className={`btn ${isCurrentPlayerTurn ? "btn-secondary" : "btn-disabled"}`}
+        type="button"
+        disabled={!isCurrentPlayerTurn}
+      >
+        {isCurrentPlayerTurn ? "play your turn" : "its not your turn"}
+      </button>
     </div>
   );
 };
