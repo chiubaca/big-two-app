@@ -7,6 +7,8 @@ import {
   type InitialGameRoomContextProps,
 } from "./GameRoom.context";
 
+import "../../../base.css";
+
 interface GameRoomProps extends InitialGameRoomContextProps {}
 
 export const GameRoom = ({
