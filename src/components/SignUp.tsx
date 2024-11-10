@@ -1,5 +1,5 @@
-import { useState } from "react";
 import { actions } from "astro:actions";
+import { useState } from "react";
 
 export const SignUp = () => {
   const [error, setError] = useState<string>("");

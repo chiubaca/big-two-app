@@ -1,6 +1,6 @@
+import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
 import pbClient from "~libs/pocketbase/pocketbase-client";
-import Cookies from "js-cookie";
 
 export const Login = () => {
   return (

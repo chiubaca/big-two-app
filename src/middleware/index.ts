@@ -1,5 +1,5 @@
-import PocketBase from "pocketbase";
 import { defineMiddleware } from "astro/middleware";
+import PocketBase from "pocketbase";
 
 /**
  * Upon every route we  initialise a new a pocket base instance and attach it our

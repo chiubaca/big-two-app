@@ -1,14 +1,14 @@
+import { type SafeResult, actions } from "astro:actions";
+import type { RecordModel } from "pocketbase";
 import {
+  type FC,
+  type PropsWithChildren,
   createContext,
   useEffect,
   useState,
-  type FC,
-  type PropsWithChildren,
 } from "react";
-import type { RecordModel } from "pocketbase";
 import pbClient from "~libs/pocketbase/pocketbase-client";
-import { actions, type SafeResult } from "astro:actions";
-import { baseGameState, type GameState } from "../../helpers/gameState";
+import { type GameState, baseGameState } from "../../helpers/gameState";
 
 type GameRoomContextType = {
   roomId: string;
