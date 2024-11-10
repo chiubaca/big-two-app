@@ -47,6 +47,8 @@ export const server = {
     }),
     handler: async (input, context) => {
       console.log("🚀 Create a room action", input);
+      const currentUserId = context.locals.pb.authStore.model?.id;
+      const currentPlayerName = context.locals.pb.authStore.model?.name;
 
       try {
         const { roomName } = input;
@@ -57,12 +59,12 @@ export const server = {
         }
 
         const data = {
-          admin: context.locals.pb.authStore.model?.id,
-          players: [context.locals.pb.authStore.model?.id],
+          admin: currentUserId,
+          players: [currentUserId],
           roomName,
           gameState: {
             ...baseGameState,
-            players: [{ hand: [], id: context.locals.pb.authStore.model?.id }],
+            players: [{ hand: [], id: currentUserId, name: currentPlayerName }],
           } satisfies GameState,
         };
 
@@ -96,6 +98,8 @@ export const server = {
           .collection("rooms")
           .getOne<RoomSchema>(input.roomId);
 
+        const playerNames = roomRecord.gameState.players.map((p) => p.name);
+
         const shuffledDeck = shuffleArray(newDeck);
         const dealtCards = dealArray(shuffledDeck, roomRecord.players.length);
 
@@ -104,6 +108,7 @@ export const server = {
             return {
               id: playerId,
               hand: sortCards(dealtCards[index]),
+              name: playerNames[index],
             };
           }),
           currentPlayerIndex: 0,
@@ -121,6 +126,103 @@ export const server = {
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Server error starting game",
+          stack: JSON.stringify(e),
+        });
+      }
+    },
+  }),
+  joinGame: defineAction({
+    accept: "json",
+    input: z.object({
+      roomId: z.string(),
+    }),
+    handler: async (input, context) => {
+      console.log("🚀 ~ join game");
+      try {
+        const pb = context.locals.pb;
+        const currentPlayerId = context.locals.pb.authStore.model?.id;
+        const currentPlayerName = context.locals.pb.authStore.model?.name;
+
+        const roomRecord = await pb
+          .collection("rooms")
+          .getOne<RoomSchema>(input.roomId);
+
+        if (roomRecord.players.includes(currentPlayerId)) {
+          return "you're already in this room";
+        }
+        const updatedPlayers = [...roomRecord.players, currentPlayerId];
+        const updatedGameState = {
+          ...roomRecord.gameState,
+          players: [
+            ...roomRecord.gameState.players,
+            { id: currentPlayerId, name: currentPlayerName, hand: [] },
+          ],
+        } satisfies GameState;
+
+        console.dir(roomRecord, { depth: null });
+
+        const record = await pb.collection("rooms").update(input.roomId, {
+          players: updatedPlayers,
+          gameState: updatedGameState,
+        });
+
+        return "record";
+      } catch (e) {
+        console.log("Server Error", JSON.stringify(e));
+        throw new ActionError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Server error  join game room",
+          stack: JSON.stringify(e),
+        });
+      }
+    },
+  }),
+  leaveGame: defineAction({
+    accept: "json",
+    input: z.object({
+      roomId: z.string(),
+    }),
+    handler: async (input, context) => {
+      console.log("🚀 ~ leave game");
+      try {
+        const pb = context.locals.pb;
+        const currentPlayerId = context.locals.pb.authStore.model?.id;
+
+        const roomRecord = await pb
+          .collection("rooms")
+          .getOne<RoomSchema>(input.roomId);
+
+        if (roomRecord.admin === currentPlayerId) {
+          console.log("you cant leave a room are admin of");
+          return "you cant leave a room are admin of";
+        }
+
+        // update players array
+        const updatedPlayers = roomRecord.players.filter(
+          (playerId) => playerId !== currentPlayerId
+        );
+
+        // update gameState players
+        const updateGameState = {
+          ...roomRecord.gameState,
+          players: roomRecord.gameState.players.filter(
+            (player) => player.id !== currentPlayerId
+          ),
+        } satisfies GameState;
+
+        const updatedRecord = pb
+          .collection("rooms")
+          .update<RoomSchema>(input.roomId, {
+            players: updatedPlayers,
+            gameState: updateGameState,
+          });
+
+        return updatedRecord;
+      } catch (e) {
+        console.log("Server Error", JSON.stringify(e));
+        throw new ActionError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Server error leaving game room",
           stack: JSON.stringify(e),
         });
       }

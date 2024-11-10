@@ -1,6 +1,6 @@
+import { actions } from "astro:actions";
 import type { Card } from "@chiubaca/big-two-utils";
 import { useContext } from "react";
-import pbClient from "~libs/pocketbase/pocketbase-client";
 import {
   GameRoomContext,
   GameRoomProvider,
@@ -30,12 +30,20 @@ export const GameRoom = ({
 };
 
 const Player = () => {
-  const { players } = useContext(GameRoomContext);
+  const { gameState, currentUserId } = useContext(GameRoomContext);
 
   return (
     <>
       <div className="m-3 text-lg">
-        Players in this room: {JSON.stringify(players)}
+        Players in this room:
+        <ol>
+          {gameState.players.map((player) => (
+            <li key={player.id}>
+              {player.name} (<code>{player.id}</code>)
+              {player.id === currentUserId && "(you)"}
+            </li>
+          ))}
+        </ol>
       </div>
     </>
   );
@@ -45,19 +53,13 @@ const JoinLeaveRoom = () => {
   const { currentUserId, players, roomId } = useContext(GameRoomContext);
 
   const handleLeaveRoom = async () => {
-    const updatedPlayersList = players.filter((p) => p !== currentUserId);
-    console.log("🚀 ~ JoinLeaveRoom ~ updatedPlayersList:", updatedPlayersList);
-    await pbClient
-      .collection("rooms")
-      .update(roomId, { players: updatedPlayersList });
+    await actions.leaveGame({ roomId });
   };
 
   const handleJoinRoom = async () => {
-    const updatedPlayersList = [...players, currentUserId];
-
-    await pbClient
-      .collection("rooms")
-      .update(roomId, { players: updatedPlayersList });
+    await actions.joinGame({
+      roomId,
+    });
   };
 
   if (players.includes(currentUserId)) {

@@ -1,22 +1,32 @@
 import type { Card } from "@chiubaca/big-two-utils";
 
-type RoundMode = "single" | "pairs" | "combo";
+import { z } from "zod";
 
-type Player = {
-  id: string;
-  hand: Card[];
-};
+const cardSchema = z.custom<Card>();
 
-export type GameState = {
-  players: Player[];
-  currentPlayerIndex: 0 | 1 | 2 | 3;
-  roundMode: RoundMode;
-  // lastPlayedCards: Card[];
-  // lastPlayedBy: string | null;
-  // selectedCards: Card[];
-  // message: string;
-  // consecutivePasses: number;
-};
+const playerSchema = z.object({
+  name: z.string(),
+  id: z.string(),
+  hand: z.array(cardSchema),
+});
+
+const roundModeSchema = z.union([
+  z.literal("single"),
+  z.literal("pairs"),
+  z.literal("combo"),
+]);
+export const gameStateSchema = z.object({
+  players: z.array(playerSchema),
+  currentPlayerIndex: z.union([
+    z.literal(0),
+    z.literal(1),
+    z.literal(2),
+    z.literal(3),
+  ]),
+  roundMode: roundModeSchema,
+});
+
+export type GameState = z.infer<typeof gameStateSchema>;
 
 export const baseGameState: GameState = {
   players: [],

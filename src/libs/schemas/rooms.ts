@@ -1,4 +1,7 @@
 import { z } from "zod";
+
+import { gameStateSchema } from "~libs/helpers/gameState";
+
 import { userSchema } from "./user";
 
 export const roomSchema = z.object({
@@ -6,7 +9,7 @@ export const roomSchema = z.object({
   collectionId: z.string(),
   collectionName: z.string(),
   created: z.string(),
-  gameState: z.any(),
+  gameState: gameStateSchema,
   id: z.string(),
   players: z.array(z.string()),
   roomName: z.string(),
