@@ -4,7 +4,7 @@ import {
   GameRoomProvider,
   type InitialGameRoomContextProps,
 } from "./GameRoom/GameRoom.context";
-import pbClient from "../libs/pocketbase-client";
+import pbClient from "@libs/pocketbase/pocketbase-client";
 import type { Card } from "@chiubaca/big-two-utils";
 
 interface GameRoomProps extends InitialGameRoomContextProps {}

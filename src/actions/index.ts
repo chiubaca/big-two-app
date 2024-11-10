@@ -1,6 +1,6 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import pbAdmin from "../libs/pocketbase-admin";
+import pbAdmin from "@libs/pocketbase/pocketbase-admin";
 import { createDeck, sortCards } from "@chiubaca/big-two-utils";
 import { baseGameState, type GameState } from "../helpers/gameState";
 import type { RoomSchema } from "../schemas/rooms";
