@@ -1,6 +1,6 @@
 import { actions } from "astro:actions";
 import type { Card } from "@chiubaca/big-two-utils";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import {
   GameRoomContext,
   GameRoomProvider,
@@ -8,6 +8,7 @@ import {
 } from "./GameRoom.context";
 
 import "../../../base.css";
+import { PlayingCard } from "../components/PlayingCard";
 
 interface GameRoomProps extends InitialGameRoomContextProps {}
 
@@ -87,21 +88,9 @@ const JoinLeaveRoom = () => {
   );
 };
 
-const suitIconMapper = (suit: Card["suit"]) => {
-  const mapper: Record<Card["suit"], string> = {
-    DIAMOND: "♦️",
-    CLUB: "️♣️",
-    HEART: "♥️",
-    SPADE: "♠️",
-  };
-  return mapper[suit];
-};
-
-const cardColourMapper = (suit: Card["suit"]) => {
-  return suit === "HEART" || suit === "DIAMOND" ? "text-red-500" : "text-black";
-};
-
 const Game = () => {
+  const [selectedCards, setSelectedCards] = useState<Card[]>([]);
+
   const { handleStartGame, gameState, currentUserId } =
     useContext(GameRoomContext);
 
@@ -110,6 +99,23 @@ const Game = () => {
 
   const isCurrentPlayerTurn = currentPlayerIdTurn === currentUserId;
 
+  const toggleSelectedCard = (card: Card) => {
+    const isCardSelected = selectedCards.some(
+      (selectedCard) =>
+        selectedCard.suit === card.suit && selectedCard.value === card.value
+    );
+    if (isCardSelected) {
+      setSelectedCards(
+        selectedCards.filter(
+          (selectedCard) =>
+            selectedCard.suit !== card.suit || selectedCard.value !== card.value
+        )
+      );
+    } else {
+      setSelectedCards([...selectedCards, card]);
+    }
+  };
+
   return (
     <div className="p-5">
       <button className="btn" type="button" onClick={() => handleStartGame()}>
@@ -117,7 +123,8 @@ const Game = () => {
       </button>
 
       <div>
-        <div className="flex flex-col gap-5 py-10">
+        <div className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-orange-400">
+          <h1> Everyones cards for debugging!</h1>
           {gameState.players.map((player, idx) => {
             return (
               <div key={player.id}>
@@ -125,12 +132,7 @@ const Game = () => {
                 <div className="flex flex-wrap gap-2">
                   {player.hand.map((card) => {
                     return (
-                      <div
-                        key={card.value + card.suit}
-                        className={`card card-bordered shadow-sm  p-4 ${cardColourMapper(card.suit)}`}
-                      >
-                        {suitIconMapper(card.suit)} {card.value}
-                      </div>
+                      <PlayingCard key={card.suit + card.value} card={card} />
                     );
                   })}
                 </div>
@@ -138,6 +140,34 @@ const Game = () => {
             );
           })}
         </div>
+
+        <div>
+          <h1>
+            Current Players hand (<code>{currentPlayerIdTurn})</code>
+          </h1>
+
+          <div className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-orange-400">
+            <div className="flex flex-wrap gap-2">
+              {gameState.players[gameState.currentPlayerIndex].hand.map(
+                (card) => {
+                  return (
+                    <PlayingCard
+                      key={card.suit + card.value}
+                      card={card}
+                      onSelect={() => toggleSelectedCard(card)}
+                      selected={selectedCards.some(
+                        (selectedCard) =>
+                          selectedCard.suit === card.suit &&
+                          selectedCard.value === card.value
+                      )}
+                    />
+                  );
+                }
+              )}
+            </div>
+          </div>
+        </div>
+        {JSON.stringify(selectedCards)}
       </div>
 
       <button
