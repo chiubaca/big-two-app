@@ -185,6 +185,7 @@ const Game = () => {
             cards: selectedCards,
             roomId,
           });
+          setSelectedCards([]);
           console.log("🚀 ~ onClick={ ~ resp:", resp);
         }}
       >
