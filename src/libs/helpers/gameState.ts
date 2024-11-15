@@ -2,7 +2,7 @@ import type { Card } from "@chiubaca/big-two-utils";
 
 import { z } from "zod";
 
-const cardSchema = z.custom<Card>();
+export const cardSchema = z.custom<Card>(/** implement card validator */);
 
 const playerSchema = z.object({
   name: z.string(),
@@ -17,12 +17,7 @@ const roundModeSchema = z.union([
 ]);
 export const gameStateSchema = z.object({
   players: z.array(playerSchema),
-  currentPlayerIndex: z.union([
-    z.literal(0),
-    z.literal(1),
-    z.literal(2),
-    z.literal(3),
-  ]),
+  currentPlayerIndex: z.number(),
   roundMode: roundModeSchema,
 });
 
@@ -33,3 +28,19 @@ export const baseGameState: GameState = {
   currentPlayerIndex: 0,
   roundMode: "single",
 };
+
+export function rotatePlayerIndex(args: {
+  currentPlayerIndex: number;
+  totalPlayers: number;
+}) {
+  const { currentPlayerIndex, totalPlayers } = args;
+  const incrementedPlayerIndex = currentPlayerIndex + 1;
+  const updatedPlayerIndex =
+    incrementedPlayerIndex === totalPlayers + 1 ? 0 : incrementedPlayerIndex;
+
+  if (updatedPlayerIndex > totalPlayers) {
+    throw new Error(`max index can only be ${totalPlayers}`);
+  }
+
+  return updatedPlayerIndex;
+}
