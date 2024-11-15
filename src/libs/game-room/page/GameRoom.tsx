@@ -89,7 +89,6 @@ const JoinLeaveRoom = () => {
 };
 
 const Game = () => {
-  // TODO: implemt context for local player state, this state doesnt need to be real time.
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
 
   const { handleStartGame, gameState, currentUserId, roomId } =
@@ -128,50 +127,53 @@ const Game = () => {
       </button>
 
       <div>
-        <div className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-orange-400">
-          <h1> Everyones cards for debugging!</h1>
-          {gameState.players.map((player, idx) => {
-            return (
-              <div key={player.id}>
-                {player.name}'s cards:
-                <div className="flex flex-wrap gap-2">
-                  {player.hand.map((card) => {
-                    return (
-                      <PlayingCard key={card.suit + card.value} card={card} />
-                    );
-                  })}
+        {gameState.players.length > 0 && (
+          <div className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-orange-400">
+            <h1> Everyones cards for debugging!</h1>
+            {gameState.players.map((player, idx) => {
+              return (
+                <div key={player.id}>
+                  {player.name}'s cards:
+                  <div className="flex flex-wrap gap-2">
+                    {player.hand.map((card) => {
+                      return (
+                        <PlayingCard key={card.suit + card.value} card={card} />
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
 
         <div>
           <h1>
             Current Players hand (<code>{currentPlayerIdTurn})</code>
           </h1>
 
-          <div className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-orange-400">
-            Your cards! (You are player {thisPlayerIndex})
-            <div className="flex flex-wrap gap-2">
-              {gameState.players[thisPlayerIndex].hand.map((card) => {
-                return (
-                  <PlayingCard
-                    key={card.suit + card.value}
-                    card={card}
-                    onSelect={() => toggleSelectedCard(card)}
-                    selected={selectedCards.some(
-                      (selectedCard) =>
-                        selectedCard.suit === card.suit &&
-                        selectedCard.value === card.value
-                    )}
-                  />
-                );
-              })}
+          {gameState.players[thisPlayerIndex] && (
+            <div className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-orange-400">
+              Your cards! (You are player {thisPlayerIndex})
+              <div className="flex flex-wrap gap-2">
+                {gameState.players[thisPlayerIndex].hand.map((card) => {
+                  return (
+                    <PlayingCard
+                      key={card.suit + card.value}
+                      card={card}
+                      onSelect={() => toggleSelectedCard(card)}
+                      selected={selectedCards.some(
+                        (selectedCard) =>
+                          selectedCard.suit === card.suit &&
+                          selectedCard.value === card.value
+                      )}
+                    />
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
         </div>
-        {JSON.stringify(selectedCards)}
       </div>
 
       <button
@@ -180,7 +182,7 @@ const Game = () => {
         disabled={!isCurrentPlayerTurn}
         onClick={async () => {
           const resp = await actions.playTurn({
-            cards: [], // fix me
+            cards: selectedCards,
             roomId,
           });
           console.log("🚀 ~ onClick={ ~ resp:", resp);

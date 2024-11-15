@@ -1,6 +1,7 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
 import { createDeck, sortCards } from "@chiubaca/big-two-utils";
+import { produce } from "immer";
 
 import { dealArray, shuffleArray } from "~libs/helpers/deck";
 import {
@@ -8,6 +9,7 @@ import {
   baseGameState,
   cardSchema,
   rotatePlayerIndex,
+  updatePlayersHands,
 } from "~libs/helpers/gameState";
 import pbAdmin from "~libs/pocketbase/pocketbase-admin";
 import type { RoomSchema } from "~libs/schemas/rooms";
@@ -118,6 +120,8 @@ export const server = {
           }),
           currentPlayerIndex: 0,
           roundMode: "single",
+          roundNumber: 0,
+          status: "started",
         } satisfies GameState;
         console.dir(updatedGameState, { depth: null });
 
@@ -252,17 +256,23 @@ export const server = {
           totalPlayers: currentGameState.players.length - 1, // start from 0
         });
 
-        // update gameState players
-        const updateGameState = {
-          ...currentGameState,
-          currentPlayerIndex: updatedPlayerIndex,
-        } satisfies GameState;
+        const updatedPlayerHands = updatePlayersHands({
+          currentHand:
+            currentGameState.players[currentGameState.currentPlayerIndex].hand,
+          cardsToRemove: input.cards,
+        });
+
+        const updatedGameState = produce(currentGameState, (newGameState) => {
+          newGameState.currentPlayerIndex = updatedPlayerIndex;
+          newGameState.players[currentGameState.currentPlayerIndex].hand =
+            updatedPlayerHands;
+        });
 
         console.log("🚀 ~ handler: ~ input:", input);
         const updatedRecord = pb
           .collection("rooms")
           .update<RoomSchema>(input.roomId, {
-            gameState: updateGameState,
+            gameState: updatedGameState,
           });
 
         return updatedRecord;
