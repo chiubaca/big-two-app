@@ -3,7 +3,12 @@ import { z } from "astro:schema";
 import { createDeck, sortCards } from "@chiubaca/big-two-utils";
 
 import { dealArray, shuffleArray } from "~libs/helpers/deck";
-import { type GameState, baseGameState } from "~libs/helpers/gameState";
+import {
+  type GameState,
+  baseGameState,
+  cardSchema,
+  rotatePlayerIndex,
+} from "~libs/helpers/gameState";
 import pbAdmin from "~libs/pocketbase/pocketbase-admin";
 import type { RoomSchema } from "~libs/schemas/rooms";
 
@@ -225,6 +230,44 @@ export const server = {
           message: "Server error leaving game room",
           stack: JSON.stringify(e),
         });
+      }
+    },
+  }),
+  playTurn: defineAction({
+    accept: "json",
+    input: z.object({
+      roomId: z.string(),
+      cards: z.array(cardSchema),
+    }),
+    handler: async (input, context) => {
+      try {
+        const pb = context.locals.pb;
+        const roomRecord = await pb
+          .collection("rooms")
+          .getOne<RoomSchema>(input.roomId);
+
+        const currentGameState = roomRecord.gameState;
+        const updatedPlayerIndex = rotatePlayerIndex({
+          currentPlayerIndex: currentGameState.currentPlayerIndex,
+          totalPlayers: currentGameState.players.length - 1, // start from 0
+        });
+
+        // update gameState players
+        const updateGameState = {
+          ...currentGameState,
+          currentPlayerIndex: updatedPlayerIndex,
+        } satisfies GameState;
+
+        console.log("🚀 ~ handler: ~ input:", input);
+        const updatedRecord = pb
+          .collection("rooms")
+          .update<RoomSchema>(input.roomId, {
+            gameState: updateGameState,
+          });
+
+        return updatedRecord;
+      } catch (e) {
+        console.log("🚀 ~ handler: ~ e:", e);
       }
     },
   }),

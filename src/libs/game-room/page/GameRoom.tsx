@@ -89,15 +89,20 @@ const JoinLeaveRoom = () => {
 };
 
 const Game = () => {
+  // TODO: implemt context for local player state, this state doesnt need to be real time.
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
 
-  const { handleStartGame, gameState, currentUserId } =
+  const { handleStartGame, gameState, currentUserId, roomId } =
     useContext(GameRoomContext);
 
   const currentPlayerIdTurn =
     gameState.players[gameState.currentPlayerIndex].id;
 
   const isCurrentPlayerTurn = currentPlayerIdTurn === currentUserId;
+
+  const thisPlayerIndex = gameState.players.findIndex(
+    (player) => player.id === currentUserId
+  );
 
   const toggleSelectedCard = (card: Card) => {
     const isCardSelected = selectedCards.some(
@@ -147,23 +152,22 @@ const Game = () => {
           </h1>
 
           <div className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-orange-400">
+            Your cards! (You are player {thisPlayerIndex})
             <div className="flex flex-wrap gap-2">
-              {gameState.players[gameState.currentPlayerIndex].hand.map(
-                (card) => {
-                  return (
-                    <PlayingCard
-                      key={card.suit + card.value}
-                      card={card}
-                      onSelect={() => toggleSelectedCard(card)}
-                      selected={selectedCards.some(
-                        (selectedCard) =>
-                          selectedCard.suit === card.suit &&
-                          selectedCard.value === card.value
-                      )}
-                    />
-                  );
-                }
-              )}
+              {gameState.players[thisPlayerIndex].hand.map((card) => {
+                return (
+                  <PlayingCard
+                    key={card.suit + card.value}
+                    card={card}
+                    onSelect={() => toggleSelectedCard(card)}
+                    selected={selectedCards.some(
+                      (selectedCard) =>
+                        selectedCard.suit === card.suit &&
+                        selectedCard.value === card.value
+                    )}
+                  />
+                );
+              })}
             </div>
           </div>
         </div>
@@ -174,6 +178,13 @@ const Game = () => {
         className={`btn ${isCurrentPlayerTurn ? "btn-secondary" : "btn-disabled"}`}
         type="button"
         disabled={!isCurrentPlayerTurn}
+        onClick={async () => {
+          const resp = await actions.playTurn({
+            cards: [], // fix me
+            roomId,
+          });
+          console.log("🚀 ~ onClick={ ~ resp:", resp);
+        }}
       >
         {isCurrentPlayerTurn ? "play your turn" : "its not your turn"}
       </button>
