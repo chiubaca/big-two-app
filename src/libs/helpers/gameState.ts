@@ -27,12 +27,11 @@ export const gameStateSchema = z.object({
   roundNumber: z.number(),
   playersPassed: z.array(z.string()),
   event: z.union([
-    z.literal("played"),
-    z.literal("passed"),
-    z.literal("round-ended"),
-    z.literal("starting"), // waiting to start
-    z.literal("started"), // game started
-    z.literal("ended"), // game ended
+    z.literal("round-first-move"),
+    z.literal("round-played"),
+    z.literal("round-passed"),
+    z.literal("game-waiting-to-start"),
+    z.literal("game-ended"), // game ended
   ]),
   cardPile: z.array(z.array(cardSchema)),
 });
@@ -44,7 +43,7 @@ export const baseGameState: GameState = {
   currentPlayerIndex: 0,
   roundMode: "single",
   roundNumber: 0,
-  event: "starting",
+  event: "game-waiting-to-start",
   playersPassed: [],
   cardPile: [],
 };

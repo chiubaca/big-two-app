@@ -127,7 +127,12 @@ const Game = () => {
   return (
     <div className="p-5">
       <div className="p-5 font-semibold text-center">
-        game state: <code>{gameState.event}</code>
+        <p>
+          round mode: <code>{gameState.roundMode}</code>
+        </p>
+        <p>
+          game event: <code>{gameState.event}</code>
+        </p>
       </div>
 
       <button className="btn" type="button" onClick={() => handleStartGame()}>

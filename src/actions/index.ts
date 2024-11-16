@@ -124,7 +124,7 @@ export const server = {
           roundNumber: 0,
           playersPassed: [],
           cardPile: [],
-          event: "started",
+          event: "round-first-move",
         } satisfies GameState;
         console.dir(updatedGameState, { depth: null });
 
@@ -254,15 +254,11 @@ export const server = {
           .getOne<RoomSchema>(input.roomId);
 
         const currentGameState = roomRecord.gameState;
+
         const updatedPlayerIndex = rotatePlayerIndex({
           currentPlayerIndex: currentGameState.currentPlayerIndex,
           totalPlayers: currentGameState.players.length - 1, // start from 0
         });
-
-        const updatedRoundMode = detectHandType(input.cards);
-        if (updatedRoundMode === null) {
-          throw new Error("invalid hand was played");
-        }
 
         const updatedPlayerHands = updatePlayersHands({
           currentHand:
@@ -270,13 +266,51 @@ export const server = {
           cardsToRemove: input.cards,
         });
 
+        const playedHandType = detectHandType(input.cards);
+
+        // This first move of the game bypasses the round mode check
+        if (currentGameState.event === "round-first-move") {
+          // check there is a 3 Diamond in the first play...
+          // return
+
+          if (playedHandType === null) {
+            throw new Error("invalid hand was played");
+          }
+
+          const updatedGameState = produce(currentGameState, (newGameState) => {
+            newGameState.currentPlayerIndex = updatedPlayerIndex;
+            newGameState.players[currentGameState.currentPlayerIndex].hand =
+              updatedPlayerHands;
+            newGameState.roundMode = playedHandType;
+            newGameState.roundNumber = newGameState.roundNumber += 1;
+            newGameState.event = "round-played";
+            newGameState.cardPile.push(input.cards);
+          });
+
+          const updatedRecord = pb
+            .collection("rooms")
+            .update<RoomSchema>(input.roomId, {
+              gameState: updatedGameState,
+            });
+
+          return updatedRecord;
+        }
+
+        // We must check that the played hands going forward is the same combo type
+        // as the current round, unless the event has been won?
+
+        if (playedHandType !== currentGameState.roundMode) {
+          console.error("player did not play the right type of hand");
+          return; //TODO return a common resp here
+        }
+
         const updatedGameState = produce(currentGameState, (newGameState) => {
           newGameState.currentPlayerIndex = updatedPlayerIndex;
           newGameState.players[currentGameState.currentPlayerIndex].hand =
             updatedPlayerHands;
-          newGameState.roundMode = updatedRoundMode;
+
           newGameState.roundNumber = newGameState.roundNumber += 1;
-          newGameState.event = "played";
+          newGameState.event = "round-played";
           newGameState.cardPile.push(input.cards);
         });
 
