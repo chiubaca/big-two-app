@@ -1,4 +1,8 @@
-import type { Card } from "@chiubaca/big-two-utils";
+import {
+  isPairValid,
+  validateComboType,
+  type Card,
+} from "@chiubaca/big-two-utils";
 
 import { z } from "zod";
 
@@ -67,4 +71,16 @@ export function updatePlayersHands({
     (card) =>
       !cardsToRemove.some((c) => c.suit === card.suit && c.value === card.value)
   );
+}
+
+export function detectHandType(cards: Card[]): GameState["roundMode"] | null {
+  if (cards.length === 1) return "single";
+
+  if (cards.length === 2 && isPairValid([cards[0], cards[1]])) return "pairs";
+
+  if (cards.length === 5 && validateComboType(cards)) {
+    return "combo";
+  }
+
+  return null;
 }

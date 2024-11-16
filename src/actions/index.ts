@@ -8,6 +8,7 @@ import {
   type GameState,
   baseGameState,
   cardSchema,
+  detectHandType,
   rotatePlayerIndex,
   updatePlayersHands,
 } from "~libs/helpers/gameState";
@@ -256,6 +257,11 @@ export const server = {
           totalPlayers: currentGameState.players.length - 1, // start from 0
         });
 
+        const updatedRoundMode = detectHandType(input.cards);
+        if (updatedRoundMode === null) {
+          throw new Error("invalid hand was played");
+        }
+
         const updatedPlayerHands = updatePlayersHands({
           currentHand:
             currentGameState.players[currentGameState.currentPlayerIndex].hand,
@@ -266,9 +272,9 @@ export const server = {
           newGameState.currentPlayerIndex = updatedPlayerIndex;
           newGameState.players[currentGameState.currentPlayerIndex].hand =
             updatedPlayerHands;
+          newGameState.roundMode = updatedRoundMode;
         });
 
-        console.log("🚀 ~ handler: ~ input:", input);
         const updatedRecord = pb
           .collection("rooms")
           .update<RoomSchema>(input.roomId, {

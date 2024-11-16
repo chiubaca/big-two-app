@@ -9,6 +9,7 @@ import {
 
 import "../../../base.css";
 import { PlayingCard } from "../components/PlayingCard";
+import { detectHandType } from "~libs/helpers/gameState";
 
 interface GameRoomProps extends InitialGameRoomContextProps {}
 
@@ -90,6 +91,7 @@ const JoinLeaveRoom = () => {
 
 const Game = () => {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
+  const isValidPlay = detectHandType(selectedCards);
 
   const { handleStartGame, gameState, currentUserId, roomId } =
     useContext(GameRoomContext);
@@ -171,6 +173,7 @@ const Game = () => {
                   );
                 })}
               </div>
+              <div>{isValidPlay ? isValidPlay : "invalid play"}</div>
             </div>
           )}
         </div>
