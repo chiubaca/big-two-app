@@ -105,6 +105,8 @@ const Game = () => {
     (player) => player.id === currentUserId
   );
 
+  const lastHandPlayed = gameState.cardPile.at(-1);
+
   const toggleSelectedCard = (card: Card) => {
     const isCardSelected = selectedCards.some(
       (selectedCard) =>
@@ -124,39 +126,56 @@ const Game = () => {
 
   return (
     <div className="p-5">
+      <div className="p-5 font-semibold text-center">
+        game state: <code>{gameState.event}</code>
+      </div>
+
       <button className="btn" type="button" onClick={() => handleStartGame()}>
         Start Game
       </button>
 
+      {/* DEBUGGING STUFF */}
+      <details className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-gray-400">
+        <h1> Everyones cards for debugging!</h1>
+        {gameState.players.map((player, idx) => {
+          return (
+            <div key={player.id}>
+              {player.name}'s cards:
+              <div className="flex flex-wrap gap-2">
+                {player.hand.map((card) => {
+                  return (
+                    <PlayingCard key={card.suit + card.value} card={card} />
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </details>
+
       <div>
-        {gameState.players.length > 0 && (
-          <div className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-orange-400">
-            <h1> Everyones cards for debugging!</h1>
-            {gameState.players.map((player, idx) => {
-              return (
-                <div key={player.id}>
-                  {player.name}'s cards:
-                  <div className="flex flex-wrap gap-2">
-                    {player.hand.map((card) => {
-                      return (
-                        <PlayingCard key={card.suit + card.value} card={card} />
-                      );
-                    })}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <div className="pt-5 font-bold">
+          Round number: {gameState.roundNumber}
+        </div>
+
+        <div className="flex flex-col gap-5 py-10 border p-5 my-5 border-gray-400">
+          <p className="font-bold text-center"> Cards </p>
+
+          {lastHandPlayed && (
+            <div className="flex justify-center">
+              {lastHandPlayed.map((card) => {
+                return (
+                  <PlayingCard key={`${card.suit}${card.value}`} card={card} />
+                );
+              })}
+            </div>
+          )}
+        </div>
 
         <div>
-          <h1>
-            Current Players hand (<code>{currentPlayerIdTurn})</code>
-          </h1>
-
           {gameState.players[thisPlayerIndex] && (
             <div className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-orange-400">
-              Your cards! (You are player {thisPlayerIndex})
+              Your hand (You are player {thisPlayerIndex + 1})
               <div className="flex flex-wrap gap-2">
                 {gameState.players[thisPlayerIndex].hand.map((card) => {
                   return (
@@ -180,7 +199,7 @@ const Game = () => {
       </div>
 
       <button
-        className={`btn ${isCurrentPlayerTurn ? "btn-secondary" : "btn-disabled"}`}
+        className={`btn ${isCurrentPlayerTurn ? "btn-primary" : "btn-disabled"}`}
         type="button"
         disabled={!isCurrentPlayerTurn}
         onClick={async () => {
@@ -189,10 +208,17 @@ const Game = () => {
             roomId,
           });
           setSelectedCards([]);
-          console.log("🚀 ~ onClick={ ~ resp:", resp);
         }}
       >
-        {isCurrentPlayerTurn ? "play your turn" : "its not your turn"}
+        {isCurrentPlayerTurn ? "Play your turn" : "Its not your turn"}
+      </button>
+
+      <button
+        disabled={!isCurrentPlayerTurn}
+        type="button"
+        className={`ml-2 btn btn-secondary ${isCurrentPlayerTurn ? "btn-secondary" : "btn-disabled"}`}
+      >
+        Pass
       </button>
     </div>
   );

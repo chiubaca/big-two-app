@@ -20,18 +20,21 @@ const roundModeSchema = z.union([
   z.literal("combo"),
 ]);
 
-const statusSchema = z.union([
-  z.literal("starting"), // waiting to start
-  z.literal("started"), // game started
-  z.literal("ended"), // game ended
-]);
-
 export const gameStateSchema = z.object({
   players: z.array(playerSchema),
   currentPlayerIndex: z.number(),
   roundMode: roundModeSchema,
   roundNumber: z.number(),
-  status: statusSchema,
+  playersPassed: z.array(z.string()),
+  event: z.union([
+    z.literal("played"),
+    z.literal("passed"),
+    z.literal("round-ended"),
+    z.literal("starting"), // waiting to start
+    z.literal("started"), // game started
+    z.literal("ended"), // game ended
+  ]),
+  cardPile: z.array(z.array(cardSchema)),
 });
 
 export type GameState = z.infer<typeof gameStateSchema>;
@@ -41,7 +44,9 @@ export const baseGameState: GameState = {
   currentPlayerIndex: 0,
   roundMode: "single",
   roundNumber: 0,
-  status: "starting",
+  event: "starting",
+  playersPassed: [],
+  cardPile: [],
 };
 
 export function rotatePlayerIndex(args: {

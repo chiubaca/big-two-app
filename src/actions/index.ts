@@ -122,7 +122,9 @@ export const server = {
           currentPlayerIndex: 0,
           roundMode: "single",
           roundNumber: 0,
-          status: "started",
+          playersPassed: [],
+          cardPile: [],
+          event: "started",
         } satisfies GameState;
         console.dir(updatedGameState, { depth: null });
 
@@ -176,7 +178,7 @@ export const server = {
           gameState: updatedGameState,
         });
 
-        return "record";
+        return record;
       } catch (e) {
         console.log("Server Error", JSON.stringify(e));
         throw new ActionError({
@@ -273,6 +275,9 @@ export const server = {
           newGameState.players[currentGameState.currentPlayerIndex].hand =
             updatedPlayerHands;
           newGameState.roundMode = updatedRoundMode;
+          newGameState.roundNumber = newGameState.roundNumber += 1;
+          newGameState.event = "played";
+          newGameState.cardPile.push(input.cards);
         });
 
         const updatedRecord = pb
