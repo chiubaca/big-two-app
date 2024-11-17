@@ -1,5 +1,8 @@
 import {
+  isComboBigger,
+  isPairBigger,
   isPairValid,
+  isSingleBigger,
   validateComboType,
   type Card,
 } from "@chiubaca/big-two-utils";
@@ -90,4 +93,37 @@ export function detectHandType(cards: Card[]): GameState["roundMode"] | null {
   }
 
   return null;
+}
+
+export function isPlayedHandBigger(args: {
+  playedCards: Card[];
+  cardsToBeat: Card[];
+  handType: GameState["roundMode"];
+}): boolean {
+  const { handType, playedCards, cardsToBeat } = args;
+
+  if (handType === "single") {
+    return isSingleBigger(playedCards[0], cardsToBeat[0]);
+  }
+
+  if (handType === "pairs") {
+    return isPairBigger(
+      [playedCards[0], playedCards[1]],
+      [cardsToBeat[0], cardsToBeat[1]]
+    );
+  }
+
+  if (handType === "combo") {
+    const validatedPlayedCombo = validateComboType(playedCards);
+    const validatedComboToBeat = validateComboType(cardsToBeat);
+
+    if (!validatedPlayedCombo || !validatedComboToBeat) {
+      console.warn("combo was not validated correctly");
+      return false;
+    }
+
+    return isComboBigger(validatedPlayedCombo, validatedComboToBeat);
+  }
+
+  return false;
 }

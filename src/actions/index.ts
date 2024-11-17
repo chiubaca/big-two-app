@@ -10,6 +10,7 @@ import {
   cardSchema,
   detectHandType,
   gameStateSchema,
+  isPlayedHandBigger,
   rotatePlayerIndex,
   updatePlayersHands,
 } from "~libs/helpers/gameState";
@@ -322,11 +323,29 @@ export const server = {
           return; //TODO return a common resp here
         }
 
+        // check played hand is bigger than the current play
+
+        const cardsToBeat = currentGameState.cardPile.at(-1);
+
+        if (!cardsToBeat) {
+          throw new Error("Could not get last hand played on cardPile");
+        }
+
+        if (
+          !isPlayedHandBigger({
+            playedCards: input.cards,
+            cardsToBeat,
+            handType: currentGameState.roundMode,
+          })
+        ) {
+          console.log("not enough to beat the current hand");
+          return;
+        }
+
         const updatedGameState = produce(currentGameState, (newGameState) => {
           newGameState.currentPlayerIndex = updatedPlayerIndex;
           newGameState.players[currentGameState.currentPlayerIndex].hand =
             updatedPlayerHands;
-
           newGameState.roundNumber = newGameState.roundNumber += 1;
           newGameState.event = "player-played";
           newGameState.cardPile.push(input.cards);
