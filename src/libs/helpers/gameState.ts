@@ -28,12 +28,14 @@ export const gameStateSchema = z.object({
   playersPassed: z.array(z.string()),
   event: z.union([
     z.literal("round-first-move"),
-    z.literal("round-played"),
-    z.literal("round-passed"),
+    z.literal("round-new"),
+    z.literal("player-played"),
+    z.literal("player-passed"),
     z.literal("game-waiting-to-start"),
     z.literal("game-ended"), // game ended
   ]),
   cardPile: z.array(z.array(cardSchema)),
+  consecutivePasses: z.number(),
 });
 
 export type GameState = z.infer<typeof gameStateSchema>;
@@ -46,6 +48,7 @@ export const baseGameState: GameState = {
   event: "game-waiting-to-start",
   playersPassed: [],
   cardPile: [],
+  consecutivePasses: 0,
 };
 
 export function rotatePlayerIndex(args: {

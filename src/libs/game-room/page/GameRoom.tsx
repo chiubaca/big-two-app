@@ -222,6 +222,7 @@ const Game = () => {
         disabled={!isCurrentPlayerTurn}
         type="button"
         className={`ml-2 btn btn-secondary ${isCurrentPlayerTurn ? "btn-secondary" : "btn-disabled"}`}
+        onClick={() => actions.passTurn({ roomId })}
       >
         Pass
       </button>

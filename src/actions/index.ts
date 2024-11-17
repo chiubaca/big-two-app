@@ -112,6 +112,7 @@ export const server = {
         const dealtCards = dealArray(shuffledDeck, roomRecord.players.length);
 
         const updatedGameState = {
+          ...baseGameState,
           players: roomRecord.players.map((playerId, index) => {
             return {
               id: playerId,
@@ -119,11 +120,6 @@ export const server = {
               name: playerNames[index],
             };
           }),
-          currentPlayerIndex: 0,
-          roundMode: "single",
-          roundNumber: 0,
-          playersPassed: [],
-          cardPile: [],
           event: "round-first-move",
         } satisfies GameState;
         console.dir(updatedGameState, { depth: null });
@@ -267,15 +263,14 @@ export const server = {
         });
 
         const playedHandType = detectHandType(input.cards);
+        if (playedHandType === null) {
+          throw new Error("invalid hand was played");
+        }
 
         // This first move of the game bypasses the round mode check
         if (currentGameState.event === "round-first-move") {
           // check there is a 3 Diamond in the first play...
           // return
-
-          if (playedHandType === null) {
-            throw new Error("invalid hand was played");
-          }
 
           const updatedGameState = produce(currentGameState, (newGameState) => {
             newGameState.currentPlayerIndex = updatedPlayerIndex;
@@ -283,8 +278,30 @@ export const server = {
               updatedPlayerHands;
             newGameState.roundMode = playedHandType;
             newGameState.roundNumber = newGameState.roundNumber += 1;
-            newGameState.event = "round-played";
+            newGameState.event = "player-played";
             newGameState.cardPile.push(input.cards);
+            newGameState.consecutivePasses = 0;
+          });
+
+          const updatedRecord = pb
+            .collection("rooms")
+            .update<RoomSchema>(input.roomId, {
+              gameState: updatedGameState,
+            });
+
+          return updatedRecord;
+        }
+
+        if (currentGameState.event === "round-new") {
+          const updatedGameState = produce(currentGameState, (newGameState) => {
+            newGameState.currentPlayerIndex = updatedPlayerIndex;
+            newGameState.players[currentGameState.currentPlayerIndex].hand =
+              updatedPlayerHands;
+            newGameState.roundMode = playedHandType;
+            newGameState.roundNumber = newGameState.roundNumber += 1;
+            newGameState.event = "player-played";
+            newGameState.cardPile.push(input.cards);
+            newGameState.consecutivePasses = 0;
           });
 
           const updatedRecord = pb
@@ -310,8 +327,9 @@ export const server = {
             updatedPlayerHands;
 
           newGameState.roundNumber = newGameState.roundNumber += 1;
-          newGameState.event = "round-played";
+          newGameState.event = "player-played";
           newGameState.cardPile.push(input.cards);
+          newGameState.consecutivePasses = 0;
         });
 
         const updatedRecord = pb
@@ -323,6 +341,68 @@ export const server = {
         return updatedRecord;
       } catch (e) {
         console.log("🚀 ~ handler: ~ e:", e);
+      }
+    },
+  }),
+  passTurn: defineAction({
+    accept: "json",
+    input: z.object({
+      roomId: z.string(),
+    }),
+    handler: async (input, context) => {
+      try {
+        const pb = context.locals.pb;
+        const roomRecord = await pb
+          .collection("rooms")
+          .getOne<RoomSchema>(input.roomId);
+
+        const currentGameState = roomRecord.gameState;
+
+        const nextPlayerIndex = rotatePlayerIndex({
+          currentPlayerIndex: currentGameState.currentPlayerIndex,
+          totalPlayers: currentGameState.players.length - 1, // start from 0
+        });
+        const numberConsecutivePassesNeededToWinRound =
+          roomRecord.players.length - 1; // 2 because we normalise player length to 0 and one more less from that;
+        const updatedConsecutivePasses = currentGameState.consecutivePasses + 1;
+        console.log(
+          "🚀 ~ handler: ~ numberConsecutivePassesNeededToWinRound:",
+          numberConsecutivePassesNeededToWinRound
+        );
+        if (
+          updatedConsecutivePasses >= numberConsecutivePassesNeededToWinRound
+        ) {
+          console.log(
+            "round was won by",
+            currentGameState.players[nextPlayerIndex].name
+          );
+          const updatedGameState = produce(currentGameState, (newGameState) => {
+            newGameState.consecutivePasses = newGameState.consecutivePasses = 0;
+            newGameState.event = "round-new";
+            newGameState.currentPlayerIndex = nextPlayerIndex;
+          });
+          const updatedRecord = pb
+            .collection("rooms")
+            .update<RoomSchema>(input.roomId, {
+              gameState: updatedGameState,
+            });
+
+          return updatedRecord;
+        }
+        const updatedGameState = produce(currentGameState, (newGameState) => {
+          newGameState.consecutivePasses = newGameState.consecutivePasses += 1;
+          newGameState.event = "player-passed";
+        });
+
+        const updatedRecord = pb
+          .collection("rooms")
+          .update<RoomSchema>(input.roomId, {
+            gameState: updatedGameState,
+          });
+
+        return updatedRecord;
+      } catch (e) {
+        console.error("🚀 Pass turn error", e);
       }
     },
   }),
