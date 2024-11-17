@@ -9,6 +9,7 @@ import {
   baseGameState,
   cardSchema,
   detectHandType,
+  gameStateSchema,
   rotatePlayerIndex,
   updatePlayersHands,
 } from "~libs/helpers/gameState";
@@ -358,6 +359,13 @@ export const server = {
 
         const currentGameState = roomRecord.gameState;
 
+        if (currentGameState.event === "round-first-move") {
+          throw new Error("Cant pass on the first move");
+        }
+        if (currentGameState.event === "round-new") {
+          throw new Error("Cant pass on a new round");
+        }
+
         const nextPlayerIndex = rotatePlayerIndex({
           currentPlayerIndex: currentGameState.currentPlayerIndex,
           totalPlayers: currentGameState.players.length - 1, // start from 0
@@ -369,6 +377,8 @@ export const server = {
           "🚀 ~ handler: ~ numberConsecutivePassesNeededToWinRound:",
           numberConsecutivePassesNeededToWinRound
         );
+
+        // Handle when all players have passed
         if (
           updatedConsecutivePasses >= numberConsecutivePassesNeededToWinRound
         ) {
@@ -389,10 +399,17 @@ export const server = {
 
           return updatedRecord;
         }
-        const updatedGameState = produce(currentGameState, (newGameState) => {
-          newGameState.consecutivePasses = newGameState.consecutivePasses += 1;
-          newGameState.event = "player-passed";
-        });
+
+        // Handle a player passing mid-round
+        const updatedGameState: GameState = produce(
+          currentGameState,
+          (newGameState) => {
+            newGameState.consecutivePasses =
+              newGameState.consecutivePasses += 1;
+            newGameState.event = "player-passed";
+            newGameState.currentPlayerIndex = nextPlayerIndex;
+          }
+        );
 
         const updatedRecord = pb
           .collection("rooms")
