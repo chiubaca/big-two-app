@@ -222,7 +222,7 @@ export const server = {
           ),
         } satisfies GameState;
 
-        const updatedRecord = pb
+        const updatedRecord = await pb
           .collection("rooms")
           .update<RoomSchema>(input.roomId, {
             players: updatedPlayers,
@@ -287,7 +287,7 @@ export const server = {
             newGameState.consecutivePasses = 0;
           });
 
-          const updatedRecord = pb
+          const updatedRecord = await pb
             .collection("rooms")
             .update<RoomSchema>(input.roomId, {
               gameState: updatedGameState,
@@ -308,7 +308,7 @@ export const server = {
             newGameState.consecutivePasses = 0;
           });
 
-          const updatedRecord = pb
+          const updatedRecord = await pb
             .collection("rooms")
             .update<RoomSchema>(input.roomId, {
               gameState: updatedGameState,
@@ -351,7 +351,7 @@ export const server = {
             newGameState.consecutivePasses = 0;
           });
 
-          const updatedRecord = pb
+          const updatedRecord = await pb
             .collection("rooms")
             .update<RoomSchema>(input.roomId, {
               gameState: updatedGameState,
@@ -370,7 +370,7 @@ export const server = {
           newGameState.consecutivePasses = 0;
         });
 
-        const updatedRecord = pb
+        const updatedRecord = await pb
           .collection("rooms")
           .update<RoomSchema>(input.roomId, {
             gameState: updatedGameState,
@@ -378,7 +378,12 @@ export const server = {
 
         return updatedRecord;
       } catch (e) {
-        console.log("🚀 ~ handler: ~ e:", e);
+        console.log("Server Error", JSON.stringify(e));
+        throw new ActionError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Server error during play turn",
+          stack: JSON.stringify(e),
+        });
       }
     },
   }),
@@ -424,11 +429,11 @@ export const server = {
             currentGameState.players[nextPlayerIndex].name
           );
           const updatedGameState = produce(currentGameState, (newGameState) => {
-            newGameState.consecutivePasses = newGameState.consecutivePasses = 0;
+            newGameState.consecutivePasses = 0;
             newGameState.event = "round-new";
             newGameState.currentPlayerIndex = nextPlayerIndex;
           });
-          const updatedRecord = pb
+          const updatedRecord = await pb
             .collection("rooms")
             .update<RoomSchema>(input.roomId, {
               gameState: updatedGameState,
@@ -448,7 +453,7 @@ export const server = {
           }
         );
 
-        const updatedRecord = pb
+        const updatedRecord = await pb
           .collection("rooms")
           .update<RoomSchema>(input.roomId, {
             gameState: updatedGameState,
