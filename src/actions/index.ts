@@ -99,23 +99,26 @@ export const server = {
       roomId: z.string(),
     }),
     handler: async (input, context) => {
-      console.log("🚀 ~ start game handler");
+      console.log("🟢 New game started");
       try {
         const pb = context.locals.pb;
+
+        // Create a new deck and shuffle it
         const newDeck = createDeck();
+        const shuffledDeck = shuffleArray(newDeck);
 
         const roomRecord = await pb
           .collection("rooms")
           .getOne<RoomSchema>(input.roomId);
 
-        const playerNames = roomRecord.gameState.players.map((p) => p.name);
-
-        const shuffledDeck = shuffleArray(newDeck);
+        // split the shuffled cards evenly between how many players are currently in this game room
         const dealtCards = dealArray(shuffledDeck, roomRecord.players.length);
 
         const updatedGameState = {
           ...baseGameState,
           players: roomRecord.players.map((playerId, index) => {
+            // array of just the player names in this room in the play order
+            const playerNames = roomRecord.gameState.players.map((p) => p.name);
             return {
               id: playerId,
               hand: sortCards(dealtCards[index]),
@@ -124,7 +127,6 @@ export const server = {
           }),
           event: "round-first-move",
         } satisfies GameState;
-        console.dir(updatedGameState, { depth: null });
 
         const record = await pb.collection("rooms").update(input.roomId, {
           gameState: updatedGameState,
@@ -323,10 +325,7 @@ export const server = {
           return; //TODO return a common resp here
         }
 
-        // check played hand is bigger than the current play
-
         const cardsToBeat = currentGameState.cardPile.at(-1);
-
         if (!cardsToBeat) {
           throw new Error("Could not get last hand played on cardPile");
         }
