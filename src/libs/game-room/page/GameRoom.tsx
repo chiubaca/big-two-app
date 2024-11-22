@@ -158,6 +158,16 @@ const Game = () => {
         })}
       </details>
 
+      {gameState.event === "game-ended" && (
+        <div>
+          {gameState.event === "game-ended" && isCurrentPlayerTurn ? (
+            <>YOU WIN</>
+          ) : (
+            <>you lost :( </>
+          )}
+        </div>
+      )}
+
       <div>
         <div className="pt-5 font-bold">
           Round number: {gameState.roundNumber}

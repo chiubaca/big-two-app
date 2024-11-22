@@ -29,16 +29,16 @@ export const gameStateSchema = z.object({
   roundMode: roundModeSchema,
   roundNumber: z.number(),
   playersPassed: z.array(z.string()),
+  cardPile: z.array(z.array(cardSchema)),
+  consecutivePasses: z.number(),
   event: z.union([
     z.literal("round-first-move"),
     z.literal("round-new"),
     z.literal("player-played"),
     z.literal("player-passed"),
     z.literal("game-waiting-to-start"),
-    z.literal("game-ended"), // game ended
+    z.literal("game-ended"),
   ]),
-  cardPile: z.array(z.array(cardSchema)),
-  consecutivePasses: z.number(),
 });
 
 export type GameState = z.infer<typeof gameStateSchema>;

@@ -341,6 +341,25 @@ export const server = {
           return;
         }
 
+        // Enter win state, when the player has no cards left.
+        if (updatedPlayerHands.length === 0) {
+          const updatedGameState = produce(currentGameState, (newGameState) => {
+            newGameState.players[currentGameState.currentPlayerIndex].hand =
+              updatedPlayerHands;
+            newGameState.event = "game-ended";
+            newGameState.cardPile.push(input.cards);
+            newGameState.consecutivePasses = 0;
+          });
+
+          const updatedRecord = pb
+            .collection("rooms")
+            .update<RoomSchema>(input.roomId, {
+              gameState: updatedGameState,
+            });
+
+          return updatedRecord;
+        }
+
         const updatedGameState = produce(currentGameState, (newGameState) => {
           newGameState.currentPlayerIndex = updatedPlayerIndex;
           newGameState.players[currentGameState.currentPlayerIndex].hand =
