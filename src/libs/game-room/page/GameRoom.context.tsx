@@ -7,22 +7,14 @@ import {
   useEffect,
   useState,
 } from "react";
-import { type GameState, baseGameState } from "~libs/helpers/gameState";
+import type { RoomSchema } from "~libs/helpers/gameStateMachine";
 import pbClient from "~libs/pocketbase/pocketbase-client";
 
 type GameRoomContextType = {
   roomId: string;
   players: string[];
   currentUserId: string;
-  gameState: GameState;
-  handleStartGame: () => Promise<
-    SafeResult<
-      {
-        roomId: string;
-      },
-      RecordModel
-    >
-  >;
+  gameState: RoomSchema["gameState"];
 };
 
 export type InitialGameRoomContextProps = Pick<
@@ -34,10 +26,7 @@ export const GameRoomContext = createContext<GameRoomContextType>({
   roomId: "",
   players: [],
   currentUserId: "",
-  gameState: baseGameState,
-  handleStartGame: () => {
-    throw new Error("used outside of provider");
-  },
+  gameState: {} as RoomSchema["gameState"],
 });
 
 export const GameRoomProvider = ({
@@ -53,8 +42,6 @@ export const GameRoomProvider = ({
     initialGameState,
   });
 
-  const handleStartGame = async () => await actions.startGame({ roomId });
-
   return (
     <GameRoomContext.Provider
       value={{
@@ -62,7 +49,6 @@ export const GameRoomProvider = ({
         players,
         currentUserId,
         gameState,
-        handleStartGame,
       }}
     >
       {children}
@@ -77,7 +63,8 @@ const useSubscribeToPlayers = ({
 }: {
   roomId: string;
   initialPlayers: string[];
-  initialGameState: GameState;
+  // initialGameState: GameState;
+  initialGameState: RoomSchema["gameState"];
 }) => {
   const [players, setPlayers] = useState<string[]>(initialPlayers);
 

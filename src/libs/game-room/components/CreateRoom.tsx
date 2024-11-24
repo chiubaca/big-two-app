@@ -7,7 +7,7 @@ export const CreateRoom = () => {
         onSubmit={async (e) => {
           e.preventDefault();
           const formData = new FormData(e.target as HTMLFormElement);
-          await actions.createRoom(formData);
+          await actions.createRoomV2(formData);
           location.reload();
         }}
       >

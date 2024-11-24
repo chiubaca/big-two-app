@@ -1,20 +1,23 @@
 import { ActionError, defineAction } from "astro:actions";
 import { z } from "astro:schema";
-import { createDeck, sortCards } from "@chiubaca/big-two-utils";
 import { produce } from "immer";
+import { createActor } from "xstate";
 
-import { dealArray, shuffleArray } from "~libs/helpers/deck";
 import {
   type GameState,
-  baseGameState,
   cardSchema,
   detectHandType,
-  gameStateSchema,
   isPlayedHandBigger,
   rotatePlayerIndex,
   updatePlayersHands,
 } from "~libs/helpers/gameState";
 import pbAdmin from "~libs/pocketbase/pocketbase-admin";
+import {
+  makeBigTwoGameMachine,
+  type BigTwoGameMachineSnapshot,
+  type RoomSchema as RoomSchemaV2,
+} from "~libs/helpers/gameStateMachine";
+
 import type { RoomSchema } from "~libs/schemas/rooms";
 
 export const server = {
@@ -50,36 +53,42 @@ export const server = {
       }
     },
   }),
-  createRoom: defineAction({
+  createRoomV2: defineAction({
     accept: "form",
     input: z.object({
       roomName: z.string(),
     }),
     handler: async (input, context) => {
-      console.log("🚀 Create a room action", input);
+      console.log("🚀 Create a room action v2", input);
       const currentUserId = context.locals.pb.authStore.model?.id;
       const currentPlayerName = context.locals.pb.authStore.model?.name;
 
       try {
-        const { roomName } = input;
-
         if (!context.locals.pb.authStore.isValid) {
-          console.log("user must be logged in to post");
+          console.log("user must be logged in to create a room v2");
           return null;
         }
 
-        const data = {
+        const bigTwoGameMachine = makeBigTwoGameMachine();
+
+        const gameStateMachineActor = createActor(bigTwoGameMachine).start();
+        gameStateMachineActor.send({
+          type: "JOIN_GAME",
+          playerId: currentUserId,
+          playerName: currentPlayerName,
+        });
+        const gameStateSnapshot =
+          gameStateMachineActor.getPersistedSnapshot() as BigTwoGameMachineSnapshot;
+        console.log("🚀 ~ handler: ~ gameStateSnapshot:", gameStateSnapshot);
+
+        const roomRecord = {
           admin: currentUserId,
           players: [currentUserId],
-          roomName,
-          gameState: {
-            ...baseGameState,
-            players: [{ hand: [], id: currentUserId, name: currentPlayerName }],
-          } satisfies GameState,
-        };
+          roomName: input.roomName,
+          gameState: gameStateSnapshot,
+        } satisfies RoomSchemaV2;
 
-        const record = await pbAdmin.collection("rooms").create(data);
-        console.log("🚀 ~ handler: ~ record:", record);
+        const record = await pbAdmin.collection("rooms").create(roomRecord);
 
         return record;
       } catch (e) {
@@ -93,63 +102,41 @@ export const server = {
     },
   }),
 
-  startGame: defineAction({
+  startGameV2: defineAction({
     accept: "json",
     input: z.object({
       roomId: z.string(),
     }),
     handler: async (input, context) => {
-      console.log("🟢 New game started");
-      try {
-        const pb = context.locals.pb;
+      console.log("🟢 New game started...");
+      const pb = context.locals.pb;
+      const roomRecord = await pb
+        .collection("rooms")
+        .getOne<RoomSchemaV2>(input.roomId);
 
-        // Create a new deck and shuffle it
-        const newDeck = createDeck();
-        const shuffledDeck = shuffleArray(newDeck);
+      const bigTwoGameMachine = makeBigTwoGameMachine();
+      const serverGameState = roomRecord.gameState;
+      const gameStateMachineActor = createActor(bigTwoGameMachine, {
+        snapshot: serverGameState,
+      }).start();
 
-        const roomRecord = await pb
-          .collection("rooms")
-          .getOne<RoomSchema>(input.roomId);
+      gameStateMachineActor.send({ type: "START_GAME" });
+      const gameStateSnapshot = gameStateMachineActor.getPersistedSnapshot();
 
-        // split the shuffled cards evenly between how many players are currently in this game room
-        const dealtCards = dealArray(shuffledDeck, roomRecord.players.length);
+      const record = await pb.collection("rooms").update(input.roomId, {
+        gameState: gameStateSnapshot,
+      });
 
-        const updatedGameState = {
-          ...baseGameState,
-          players: roomRecord.players.map((playerId, index) => {
-            // array of just the player names in this room in the play order
-            const playerNames = roomRecord.gameState.players.map((p) => p.name);
-            return {
-              id: playerId,
-              hand: sortCards(dealtCards[index]),
-              name: playerNames[index],
-            };
-          }),
-          event: "round-first-move",
-        } satisfies GameState;
-
-        const record = await pb.collection("rooms").update(input.roomId, {
-          gameState: updatedGameState,
-        });
-
-        return record;
-      } catch (e) {
-        console.log("Server Error", JSON.stringify(e));
-        throw new ActionError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Server error starting game",
-          stack: JSON.stringify(e),
-        });
-      }
+      return record;
     },
   }),
-  joinGame: defineAction({
+  joinGameV2: defineAction({
     accept: "json",
     input: z.object({
       roomId: z.string(),
     }),
     handler: async (input, context) => {
-      console.log("🚀 ~ join game");
+      console.log("🚀 ~ join game v2....");
       try {
         const pb = context.locals.pb;
         const currentPlayerId = context.locals.pb.authStore.model?.id;
@@ -157,25 +144,37 @@ export const server = {
 
         const roomRecord = await pb
           .collection("rooms")
-          .getOne<RoomSchema>(input.roomId);
+          .getOne<RoomSchemaV2>(input.roomId);
 
         if (roomRecord.players.includes(currentPlayerId)) {
           return "you're already in this room";
         }
-        const updatedPlayers = [...roomRecord.players, currentPlayerId];
-        const updatedGameState = {
-          ...roomRecord.gameState,
-          players: [
-            ...roomRecord.gameState.players,
-            { id: currentPlayerId, name: currentPlayerName, hand: [] },
-          ],
-        } satisfies GameState;
 
-        console.dir(roomRecord, { depth: null });
+        const serverGameState = roomRecord.gameState;
+
+        const bigTwoGameMachine = makeBigTwoGameMachine();
+        const gameStateMachineActor = createActor(bigTwoGameMachine, {
+          snapshot: serverGameState,
+          inspect: (inspectorEvent) => {
+            console.dir(
+              {
+                "🔍 Inspector Event:": inspectorEvent,
+              },
+              { depth: null }
+            );
+          },
+        }).start();
+
+        gameStateMachineActor.send({
+          type: "JOIN_GAME",
+          playerId: currentPlayerId,
+          playerName: currentPlayerName,
+        });
+        const gameStateSnapshot = gameStateMachineActor.getPersistedSnapshot();
 
         const record = await pb.collection("rooms").update(input.roomId, {
-          players: updatedPlayers,
-          gameState: updatedGameState,
+          players: [...roomRecord.players, currentPlayerId],
+          gameState: gameStateSnapshot,
         });
 
         return record;
@@ -189,57 +188,7 @@ export const server = {
       }
     },
   }),
-  leaveGame: defineAction({
-    accept: "json",
-    input: z.object({
-      roomId: z.string(),
-    }),
-    handler: async (input, context) => {
-      console.log("🚀 ~ leave game");
-      try {
-        const pb = context.locals.pb;
-        const currentPlayerId = context.locals.pb.authStore.model?.id;
 
-        const roomRecord = await pb
-          .collection("rooms")
-          .getOne<RoomSchema>(input.roomId);
-
-        if (roomRecord.admin === currentPlayerId) {
-          console.log("you cant leave a room are admin of");
-          return "you cant leave a room are admin of";
-        }
-
-        // update players array
-        const updatedPlayers = roomRecord.players.filter(
-          (playerId) => playerId !== currentPlayerId
-        );
-
-        // update gameState players
-        const updateGameState = {
-          ...roomRecord.gameState,
-          players: roomRecord.gameState.players.filter(
-            (player) => player.id !== currentPlayerId
-          ),
-        } satisfies GameState;
-
-        const updatedRecord = await pb
-          .collection("rooms")
-          .update<RoomSchema>(input.roomId, {
-            players: updatedPlayers,
-            gameState: updateGameState,
-          });
-
-        return updatedRecord;
-      } catch (e) {
-        console.log("Server Error", JSON.stringify(e));
-        throw new ActionError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Server error leaving game room",
-          stack: JSON.stringify(e),
-        });
-      }
-    },
-  }),
   playTurn: defineAction({
     accept: "json",
     input: z.object({
