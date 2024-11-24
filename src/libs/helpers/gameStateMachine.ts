@@ -74,11 +74,11 @@ export const makeBigTwoGameMachine = () =>
         const shuffledDeck = shuffleArray(newDeck);
 
         const dealtCards = dealArray(shuffledDeck, context.players.length);
-        console.log("🚀 ~ dealtCards:", dealtCards);
 
         context.players.forEach((player, index) => {
-          player.hand = dealtCards[index];
+          context.players[index].hand = sortCards(dealtCards[index]);
         });
+
         console.log("✅ Cards dealt:", context);
       },
       playFirstMove: ({ context, event }) => {
