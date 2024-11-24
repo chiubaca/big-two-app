@@ -28,6 +28,7 @@ export type GameEvent =
   | { type: "START_GAME" }
   | { type: "ROUND_FIRST_MOVE" }
   | { type: "PLAY_FIRST_MOVE"; cards: Card[] }
+  | { type: "PLAY_NEW_ROUND_FIRST_MOVE"; cards: Card[] }
   | { type: "PLAY_CARDS"; cards: Card[] }
   | { type: "PASS_TURN"; playerId: string }
   | { type: "RESET_GAME" };
@@ -117,9 +118,15 @@ export const makeBigTwoGameMachine = () =>
           currentPlayerIndex: context.currentPlayerIndex,
           totalPlayers: context.players.length - 1, // start from 0
         });
+        const updatedPlayerHands = updatePlayersHands({
+          currentHand: context.players[context.currentPlayerIndex].hand,
+          cardsToRemove: event.cards,
+        });
+
         context.consecutivePasses = 0;
         context.currentPlayerIndex = updatedPlayerIndex;
         context.cardPile.push(cardsPlayed);
+        context.players[context.currentPlayerIndex].hand = updatedPlayerHands;
       },
       resetGame: ({ context }) => {
         context.players = context.players.map((player) => {
@@ -133,6 +140,47 @@ export const makeBigTwoGameMachine = () =>
         context.roundMode = null;
         context.cardPile = [];
         context.consecutivePasses = 0;
+      },
+      passTurn: ({ context, event }) => {
+        if (event.type !== "PASS_TURN") {
+          console.warn("🚨 attempted passTurn action on incorrect state");
+          return;
+        }
+
+        const updatedPlayerIndex = rotatePlayerIndex({
+          currentPlayerIndex: context.currentPlayerIndex,
+          totalPlayers: context.players.length - 1, // start from 0
+        });
+
+        context.consecutivePasses += 1;
+        context.currentPlayerIndex = updatedPlayerIndex;
+      },
+      playNewRoundFirstMove: ({ context, event }) => {
+        if (event.type !== "PLAY_NEW_ROUND_FIRST_MOVE") {
+          throw new Error("attempted playFirstMove on incorrect state");
+        }
+
+        const cardsPlayed = event.cards;
+        const handType = detectHandType(cardsPlayed);
+
+        const updatedPlayerIndex = rotatePlayerIndex({
+          currentPlayerIndex: context.currentPlayerIndex,
+          totalPlayers: context.players.length - 1, // start from 0
+        });
+
+        const updatedPlayerHands = updatePlayersHands({
+          currentHand: context.players[context.currentPlayerIndex].hand,
+          cardsToRemove: event.cards,
+        });
+
+        context.roundMode = handType;
+        context.currentPlayerIndex = updatedPlayerIndex;
+        context.cardPile.push(cardsPlayed);
+        context.players[context.currentPlayerIndex].hand = updatedPlayerHands;
+      },
+      startNewRound: ({ context }) => {
+        context.consecutivePasses = 0;
+        context.roundMode = null;
       },
     },
     guards: {
@@ -185,6 +233,15 @@ export const makeBigTwoGameMachine = () =>
 
         return true;
       },
+      hasEveryonePassedExceptLastPlayer: ({ context }) => {
+        const playerCount = context.players.length - 1; //normalise to index 0
+
+        // when all players pass in a row, minus the last player, that player has won the round.
+        const numberConsecutivePassesNeededToWinRound = playerCount - 1;
+        return (
+          context.consecutivePasses >= numberConsecutivePassesNeededToWinRound
+        );
+      },
     },
   }).createMachine({
     id: "bigTwoGame",
@@ -228,6 +285,36 @@ export const makeBigTwoGameMachine = () =>
           PLAY_CARDS: {
             actions: ["playCards"],
             guard: "isPlayedHandValid",
+          },
+          //**
+          //* In XState, when you group transitions in an array like this, it creates
+          // an ordered list of potential transitions that will be evaluated from top to bottom.
+          // this is known as "guard prioritization" or "ordered transitions."
+          //*
+          PASS_TURN: [
+            // check if everyone has passed except the last player
+            {
+              guard: "hasEveryonePassedExceptLastPlayer",
+              target: "PLAY_NEW_ROUND",
+              actions: ["passTurn"],
+            },
+            {
+              actions: ["passTurn"],
+            },
+            // Second transition fallback if first guard fails
+          ],
+          RESET_GAME: {
+            actions: ["resetGame"],
+            target: "WAITING_FOR_PLAYERS",
+          },
+        },
+      },
+      PLAY_NEW_ROUND: {
+        entry: ["startNewRound"],
+        on: {
+          PLAY_NEW_ROUND_FIRST_MOVE: {
+            actions: ["playNewRoundFirstMove"],
+            target: "NEXT_PLAYER_TURN",
           },
           RESET_GAME: {
             actions: ["resetGame"],

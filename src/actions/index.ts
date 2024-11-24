@@ -363,6 +363,24 @@ export const server = {
 
           return record;
         }
+
+        if (currentGameState.value === "PLAY_NEW_ROUND") {
+          console.log("🟢 Playing new round first move");
+          gameStateMachineActor.send({
+            type: "PLAY_NEW_ROUND_FIRST_MOVE",
+            cards: input.cards,
+          });
+
+          const gameStateSnapshot =
+            gameStateMachineActor.getPersistedSnapshot();
+
+          const record = await pb.collection("rooms").update(input.roomId, {
+            gameState: gameStateSnapshot,
+          });
+
+          return record;
+        }
+
         console.log("🟢 Playing next player cards");
         gameStateMachineActor.send({
           type: "PLAY_CARDS",
@@ -499,6 +517,46 @@ export const server = {
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Server error during play turn",
+          stack: JSON.stringify(e),
+        });
+      }
+    },
+  }),
+  passTurnV2: defineAction({
+    accept: "json",
+    input: z.object({
+      roomId: z.string(),
+    }),
+    handler: async (input, context) => {
+      try {
+        const pb = context.locals.pb;
+        const roomRecord = await pb
+          .collection("rooms")
+          .getOne<RoomSchemaV2>(input.roomId);
+        const serverGameState = roomRecord.gameState;
+        const bigTwoGameMachine = makeBigTwoGameMachine();
+        const gameStateMachineActor = createActor(bigTwoGameMachine, {
+          snapshot: serverGameState,
+        }).start();
+
+        console.log("🟢 Player passing turn");
+        gameStateMachineActor.send({
+          type: "PASS_TURN",
+          playerId: context.locals.pb.authStore.model?.id,
+        });
+
+        const gameStateSnapshot = gameStateMachineActor.getPersistedSnapshot();
+
+        const record = await pb.collection("rooms").update(input.roomId, {
+          gameState: gameStateSnapshot,
+        });
+
+        return record;
+      } catch (e) {
+        console.log("Server Error", JSON.stringify(e));
+        throw new ActionError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Server error during pass turn",
           stack: JSON.stringify(e),
         });
       }
