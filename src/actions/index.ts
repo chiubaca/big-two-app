@@ -155,14 +155,6 @@ export const server = {
         const bigTwoGameMachine = makeBigTwoGameMachine();
         const gameStateMachineActor = createActor(bigTwoGameMachine, {
           snapshot: serverGameState,
-          inspect: (inspectorEvent) => {
-            console.dir(
-              {
-                "🔍 Inspector Event:": inspectorEvent,
-              },
-              { depth: null }
-            );
-          },
         }).start();
 
         gameStateMachineActor.send({
@@ -371,9 +363,19 @@ export const server = {
 
           return record;
         }
+        console.log("🟢 Playing next player cards");
+        gameStateMachineActor.send({
+          type: "PLAY_CARDS",
+          cards: input.cards,
+        });
 
-        console.log("TODO: handle play cards after first move");
-        return;
+        const gameStateSnapshot = gameStateMachineActor.getPersistedSnapshot();
+
+        const record = await pb.collection("rooms").update(input.roomId, {
+          gameState: gameStateSnapshot,
+        });
+
+        return record;
       } catch (e) {
         console.log("Server Error", JSON.stringify(e));
         throw new ActionError({

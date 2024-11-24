@@ -8,6 +8,7 @@ import {
 import { dealArray, shuffleArray } from "./deck";
 import {
   detectHandType,
+  isPlayedHandBigger,
   rotatePlayerIndex,
   updatePlayersHands,
 } from "./gameState";
@@ -87,10 +88,6 @@ export const makeBigTwoGameMachine = () =>
         const cardsPlayed = event.cards;
         const handType = detectHandType(cardsPlayed);
 
-        if (handType === null) {
-          throw new Error("invalid hand was played");
-        }
-
         const updatedPlayerIndex = rotatePlayerIndex({
           currentPlayerIndex: context.currentPlayerIndex,
           totalPlayers: context.players.length - 1, // start from 0
@@ -107,15 +104,73 @@ export const makeBigTwoGameMachine = () =>
         context.players[context.currentPlayerIndex].hand = updatedPlayerHands;
       },
       playCards: ({ context, event }) => {
-        // Implementation here
+        if (event.type !== "PLAY_CARDS") {
+          console.warn("🚨 attempted playCards action on incorrect state");
+          return;
+        }
+
+        const cardsPlayed = event.cards;
+
+        // If all passes, we can continue to the next player
+        const updatedPlayerIndex = rotatePlayerIndex({
+          currentPlayerIndex: context.currentPlayerIndex,
+          totalPlayers: context.players.length - 1, // start from 0
+        });
+        context.consecutivePasses = 0;
+        context.currentPlayerIndex = updatedPlayerIndex;
+        context.cardPile.push(cardsPlayed);
       },
     },
     guards: {
       hasMaxPlayers: ({ context }) => context.players.length !== 4,
-      // isValidFirstMove: ({ context, event }) => {
-      //   // this should check if the player has a 3 diamond card
-      //   return true;
-      // },
+      isValidFirstMove: ({ context, event }) => {
+        if (event.type !== "PLAY_FIRST_MOVE") {
+          console.warn("🚨 attempted PLAY_FIRST_MOVE on incorrect state");
+          return false;
+        }
+        const handType = detectHandType(event.cards);
+
+        if (handType === null) {
+          console.warn("🚨 invalid hand was played");
+          return false;
+        }
+        return true;
+      },
+      isPlayedHandValid: ({ context, event }) => {
+        if (event.type !== "PLAY_CARDS") {
+          console.warn("🚨 attempted PLAY_CARDS on incorrect state");
+          return false;
+        }
+        const handType = detectHandType(event.cards);
+        if (handType === null) {
+          console.warn("🚨 invalid hand was played");
+          return false;
+        }
+
+        if (handType !== context.roundMode) {
+          console.warn("🚨 hand type does not match round mode");
+          return false;
+        }
+
+        const cardsToBeat = context.cardPile.at(-1);
+        if (!cardsToBeat) {
+          console.warn("🚨 could not get last hand played on cardPile");
+          return false;
+        }
+
+        if (
+          !isPlayedHandBigger({
+            playedCards: event.cards,
+            cardsToBeat,
+            handType: context.roundMode,
+          })
+        ) {
+          console.warn("🚨 played hand is not bigger than last cards on pile");
+          return false;
+        }
+
+        return true;
+      },
     },
   }).createMachine({
     id: "bigTwoGame",
@@ -136,28 +191,27 @@ export const makeBigTwoGameMachine = () =>
             guard: "hasMaxPlayers",
           },
           START_GAME: {
-            target: "GAME_STARTING",
+            actions: ["dealCards"],
+            target: "ROUND_FIRST_MOVE",
           },
-        },
-      },
-      GAME_STARTING: {
-        entry: ["dealCards"],
-        always: {
-          target: "ROUND_FIRST_MOVE",
         },
       },
       ROUND_FIRST_MOVE: {
         on: {
           PLAY_FIRST_MOVE: {
             actions: ["playFirstMove"],
+            guard: "isValidFirstMove",
+            target: "NEXT_PLAYER_TURN",
           },
-        },
-        always: {
-          target: "NEXT_PLAYER_TURN",
         },
       },
       NEXT_PLAYER_TURN: {
-        // Add player turn state logic here
+        on: {
+          PLAY_CARDS: {
+            actions: ["playCards"],
+            guard: "isPlayedHandValid",
+          },
+        },
       },
     },
   });
