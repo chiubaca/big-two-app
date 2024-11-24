@@ -190,7 +190,20 @@ export const makeBigTwoGameMachine = () =>
           return false;
         }
         const handType = detectHandType(event.cards);
-
+        if (handType === null) {
+          console.warn("🚨 invalid hand was played");
+          return false;
+        }
+        return true;
+      },
+      isValidNewRoundFirstMove: ({ context, event }) => {
+        if (event.type !== "PLAY_NEW_ROUND_FIRST_MOVE") {
+          console.warn(
+            "🚨 attempted PLAY_NEW_ROUND_FIRST_MOVE on incorrect state"
+          );
+          return false;
+        }
+        const handType = detectHandType(event.cards);
         if (handType === null) {
           console.warn("🚨 invalid hand was played");
           return false;
@@ -314,6 +327,7 @@ export const makeBigTwoGameMachine = () =>
           PLAY_NEW_ROUND_FIRST_MOVE: {
             actions: ["playNewRoundFirstMove"],
             target: "NEXT_PLAYER_TURN",
+            guard: "isValidNewRoundFirstMove",
           },
           RESET_GAME: {
             actions: ["resetGame"],
