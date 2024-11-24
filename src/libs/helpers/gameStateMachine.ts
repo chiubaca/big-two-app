@@ -29,7 +29,8 @@ export type GameEvent =
   | { type: "ROUND_FIRST_MOVE" }
   | { type: "PLAY_FIRST_MOVE"; cards: Card[] }
   | { type: "PLAY_CARDS"; cards: Card[] }
-  | { type: "PASS_TURN"; playerId: string };
+  | { type: "PASS_TURN"; playerId: string }
+  | { type: "RESET_GAME" };
 
 type Player = {
   name: string;
@@ -120,6 +121,19 @@ export const makeBigTwoGameMachine = () =>
         context.currentPlayerIndex = updatedPlayerIndex;
         context.cardPile.push(cardsPlayed);
       },
+      resetGame: ({ context }) => {
+        context.players = context.players.map((player) => {
+          return {
+            hand: [],
+            id: player.id,
+            name: player.name,
+          };
+        });
+        context.currentPlayerIndex = 0;
+        context.roundMode = null;
+        context.cardPile = [];
+        context.consecutivePasses = 0;
+      },
     },
     guards: {
       hasMaxPlayers: ({ context }) => context.players.length !== 4,
@@ -203,6 +217,10 @@ export const makeBigTwoGameMachine = () =>
             guard: "isValidFirstMove",
             target: "NEXT_PLAYER_TURN",
           },
+          RESET_GAME: {
+            actions: ["resetGame"],
+            target: "WAITING_FOR_PLAYERS",
+          },
         },
       },
       NEXT_PLAYER_TURN: {
@@ -210,6 +228,10 @@ export const makeBigTwoGameMachine = () =>
           PLAY_CARDS: {
             actions: ["playCards"],
             guard: "isPlayedHandValid",
+          },
+          RESET_GAME: {
+            actions: ["resetGame"],
+            target: "WAITING_FOR_PLAYERS",
           },
         },
       },

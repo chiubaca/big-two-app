@@ -69,13 +69,22 @@ const JoinRoom = () => {
   };
 
   return (
-    <button
-      className="btn btn-primary m-3"
-      type="button"
-      onClick={handleJoinRoom}
-    >
-      Join room
-    </button>
+    <div>
+      <button
+        className="btn btn-primary m-3"
+        type="button"
+        onClick={handleJoinRoom}
+      >
+        Join room
+      </button>
+      <button
+        className="btn btn-warning m-3"
+        type="button"
+        onClick={() => actions.resetGame({ roomId })}
+      >
+        reset game
+      </button>
+    </div>
   );
 };
 

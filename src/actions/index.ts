@@ -464,4 +464,44 @@ export const server = {
       }
     },
   }),
+  resetGame: defineAction({
+    accept: "json",
+    input: z.object({
+      roomId: z.string(),
+    }),
+    handler: async (input, context) => {
+      try {
+        const pb = context.locals.pb;
+        const roomRecord = await pb
+          .collection("rooms")
+          .getOne<RoomSchemaV2>(input.roomId);
+        const serverGameState = roomRecord.gameState;
+        const currentGameState = roomRecord.gameState;
+        const bigTwoGameMachine = makeBigTwoGameMachine();
+        const gameStateMachineActor = createActor(bigTwoGameMachine, {
+          snapshot: serverGameState,
+        }).start();
+
+        console.log("🟢 resetting game");
+        gameStateMachineActor.send({
+          type: "RESET_GAME",
+        });
+
+        const gameStateSnapshot = gameStateMachineActor.getPersistedSnapshot();
+
+        const record = await pb.collection("rooms").update(input.roomId, {
+          gameState: gameStateSnapshot,
+        });
+
+        return record;
+      } catch (e) {
+        console.log("Server Error", JSON.stringify(e));
+        throw new ActionError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Server error during play turn",
+          stack: JSON.stringify(e),
+        });
+      }
+    },
+  }),
 };
