@@ -336,6 +336,54 @@ export const server = {
       }
     },
   }),
+  playTurnV2: defineAction({
+    accept: "json",
+    input: z.object({
+      roomId: z.string(),
+      cards: z.array(cardSchema),
+    }),
+    handler: async (input, context) => {
+      try {
+        const pb = context.locals.pb;
+        const roomRecord = await pb
+          .collection("rooms")
+          .getOne<RoomSchemaV2>(input.roomId);
+        const serverGameState = roomRecord.gameState;
+        const currentGameState = roomRecord.gameState;
+        const bigTwoGameMachine = makeBigTwoGameMachine();
+        const gameStateMachineActor = createActor(bigTwoGameMachine, {
+          snapshot: serverGameState,
+        }).start();
+
+        if (currentGameState.value === "ROUND_FIRST_MOVE") {
+          console.log("🟢 Playing round first move");
+          gameStateMachineActor.send({
+            type: "PLAY_FIRST_MOVE",
+            cards: input.cards,
+          });
+
+          const gameStateSnapshot =
+            gameStateMachineActor.getPersistedSnapshot();
+
+          const record = await pb.collection("rooms").update(input.roomId, {
+            gameState: gameStateSnapshot,
+          });
+
+          return record;
+        }
+
+        console.log("TODO: handle play cards after first move");
+        return;
+      } catch (e) {
+        console.log("Server Error", JSON.stringify(e));
+        throw new ActionError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Server error during play turn",
+          stack: JSON.stringify(e),
+        });
+      }
+    },
+  }),
   passTurn: defineAction({
     accept: "json",
     input: z.object({

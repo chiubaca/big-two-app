@@ -191,6 +191,10 @@ const Game = () => {
         disabled={!isCurrentPlayerTurn}
         onClick={async () => {
           setSelectedCards([]);
+          await actions.playTurnV2({
+            roomId,
+            cards: selectedCards,
+          });
         }}
       >
         {isCurrentPlayerTurn ? "Play your turn" : "Its not your turn"}

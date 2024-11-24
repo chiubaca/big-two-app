@@ -6,6 +6,11 @@ import {
   type SnapshotFrom,
 } from "xstate";
 import { dealArray, shuffleArray } from "./deck";
+import {
+  detectHandType,
+  rotatePlayerIndex,
+  updatePlayersHands,
+} from "./gameState";
 
 export type RoomSchema = {
   admin: string;
@@ -20,23 +25,16 @@ export type BigTwoGameMachineSnapshot = SnapshotFrom<BigTwoGameMachine>;
 export type GameEvent =
   | { type: "JOIN_GAME"; playerId: string; playerName: string }
   | { type: "START_GAME" }
-  | { type: "PLAY_CARDS"; cards: Card[]; playerId: string }
-  | { type: "PASS_TURN"; playerId: string }
-  | { type: "PLAYER_LEFT"; playerId: string };
+  | { type: "ROUND_FIRST_MOVE" }
+  | { type: "PLAY_FIRST_MOVE"; cards: Card[] }
+  | { type: "PLAY_CARDS"; cards: Card[] }
+  | { type: "PASS_TURN"; playerId: string };
 
 type Player = {
   name: string;
   id: string;
   hand: Card[];
 };
-
-export type GameStatus =
-  | "WAITING_FOR_PLAYERS"
-  | "GAME_STARTING"
-  | "ROUND_FIRST_MOVE"
-  | "PLAYER_TURN"
-  | "ROUND_END"
-  | "GAME_END";
 
 type RoundMode = "single" | "pairs" | "combo";
 
@@ -81,10 +79,34 @@ export const makeBigTwoGameMachine = () =>
         });
         console.log("✅ Cards dealt:", context);
       },
-      playCards: ({ context, event }) => {
-        // Implementation here
+      playFirstMove: ({ context, event }) => {
+        if (event.type !== "PLAY_FIRST_MOVE") {
+          throw new Error("attempted playFirstMove on incorrect state");
+        }
+
+        const cardsPlayed = event.cards;
+        const handType = detectHandType(cardsPlayed);
+
+        if (handType === null) {
+          throw new Error("invalid hand was played");
+        }
+
+        const updatedPlayerIndex = rotatePlayerIndex({
+          currentPlayerIndex: context.currentPlayerIndex,
+          totalPlayers: context.players.length - 1, // start from 0
+        });
+
+        const updatedPlayerHands = updatePlayersHands({
+          currentHand: context.players[context.currentPlayerIndex].hand,
+          cardsToRemove: event.cards,
+        });
+
+        context.roundMode = handType;
+        context.currentPlayerIndex = updatedPlayerIndex;
+        context.cardPile.push(cardsPlayed);
+        context.players[context.currentPlayerIndex].hand = updatedPlayerHands;
       },
-      setRoundMode: ({ context, event }) => {
+      playCards: ({ context, event }) => {
         // Implementation here
       },
     },
@@ -126,14 +148,15 @@ export const makeBigTwoGameMachine = () =>
       },
       ROUND_FIRST_MOVE: {
         on: {
-          PLAY_CARDS: {
-            target: "PLAYER_TURN",
-            // guard: "isValidFirstMove",
-            actions: ["playCards", "setRoundMode"],
+          PLAY_FIRST_MOVE: {
+            actions: ["playFirstMove"],
           },
         },
+        always: {
+          target: "NEXT_PLAYER_TURN",
+        },
       },
-      PLAYER_TURN: {
+      NEXT_PLAYER_TURN: {
         // Add player turn state logic here
       },
     },
