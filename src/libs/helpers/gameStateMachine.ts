@@ -86,47 +86,46 @@ export const makeBigTwoGameMachine = () =>
         if (event.type !== "PLAY_FIRST_MOVE") {
           throw new Error("attempted playFirstMove on incorrect state");
         }
-
         const cardsPlayed = event.cards;
-        const handType = detectHandType(cardsPlayed);
 
-        const updatedPlayerIndex = rotatePlayerIndex({
-          currentPlayerIndex: context.currentPlayerIndex,
-          totalPlayers: context.players.length - 1, // start from 0
-        });
-
+        // update the current player's hand
         const updatedPlayerHands = updatePlayersHands({
           currentHand: context.players[context.currentPlayerIndex].hand,
-          cardsToRemove: event.cards,
+          cardsToRemove: cardsPlayed,
+        });
+        context.players[context.currentPlayerIndex].hand = updatedPlayerHands;
+
+        // update the current player index
+        const updatedCurrentPlayerIndex = rotatePlayerIndex({
+          currentPlayerIndex: context.currentPlayerIndex,
+          totalPlayers: context.players.length - 1,
         });
 
+        const handType = detectHandType(cardsPlayed);
         context.roundMode = handType;
-        context.currentPlayerIndex = updatedPlayerIndex;
+        context.currentPlayerIndex = updatedCurrentPlayerIndex;
         context.cardPile.push(cardsPlayed);
-        context.players[context.currentPlayerIndex].hand = updatedPlayerHands;
       },
       playCards: ({ context, event }) => {
         if (event.type !== "PLAY_CARDS") {
           console.warn("🚨 attempted playCards action on incorrect state");
           return;
         }
-
         const cardsPlayed = event.cards;
-
-        // If all passes, we can continue to the next player
-        const updatedPlayerIndex = rotatePlayerIndex({
-          currentPlayerIndex: context.currentPlayerIndex,
-          totalPlayers: context.players.length - 1, // start from 0
-        });
         const updatedPlayerHands = updatePlayersHands({
           currentHand: context.players[context.currentPlayerIndex].hand,
           cardsToRemove: event.cards,
+        });
+        context.players[context.currentPlayerIndex].hand = updatedPlayerHands;
+
+        const updatedPlayerIndex = rotatePlayerIndex({
+          currentPlayerIndex: context.currentPlayerIndex,
+          totalPlayers: context.players.length - 1,
         });
 
         context.consecutivePasses = 0;
         context.currentPlayerIndex = updatedPlayerIndex;
         context.cardPile.push(cardsPlayed);
-        context.players[context.currentPlayerIndex].hand = updatedPlayerHands;
       },
       resetGame: ({ context }) => {
         context.players = context.players.map((player) => {
@@ -163,20 +162,20 @@ export const makeBigTwoGameMachine = () =>
         const cardsPlayed = event.cards;
         const handType = detectHandType(cardsPlayed);
 
-        const updatedPlayerIndex = rotatePlayerIndex({
-          currentPlayerIndex: context.currentPlayerIndex,
-          totalPlayers: context.players.length - 1, // start from 0
-        });
-
         const updatedPlayerHands = updatePlayersHands({
           currentHand: context.players[context.currentPlayerIndex].hand,
-          cardsToRemove: event.cards,
+          cardsToRemove: cardsPlayed,
+        });
+        context.players[context.currentPlayerIndex].hand = updatedPlayerHands;
+
+        const updatedPlayerIndex = rotatePlayerIndex({
+          currentPlayerIndex: context.currentPlayerIndex,
+          totalPlayers: context.players.length - 1,
         });
 
         context.roundMode = handType;
         context.currentPlayerIndex = updatedPlayerIndex;
         context.cardPile.push(cardsPlayed);
-        context.players[context.currentPlayerIndex].hand = updatedPlayerHands;
       },
       startNewRound: ({ context }) => {
         context.consecutivePasses = 0;
