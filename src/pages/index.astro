@@ -12,9 +12,6 @@ const rooms = currentUserId
       .collection("rooms")
       .getFullList<RoomExpandedSchema>({ expand: "admin" })
   : [];
-console.dir(rooms, { depth: null });
-
-// console.dir({ "🚀 rooms on home page": rooms }, { depth: null });
 ---
 
 <html lang="en">
