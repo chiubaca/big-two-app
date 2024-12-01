@@ -1,6 +1,6 @@
 // sum.test.js
 import { expect, test } from "vitest";
-import { rotatePlayerIndex } from "./gameState";
+import { rotatePlayerIndex } from "./gameStateMachine";
 
 test.each([
   [{ currentPlayerIndex: 0, totalPlayers: 3 }, 1],

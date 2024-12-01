@@ -9,8 +9,7 @@ import {
 
 import "../../../base.css";
 import { PlayingCard } from "../components/PlayingCard";
-import { detectHandType } from "~libs/helpers/gameState";
-
+import { detectHandType } from "~libs/helpers/gameStateMachine";
 interface GameRoomProps extends InitialGameRoomContextProps {}
 
 export const GameRoomV2 = ({

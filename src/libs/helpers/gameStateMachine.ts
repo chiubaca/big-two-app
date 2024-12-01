@@ -1,4 +1,14 @@
-import { createDeck, sortCards, type Card } from "@chiubaca/big-two-utils";
+import {
+  isComboBigger,
+  isPairBigger,
+  isPairValid,
+  isSingleBigger,
+  validateComboType,
+  createDeck,
+  sortCards,
+  type Card,
+} from "@chiubaca/big-two-utils";
+
 import {
   createActor,
   setup,
@@ -6,12 +16,80 @@ import {
   type SnapshotFrom,
 } from "xstate";
 import { dealArray, shuffleArray } from "./deck";
-import {
-  detectHandType,
-  isPlayedHandBigger,
-  rotatePlayerIndex,
-  updatePlayersHands,
-} from "./gameState";
+
+export function rotatePlayerIndex(args: {
+  currentPlayerIndex: number;
+  totalPlayers: number;
+}) {
+  const { currentPlayerIndex, totalPlayers } = args;
+  const incrementedPlayerIndex = currentPlayerIndex + 1;
+  const updatedPlayerIndex =
+    incrementedPlayerIndex === totalPlayers + 1 ? 0 : incrementedPlayerIndex;
+
+  if (updatedPlayerIndex > totalPlayers) {
+    throw new Error(`max index can only be ${totalPlayers}`);
+  }
+
+  return updatedPlayerIndex;
+}
+
+export function updatePlayersHands({
+  currentHand,
+  cardsToRemove,
+}: {
+  currentHand: Card[];
+  cardsToRemove: Card[];
+}): Card[] {
+  return currentHand.filter(
+    (card) =>
+      !cardsToRemove.some((c) => c.suit === card.suit && c.value === card.value)
+  );
+}
+
+export function detectHandType(cards: Card[]): RoundMode | null {
+  if (cards.length === 1) return "single";
+
+  if (cards.length === 2 && isPairValid([cards[0], cards[1]])) return "pairs";
+
+  if (cards.length === 5 && validateComboType(cards)) {
+    return "combo";
+  }
+
+  return null;
+}
+
+export function isPlayedHandBigger(args: {
+  playedCards: Card[];
+  cardsToBeat: Card[];
+  handType: RoundMode;
+}): boolean {
+  const { handType, playedCards, cardsToBeat } = args;
+
+  if (handType === "single") {
+    return isSingleBigger(playedCards[0], cardsToBeat[0]);
+  }
+
+  if (handType === "pairs") {
+    return isPairBigger(
+      [playedCards[0], playedCards[1]],
+      [cardsToBeat[0], cardsToBeat[1]]
+    );
+  }
+
+  if (handType === "combo") {
+    const validatedPlayedCombo = validateComboType(playedCards);
+    const validatedComboToBeat = validateComboType(cardsToBeat);
+
+    if (!validatedPlayedCombo || !validatedComboToBeat) {
+      console.warn("combo was not validated correctly");
+      return false;
+    }
+
+    return isComboBigger(validatedPlayedCombo, validatedComboToBeat);
+  }
+
+  return false;
+}
 
 export type RoomSchema = {
   admin: string;

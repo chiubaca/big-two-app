@@ -1,5 +1,4 @@
 ---
-import { GameRoom } from "~libs/game-room/page/GameRoom";
 import { GameRoomV2 } from "~libs/game-room/page/GameRoomV2";
 import type { RoomSchema } from "~libs/helpers/gameStateMachine";
 import pbAdmin from "~libs/pocketbase/pocketbase-admin";
@@ -24,7 +23,6 @@ const userName = pb.authStore.model?.name;
 const roomDetails = await pbAdmin
   .collection("rooms")
   .getOne<RoomSchema>(roomId);
-// console.log("🚀 ~ roomDetails:", roomDetails);
 ---
 
 <a href="/">Back to Home</a>

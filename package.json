@@ -21,7 +21,6 @@
     "@types/react": "npm:types-react@rc",
     "@types/react-dom": "npm:types-react-dom@rc",
     "astro": "^4.16.7",
-    "immer": "^10.1.1",
     "js-cookie": "^3.0.5",
     "pocketbase": "^0.21.5",
     "react": "19.0.0-rc-7c8e5e7a-20241101",
