@@ -9,13 +9,7 @@ import {
   type Card,
 } from "@chiubaca/big-two-utils";
 
-import {
-  and,
-  createActor,
-  setup,
-  type MachineSnapshot,
-  type SnapshotFrom,
-} from "xstate";
+import { setup, type SnapshotFrom } from "xstate";
 import { dealArray, shuffleArray } from "./deck";
 
 export function rotatePlayerIndex(args: {
