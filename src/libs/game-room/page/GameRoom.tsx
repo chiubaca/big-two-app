@@ -12,7 +12,7 @@ import { PlayingCard } from "../components/PlayingCard";
 import { detectHandType } from "~libs/helpers/gameStateMachine";
 interface GameRoomProps extends InitialGameRoomContextProps {}
 
-export const GameRoomV2 = ({
+export const GameRoom = ({
   currentUserId,
   roomId,
   players,

@@ -1,5 +1,5 @@
 ---
-import { GameRoomV2 } from "~libs/game-room/page/GameRoomV2";
+import { GameRoom } from "~libs/game-room/page/GameRoom";
 import type { RoomSchema } from "~libs/helpers/gameStateMachine";
 import pbAdmin from "~libs/pocketbase/pocketbase-admin";
 
@@ -31,7 +31,7 @@ const roomDetails = await pbAdmin
   Welcome to room {roomId}, {userName} (<code>{currentUserId}</code>)
 </h1>
 
-<GameRoomV2
+<GameRoom
   currentUserId={currentUserId}
   roomId={roomId}
   players={roomDetails.players}
