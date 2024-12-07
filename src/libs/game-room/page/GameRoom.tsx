@@ -69,7 +69,7 @@ const JoinRoom = () => {
   const { roomId } = useContext(GameRoomContext);
 
   const handleJoinRoom = async () => {
-    await actions.joinGameV2({
+    await actions.joinGame({
       roomId,
     });
   };
@@ -133,7 +133,7 @@ const Game = () => {
       <button
         className="btn"
         type="button"
-        onClick={() => actions.startGameV2({ roomId })}
+        onClick={() => actions.startGame({ roomId })}
       >
         Start Game
       </button>
@@ -206,7 +206,7 @@ const Game = () => {
         disabled={!isCurrentPlayerTurn}
         onClick={async () => {
           setSelectedCards([]);
-          await actions.playTurnV2({
+          await actions.playTurn({
             roomId,
             cards: selectedCards,
           });
@@ -219,7 +219,7 @@ const Game = () => {
         disabled={!isCurrentPlayerTurn}
         type="button"
         className={`ml-2 btn btn-secondary ${isCurrentPlayerTurn ? "btn-secondary" : "btn-disabled"}`}
-        onClick={() => actions.passTurnV2({ roomId })}
+        onClick={() => actions.passTurn({ roomId })}
       >
         Pass
       </button>

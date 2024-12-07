@@ -6,10 +6,9 @@ import pbAdmin from "~libs/pocketbase/pocketbase-admin";
 import {
   makeBigTwoGameMachine,
   type BigTwoGameMachineSnapshot,
-  type RoomSchema as RoomSchemaV2,
+  type RoomSchema,
 } from "~libs/helpers/gameStateMachine";
 
-import type { RoomSchema } from "~libs/schemas/rooms";
 import type { Card } from "@chiubaca/big-two-utils";
 
 export const server = {
@@ -77,7 +76,7 @@ export const server = {
           players: [currentUserId],
           roomName: input.roomName,
           gameState: gameStateSnapshot,
-        } satisfies RoomSchemaV2;
+        } satisfies RoomSchema;
 
         const record = await pbAdmin.collection("rooms").create(roomRecord);
 
@@ -93,7 +92,7 @@ export const server = {
     },
   }),
 
-  startGameV2: defineAction({
+  startGame: defineAction({
     accept: "json",
     input: z.object({
       roomId: z.string(),
@@ -103,7 +102,7 @@ export const server = {
       const pb = context.locals.pb;
       const roomRecord = await pb
         .collection("rooms")
-        .getOne<RoomSchemaV2>(input.roomId);
+        .getOne<RoomSchema>(input.roomId);
 
       const bigTwoGameMachine = makeBigTwoGameMachine();
       const serverGameState = roomRecord.gameState;
@@ -121,7 +120,7 @@ export const server = {
       return record;
     },
   }),
-  joinGameV2: defineAction({
+  joinGame: defineAction({
     accept: "json",
     input: z.object({
       roomId: z.string(),
@@ -135,7 +134,7 @@ export const server = {
 
         const roomRecord = await pb
           .collection("rooms")
-          .getOne<RoomSchemaV2>(input.roomId);
+          .getOne<RoomSchema>(input.roomId);
 
         if (roomRecord.players.includes(currentPlayerId)) {
           return "you're already in this room";
@@ -172,7 +171,7 @@ export const server = {
     },
   }),
 
-  playTurnV2: defineAction({
+  playTurn: defineAction({
     accept: "json",
     input: z.object({
       roomId: z.string(),
@@ -183,7 +182,7 @@ export const server = {
         const pb = context.locals.pb;
         const roomRecord = await pb
           .collection("rooms")
-          .getOne<RoomSchemaV2>(input.roomId);
+          .getOne<RoomSchema>(input.roomId);
         const serverGameState = roomRecord.gameState;
         const currentGameState = roomRecord.gameState;
         const bigTwoGameMachine = makeBigTwoGameMachine();
@@ -259,7 +258,7 @@ export const server = {
         const pb = context.locals.pb;
         const roomRecord = await pb
           .collection("rooms")
-          .getOne<RoomSchemaV2>(input.roomId);
+          .getOne<RoomSchema>(input.roomId);
         const serverGameState = roomRecord.gameState;
         const bigTwoGameMachine = makeBigTwoGameMachine();
         const gameStateMachineActor = createActor(bigTwoGameMachine, {
@@ -288,7 +287,7 @@ export const server = {
       }
     },
   }),
-  passTurnV2: defineAction({
+  passTurn: defineAction({
     accept: "json",
     input: z.object({
       roomId: z.string(),
@@ -298,7 +297,7 @@ export const server = {
         const pb = context.locals.pb;
         const roomRecord = await pb
           .collection("rooms")
-          .getOne<RoomSchemaV2>(input.roomId);
+          .getOne<RoomSchema>(input.roomId);
         const serverGameState = roomRecord.gameState;
         const bigTwoGameMachine = makeBigTwoGameMachine();
         const gameStateMachineActor = createActor(bigTwoGameMachine, {
