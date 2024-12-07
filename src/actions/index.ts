@@ -45,7 +45,7 @@ export const server = {
       }
     },
   }),
-  createRoomV2: defineAction({
+  createRoom: defineAction({
     accept: "form",
     input: z.object({
       roomName: z.string(),
