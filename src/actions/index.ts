@@ -71,7 +71,6 @@ export const server = {
         });
         const gameStateSnapshot =
           gameStateMachineActor.getPersistedSnapshot() as BigTwoGameMachineSnapshot;
-        console.log("🚀 ~ handler: ~ gameStateSnapshot:", gameStateSnapshot);
 
         const roomRecord = {
           admin: currentUserId,
@@ -201,7 +200,7 @@ export const server = {
 
           const gameStateSnapshot =
             gameStateMachineActor.getPersistedSnapshot();
-
+          console.log("🚀 ~ handler: ~ gameStateSnapshot:", gameStateSnapshot);
           const record = await pb.collection("rooms").update(input.roomId, {
             gameState: gameStateSnapshot,
           });

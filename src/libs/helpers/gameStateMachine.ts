@@ -10,6 +10,7 @@ import {
 } from "@chiubaca/big-two-utils";
 
 import {
+  and,
   createActor,
   setup,
   type MachineSnapshot,
@@ -109,7 +110,8 @@ export type GameEvent =
   | { type: "PLAY_NEW_ROUND_FIRST_MOVE"; cards: Card[] }
   | { type: "PLAY_CARDS"; cards: Card[] }
   | { type: "PASS_TURN"; playerId: string }
-  | { type: "RESET_GAME" };
+  | { type: "RESET_GAME" }
+  | { type: "GAME_END" };
 
 type Player = {
   name: string;
@@ -125,7 +127,7 @@ export interface GameContext {
   roundMode: RoundMode | null;
   cardPile: Card[][];
   consecutivePasses: number;
-  winner?: string;
+  winner?: Player;
 }
 
 export const makeBigTwoGameMachine = () =>
@@ -194,8 +196,13 @@ export const makeBigTwoGameMachine = () =>
           currentHand: context.players[context.currentPlayerIndex].hand,
           cardsToRemove: event.cards,
         });
-        context.players[context.currentPlayerIndex].hand = updatedPlayerHands;
 
+        // Check for win condition before updating other state
+        if (updatedPlayerHands.length === 0) {
+          context.winner = { ...context.players[context.currentPlayerIndex] };
+        }
+
+        context.players[context.currentPlayerIndex].hand = updatedPlayerHands;
         const updatedPlayerIndex = rotatePlayerIndex({
           currentPlayerIndex: context.currentPlayerIndex,
           totalPlayers: context.players.length - 1,
@@ -217,6 +224,7 @@ export const makeBigTwoGameMachine = () =>
         context.roundMode = null;
         context.cardPile = [];
         context.consecutivePasses = 0;
+        context.winner = undefined;
       },
       passTurn: ({ context, event }) => {
         if (event.type !== "PASS_TURN") {
@@ -245,6 +253,11 @@ export const makeBigTwoGameMachine = () =>
           cardsToRemove: cardsPlayed,
         });
         context.players[context.currentPlayerIndex].hand = updatedPlayerHands;
+
+        // Check for win condition before updating other state
+        if (updatedPlayerHands.length === 0) {
+          context.winner = { ...context.players[context.currentPlayerIndex] };
+        }
 
         const updatedPlayerIndex = rotatePlayerIndex({
           currentPlayerIndex: context.currentPlayerIndex,
@@ -358,6 +371,10 @@ export const makeBigTwoGameMachine = () =>
         },
       },
       ROUND_FIRST_MOVE: {
+        always: {
+          guard: ({ context }) => context.winner !== undefined,
+          target: "GAME_END",
+        },
         on: {
           PLAY_FIRST_MOVE: {
             actions: ["playFirstMove"],
@@ -371,11 +388,17 @@ export const makeBigTwoGameMachine = () =>
         },
       },
       NEXT_PLAYER_TURN: {
+        always: {
+          guard: ({ context }) => context.winner !== undefined,
+          target: "GAME_END",
+        },
         on: {
-          PLAY_CARDS: {
-            actions: ["playCards"],
-            guard: "isPlayedHandValid",
-          },
+          PLAY_CARDS: [
+            {
+              actions: ["playCards"],
+              guard: "isPlayedHandValid",
+            },
+          ],
           //**
           //* In XState, when you group transitions in an array like this, it creates
           // an ordered list of potential transitions that will be evaluated from top to bottom.
@@ -407,6 +430,14 @@ export const makeBigTwoGameMachine = () =>
             target: "NEXT_PLAYER_TURN",
             guard: "isValidNewRoundFirstMove",
           },
+          RESET_GAME: {
+            actions: ["resetGame"],
+            target: "WAITING_FOR_PLAYERS",
+          },
+        },
+      },
+      GAME_END: {
+        on: {
           RESET_GAME: {
             actions: ["resetGame"],
             target: "WAITING_FOR_PLAYERS",

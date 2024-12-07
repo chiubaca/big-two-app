@@ -38,6 +38,13 @@ const Player = () => {
 
   return (
     <>
+      {gameState.context.winner && (
+        <div className="text-4xl">
+          {gameState.context.winner.id === currentUserId
+            ? "You win 🎉"
+            : `You lost 😭, ${gameState.context.winner.name} won. Better luck next time!`}{" "}
+        </div>
+      )}
       <div className="m-3 text-lg">
         Players in this room:
         <ol>
