@@ -12,12 +12,13 @@ WORKDIR /app
 # Set production environment
 ENV NODE_ENV="production"
 
+
 # Throw-away build stage to reduce size of final image
 FROM base as build
 
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
-apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
+    apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
 # Install node modules
 COPY .npmrc package-lock.json package.json ./
@@ -27,15 +28,12 @@ RUN npm ci --include=dev
 COPY . .
 RUN rm -rf /app/pocketbase
 
-# Mount secret and build application
-RUN --mount=type=secret,id=PUBLIC_PB_ENDPOINT \
-    PUBLIC_PB_ENDPOINT="$(cat /run/secrets/PUBLIC_PB_ENDPOINT)" \
-    && echo "URL TEST..." $PUBLIC_PB_ENDPOINT \
-    && echo "we build now" \
-    && npm run build
+# Build application
+RUN npm run build
 
 # Remove development dependencies
 RUN npm prune --omit=dev
+
 
 # Final stage for app image
 FROM base

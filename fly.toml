@@ -21,5 +21,6 @@ memory = '1gb'
 cpu_kind = 'shared'
 cpus = 1
 
-[env]
+
+[build.args]
 PUBLIC_PB_ENDPOINT = 'https://big-two-pb.fly.dev'
