@@ -86,13 +86,6 @@ export function isPlayedHandBigger(args: {
   return false;
 }
 
-export type RoomSchema = {
-  admin: string;
-  players: string[];
-  roomName: string;
-  gameState: BigTwoGameMachineSnapshot;
-};
-
 type BigTwoGameMachine = ReturnType<typeof makeBigTwoGameMachine>;
 export type BigTwoGameMachineSnapshot = SnapshotFrom<BigTwoGameMachine>;
 

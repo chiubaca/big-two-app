@@ -1,7 +1,7 @@
 ---
 import { GameRoom } from "~libs/game-room/page/GameRoom";
-import type { RoomSchema } from "~libs/helpers/gameStateMachine";
 import pbAdmin from "~libs/pocketbase/pocketbase-admin";
+import type { Room } from "~libs/types/Room";
 
 const { roomId } = Astro.params;
 
@@ -20,9 +20,7 @@ const currentUserId = pb.authStore.model?.id;
 const userName = pb.authStore.model?.name;
 
 // // check players in this room
-const roomDetails = await pbAdmin
-  .collection("rooms")
-  .getOne<RoomSchema>(roomId);
+const roomDetails = await pbAdmin.collection("rooms").getOne<Room>(roomId);
 ---
 
 <a href="/">Back to Home</a>

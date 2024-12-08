@@ -6,10 +6,10 @@ import pbAdmin from "~libs/pocketbase/pocketbase-admin";
 import {
   makeBigTwoGameMachine,
   type BigTwoGameMachineSnapshot,
-  type RoomSchema,
 } from "~libs/helpers/gameStateMachine";
 
 import type { Card } from "@chiubaca/big-two-utils";
+import type { Room } from "~libs/types/Room";
 
 export const server = {
   signUp: defineAction({
@@ -76,7 +76,7 @@ export const server = {
           players: [currentUserId],
           roomName: input.roomName,
           gameState: gameStateSnapshot,
-        } satisfies RoomSchema;
+        } as Room;
 
         const record = await pbAdmin.collection("rooms").create(roomRecord);
 
@@ -102,7 +102,7 @@ export const server = {
       const pb = context.locals.pb;
       const roomRecord = await pb
         .collection("rooms")
-        .getOne<RoomSchema>(input.roomId);
+        .getOne<Room>(input.roomId);
 
       const bigTwoGameMachine = makeBigTwoGameMachine();
       const serverGameState = roomRecord.gameState;
@@ -134,7 +134,7 @@ export const server = {
 
         const roomRecord = await pb
           .collection("rooms")
-          .getOne<RoomSchema>(input.roomId);
+          .getOne<Room>(input.roomId);
 
         if (roomRecord.players.includes(currentPlayerId)) {
           return "you're already in this room";
@@ -182,7 +182,7 @@ export const server = {
         const pb = context.locals.pb;
         const roomRecord = await pb
           .collection("rooms")
-          .getOne<RoomSchema>(input.roomId);
+          .getOne<Room>(input.roomId);
         const serverGameState = roomRecord.gameState;
         const currentGameState = roomRecord.gameState;
         const bigTwoGameMachine = makeBigTwoGameMachine();
@@ -258,7 +258,7 @@ export const server = {
         const pb = context.locals.pb;
         const roomRecord = await pb
           .collection("rooms")
-          .getOne<RoomSchema>(input.roomId);
+          .getOne<Room>(input.roomId);
         const serverGameState = roomRecord.gameState;
         const bigTwoGameMachine = makeBigTwoGameMachine();
         const gameStateMachineActor = createActor(bigTwoGameMachine, {
@@ -297,7 +297,7 @@ export const server = {
         const pb = context.locals.pb;
         const roomRecord = await pb
           .collection("rooms")
-          .getOne<RoomSchema>(input.roomId);
+          .getOne<Room>(input.roomId);
         const serverGameState = roomRecord.gameState;
         const bigTwoGameMachine = makeBigTwoGameMachine();
         const gameStateMachineActor = createActor(bigTwoGameMachine, {

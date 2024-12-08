@@ -1,8 +1,8 @@
 ---
 import { CreateRoom } from "~libs/game-room/components/CreateRoom";
-import type { RoomExpandedSchema } from "~libs/schemas/rooms";
 import { Login } from "../components/Login";
 import { SignUp } from "../components/SignUp";
+import type { ExpandedRoom } from "~libs/types/Room";
 
 const currentUserId = Astro.locals.pb.authStore.model?.id;
 const userName = Astro.locals.pb.authStore.model?.name;
@@ -10,7 +10,7 @@ const userName = Astro.locals.pb.authStore.model?.name;
 const rooms = currentUserId
   ? await Astro.locals.pb
       .collection("rooms")
-      .getFullList<RoomExpandedSchema>({ expand: "admin" })
+      .getFullList<ExpandedRoom>({ expand: "admin" })
   : [];
 ---
 

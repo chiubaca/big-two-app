@@ -7,14 +7,14 @@ import {
   useEffect,
   useState,
 } from "react";
-import type { RoomSchema } from "~libs/helpers/gameStateMachine";
 import pbClient from "~libs/pocketbase/pocketbase-client";
+import type { Room } from "~libs/types/Room";
 
 type GameRoomContextType = {
   roomId: string;
   players: string[];
   currentUserId: string;
-  gameState: RoomSchema["gameState"];
+  gameState: Room["gameState"];
 };
 
 export type InitialGameRoomContextProps = Pick<
@@ -26,7 +26,7 @@ export const GameRoomContext = createContext<GameRoomContextType>({
   roomId: "",
   players: [],
   currentUserId: "",
-  gameState: {} as RoomSchema["gameState"],
+  gameState: {} as Room["gameState"],
 });
 
 export const GameRoomProvider = ({
@@ -63,8 +63,7 @@ const useSubscribeToPlayers = ({
 }: {
   roomId: string;
   initialPlayers: string[];
-  // initialGameState: GameState;
-  initialGameState: RoomSchema["gameState"];
+  initialGameState: Room["gameState"];
 }) => {
   const [players, setPlayers] = useState<string[]>(initialPlayers);
 
