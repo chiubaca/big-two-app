@@ -16,4 +16,4 @@ jobs:
       - run: flyctl deploy --remote-only
         env:
           FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
-          PUBLIC_PB_ENDPOINT: ${{ env.PUBLIC_PB_ENDPOINT }}
+          PUBLIC_PB_ENDPOINT: ${{ secrets.PUBLIC_PB_ENDPOINT }}
