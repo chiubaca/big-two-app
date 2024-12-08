@@ -24,8 +24,9 @@ RUN apt-get update -qq && \
 COPY .npmrc package-lock.json package.json ./
 RUN npm ci --include=dev
 
-# Copy application code
+# Copy application code, ignoring the pocketbase directory
 COPY . .
+RUN rm -rf /app/pocketbase
 
 # Build application
 RUN npm run build
