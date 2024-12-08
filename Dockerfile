@@ -23,7 +23,9 @@ RUN apt-get update -qq && \
 # Install node modules
 COPY .npmrc package-lock.json package.json ./
 RUN --mount=type=secret,id=PUBLIC_PB_ENDPOINT \
-    PUBLIC_PB_ENDPOINT="$(cat /run/secrets/PUBLIC_PB_ENDPOINT)" npm ci --include=dev
+    PUBLIC_PB_ENDPOINT="$(cat /run/secrets/PUBLIC_PB_ENDPOINT)" \
+    && echo "PUBLIC_PB_ENDPOINT=$PUBLIC_PB_ENDPOINT" >> /app/.env \
+    && npm ci --include=dev
 
 # Copy application code, ignoring the pocketbase directory
 COPY . .
