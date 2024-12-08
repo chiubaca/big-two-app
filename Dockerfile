@@ -11,6 +11,8 @@ WORKDIR /app
 
 # Set production environment
 ENV NODE_ENV="production"
+ARG PUBLIC_PB_ENDPOINT
+ENV PUBLIC_PB_ENDPOINT=${PUBLIC_PB_ENDPOINT}
 
 
 # Throw-away build stage to reduce size of final image
