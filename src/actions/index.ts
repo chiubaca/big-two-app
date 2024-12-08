@@ -36,6 +36,7 @@ export const server = {
         return record;
       } catch (e) {
         console.log("Server Error", JSON.stringify(e));
+        console.log("🙈 PB endpoint", import.meta.env.PUBLIC_PB_ENDPOINT);
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Server error trying to create user record",
