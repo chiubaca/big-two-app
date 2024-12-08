@@ -11,8 +11,6 @@ WORKDIR /app
 
 # Set production environment
 ENV NODE_ENV="production"
-ARG PUBLIC_PB_ENDPOINT
-ENV PUBLIC_PB_ENDPOINT=${PUBLIC_PB_ENDPOINT}
 
 # Throw-away build stage to reduce size of final image
 FROM base as build
@@ -29,14 +27,15 @@ RUN npm ci --include=dev
 COPY . .
 RUN rm -rf /app/pocketbase
 
-RUN echo "URL TEST..." $PUBLIC_PB_ENDPOINT
-RUN echo "we build now"
-# Build application
-RUN npm run build
+# Mount secret and build application
+RUN --mount=type=secret,id=PUBLIC_PB_ENDPOINT \
+    PUBLIC_PB_ENDPOINT="$(cat /run/secrets/PUBLIC_PB_ENDPOINT)" \
+    && echo "URL TEST..." $PUBLIC_PB_ENDPOINT \
+    && echo "we build now" \
+    && npm run build
 
 # Remove development dependencies
 RUN npm prune --omit=dev
-
 
 # Final stage for app image
 FROM base
