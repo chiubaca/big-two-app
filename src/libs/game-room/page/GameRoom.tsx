@@ -9,8 +9,7 @@ import {
 
 import "../../../base.css";
 import { PlayingCard } from "../components/PlayingCard";
-import { detectHandType } from "~libs/helpers/gameState";
-
+import { detectHandType } from "~libs/helpers/gameStateMachine";
 interface GameRoomProps extends InitialGameRoomContextProps {}
 
 export const GameRoom = ({
@@ -28,7 +27,8 @@ export const GameRoom = ({
     >
       <Player />
       <Game />
-      <JoinLeaveRoom />
+
+      <JoinRoom />
     </GameRoomProvider>
   );
 };
@@ -38,27 +38,35 @@ const Player = () => {
 
   return (
     <>
+      {gameState.context.winner && (
+        <div className="text-4xl">
+          {gameState.context.winner.id === currentUserId
+            ? "You win 🎉"
+            : `You lost 😭, ${gameState.context.winner.name} won. Better luck next time!`}{" "}
+        </div>
+      )}
       <div className="m-3 text-lg">
         Players in this room:
         <ol>
-          {gameState.players.map((player) => (
-            <li key={player.id}>
-              {player.name} (<code>{player.id}</code>)
-              {player.id === currentUserId && "(you)"}
-            </li>
-          ))}
+          <>
+            {gameState.context.players.map((player) => (
+              <div key={player.id}>
+                <li>
+                  {player.name} (<code>{player.id}</code>)
+                  {player.id === currentUserId && "(you)"}
+                </li>
+              </div>
+            ))}
+            <span>{gameState.context.players.length} / 4 players</span>
+          </>
         </ol>
       </div>
     </>
   );
 };
 
-const JoinLeaveRoom = () => {
-  const { currentUserId, players, roomId } = useContext(GameRoomContext);
-
-  const handleLeaveRoom = async () => {
-    await actions.leaveGame({ roomId });
-  };
+const JoinRoom = () => {
+  const { roomId } = useContext(GameRoomContext);
 
   const handleJoinRoom = async () => {
     await actions.joinGame({
@@ -66,26 +74,23 @@ const JoinLeaveRoom = () => {
     });
   };
 
-  if (players.includes(currentUserId)) {
-    return (
+  return (
+    <div>
+      <button
+        className="btn btn-primary m-3"
+        type="button"
+        onClick={handleJoinRoom}
+      >
+        Join room
+      </button>
       <button
         className="btn btn-warning m-3"
         type="button"
-        onClick={handleLeaveRoom}
+        onClick={() => actions.resetGame({ roomId })}
       >
-        Leave room
+        reset game
       </button>
-    );
-  }
-
-  return (
-    <button
-      className="btn btn-primary m-3"
-      type="button"
-      onClick={handleJoinRoom}
-    >
-      Join room
-    </button>
+    </div>
   );
 };
 
@@ -93,19 +98,18 @@ const Game = () => {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const isValidPlay = detectHandType(selectedCards);
 
-  const { handleStartGame, gameState, currentUserId, roomId } =
-    useContext(GameRoomContext);
+  const { gameState, currentUserId, roomId } = useContext(GameRoomContext);
 
   const currentPlayerIdTurn =
-    gameState.players[gameState.currentPlayerIndex].id;
+    gameState.context.players[gameState.context.currentPlayerIndex].id;
 
   const isCurrentPlayerTurn = currentPlayerIdTurn === currentUserId;
 
-  const thisPlayerIndex = gameState.players.findIndex(
+  const thisPlayerIndex = gameState.context.players.findIndex(
     (player) => player.id === currentUserId
   );
 
-  const lastHandPlayed = gameState.cardPile.at(-1);
+  const lastHandPlayed = gameState.context.cardPile.at(-1);
 
   const toggleSelectedCard = (card: Card) => {
     const isCardSelected = selectedCards.some(
@@ -126,23 +130,20 @@ const Game = () => {
 
   return (
     <div className="p-5">
-      <div className="p-5 font-semibold text-center">
-        <p>
-          round mode: <code>{gameState.roundMode}</code>
-        </p>
-        <p>
-          game event: <code>{gameState.event}</code>
-        </p>
-      </div>
-
-      <button className="btn" type="button" onClick={() => handleStartGame()}>
+      <button
+        className="btn"
+        type="button"
+        onClick={() => actions.startGame({ roomId })}
+      >
         Start Game
       </button>
+
+      <div>{gameState.value}</div>
 
       {/* DEBUGGING STUFF */}
       <details className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-gray-400">
         <h1> Everyones cards for debugging!</h1>
-        {gameState.players.map((player, idx) => {
+        {gameState.context.players.map((player) => {
           return (
             <div key={player.id}>
               {player.name}'s cards:
@@ -158,21 +159,7 @@ const Game = () => {
         })}
       </details>
 
-      {gameState.event === "game-ended" && (
-        <div>
-          {gameState.event === "game-ended" && isCurrentPlayerTurn ? (
-            <>YOU WIN</>
-          ) : (
-            <>you lost :( </>
-          )}
-        </div>
-      )}
-
       <div>
-        <div className="pt-5 font-bold">
-          Round number: {gameState.roundNumber}
-        </div>
-
         <div className="flex flex-col gap-5 py-10 border p-5 my-5 border-gray-400">
           <p className="font-bold text-center"> Cards </p>
 
@@ -188,11 +175,11 @@ const Game = () => {
         </div>
 
         <div>
-          {gameState.players[thisPlayerIndex] && (
+          {gameState.context.players[thisPlayerIndex] && (
             <div className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-orange-400">
               Your hand (You are player {thisPlayerIndex + 1})
               <div className="flex flex-wrap gap-2">
-                {gameState.players[thisPlayerIndex].hand.map((card) => {
+                {gameState.context.players[thisPlayerIndex].hand.map((card) => {
                   return (
                     <PlayingCard
                       key={card.suit + card.value}
@@ -218,11 +205,11 @@ const Game = () => {
         type="button"
         disabled={!isCurrentPlayerTurn}
         onClick={async () => {
-          const resp = await actions.playTurn({
-            cards: selectedCards,
-            roomId,
-          });
           setSelectedCards([]);
+          await actions.playTurn({
+            roomId,
+            cards: selectedCards,
+          });
         }}
       >
         {isCurrentPlayerTurn ? "Play your turn" : "Its not your turn"}
