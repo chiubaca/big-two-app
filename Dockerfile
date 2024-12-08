@@ -3,28 +3,6 @@
 # Adjust NODE_VERSION as desired
 ARG NODE_VERSION=20.11.1
 FROM node:${NODE_VERSION}-slim as base
-FROM flyio/flyctl:latest as flyio
-FROM debian:bullseye-slim
-
-RUN apt-get update; apt-get install -y ca-certificates jq
-
-COPY <<"EOF" /srv/deploy.sh
-#!/bin/bash
-deploy=(flyctl deploy)
-touch /srv/.secrets
-
-while read -r secret; do
-  echo "export ${secret}=${!secret}" >> /srv/.secrets
-  deploy+=(--build-secret "${secret}=${!secret}")
-done < <(flyctl secrets list --json | jq -r ".[].Name")
-
-deploy+=(--build-secret "ALL_SECRETS=$(base64 --wrap=0 /srv/.secrets)")
-${deploy[@]}
-EOF
-
-RUN chmod +x /srv/deploy.sh
-
-COPY --from=flyio /flyctl /usr/bin
 
 LABEL fly_launch_runtime="Astro"
 
@@ -41,11 +19,6 @@ FROM base as build
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
     apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
-
-# Note: You can mount multiple secrets
-RUN --mount=type=secret,id=ALL_SECRETS \
-    eval "$(base64 -d /run/secrets/ALL_SECRETS)"
-
 
 # Install node modules
 COPY .npmrc package-lock.json package.json ./
