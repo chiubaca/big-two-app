@@ -13,14 +13,13 @@ WORKDIR /app
 ENV NODE_ENV="production"
 ARG PUBLIC_PB_ENDPOINT
 ENV PUBLIC_PB_ENDPOINT=${PUBLIC_PB_ENDPOINT}
-RUN echo "URL TEST..." $PUBLIC_PB_ENDPOINT
 
 # Throw-away build stage to reduce size of final image
 FROM base as build
 
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
-    apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
+apt-get install --no-install-recommends -y build-essential node-gyp pkg-config python-is-python3
 
 # Install node modules
 COPY .npmrc package-lock.json package.json ./
@@ -30,6 +29,8 @@ RUN npm ci --include=dev
 COPY . .
 RUN rm -rf /app/pocketbase
 
+RUN echo "URL TEST..." $PUBLIC_PB_ENDPOINT
+RUN echo "we build now"
 # Build application
 RUN npm run build
 
