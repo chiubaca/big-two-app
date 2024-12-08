@@ -1,5 +1,6 @@
 import PocketBase from "pocketbase";
-const pbAdmin = new PocketBase(import.meta.env.PUBLIC_PB_ENDPOINT);
+import { PROD_URL } from "./config";
+const pbAdmin = new PocketBase(import.meta.env.PUBLIC_PB_ENDPOINT || PROD_URL);
 
 pbAdmin.admins.authWithPassword(
   "test@test.com",

@@ -1,4 +1,5 @@
 import PocketBase from "pocketbase";
-const pbClient = new PocketBase(import.meta.env.PUBLIC_PB_ENDPOINT);
+import { PROD_URL } from "./config";
+const pbClient = new PocketBase(import.meta.env.PUBLIC_PB_ENDPOINT || PROD_URL);
 
 export default pbClient;
