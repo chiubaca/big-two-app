@@ -11,6 +11,7 @@ WORKDIR /app
 
 # Set production environment
 ENV NODE_ENV="production"
+ENV PUBLIC_PB_ENDPOINT="https://big-two-pb.fly.dev"
 
 
 # Throw-away build stage to reduce size of final image
@@ -22,10 +23,6 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY .npmrc package-lock.json package.json ./
-RUN --mount=type=secret,id=PUBLIC_PB_ENDPOINT \
-    PUBLIC_PB_ENDPOINT="$(cat /run/secrets/PUBLIC_PB_ENDPOINT)" \
-    && echo "PUBLIC_PB_ENDPOINT=$PUBLIC_PB_ENDPOINT" >> /app/.env \
-    && npm ci --include=dev
 
 # Copy application code, ignoring the pocketbase directory
 COPY . .
@@ -44,6 +41,9 @@ FROM base
 # Copy built application
 COPY --from=build /app/node_modules /app/node_modules
 COPY --from=build /app/dist /app/dist
+
+# Create .env file
+RUN echo "PUBLIC_PB_ENDPOINT=$PUBLIC_PB_ENDPOINT" > /app/.env
 
 ENV PORT=4321
 ENV HOST=0.0.0.0
