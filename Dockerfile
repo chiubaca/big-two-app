@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1
 
 # Adjust NODE_VERSION as desired
-ARG NODE_VERSION=20.11.1
+ARG NODE_VERSION=22.11.0
 FROM node:${NODE_VERSION}-slim as base
 
 LABEL fly_launch_runtime="Astro"
@@ -23,10 +23,11 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY .npmrc package-lock.json package.json ./
-RUN npm ci
+RUN npm ci --include=dev
 
-# Copy application code, ignoring the pocketbase directory
+# Copy application code
 COPY . .
+RUN echo "PUBLIC_PB_ENDPOINT=$PUBLIC_PB_ENDPOINT" > /app.env
 RUN rm -rf /app/pocketbase
 
 # Build application
@@ -42,9 +43,6 @@ FROM base
 # Copy built application
 COPY --from=build /app/node_modules /app/node_modules
 COPY --from=build /app/dist /app/dist
-
-# Create .env file
-RUN echo "PUBLIC_PB_ENDPOINT=$PUBLIC_PB_ENDPOINT" > /app/.env
 
 ENV PORT=4321
 ENV HOST=0.0.0.0
