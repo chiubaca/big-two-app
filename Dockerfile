@@ -23,6 +23,7 @@ RUN apt-get update -qq && \
 
 # Install node modules
 COPY .npmrc package-lock.json package.json ./
+RUN npm ci
 
 # Copy application code, ignoring the pocketbase directory
 COPY . .
