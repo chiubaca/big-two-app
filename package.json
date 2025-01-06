@@ -18,9 +18,11 @@
     "@astrojs/react": "^3.6.2",
     "@astrojs/tailwind": "^5.1.2",
     "@chiubaca/big-two-utils": "npm:@jsr/chiubaca__big-two-utils@^1.2.0",
+    "@hono/zod-validator": "^0.4.2",
     "@types/react": "npm:types-react@rc",
     "@types/react-dom": "npm:types-react-dom@rc",
     "astro": "^4.16.7",
+    "hono": "^4.6.16",
     "js-cookie": "^3.0.5",
     "pocketbase": "^0.21.5",
     "react": "19.0.0-rc-7c8e5e7a-20241101",
@@ -37,6 +39,7 @@
     "@biomejs/biome": "1.9.4",
     "@flydotio/dockerfile": "^0.5.9",
     "@types/js-cookie": "^3.0.6",
+    "@types/node": "^22.10.5",
     "daisyui": "^4.12.14",
     "vitest": "^2.1.5"
   }
