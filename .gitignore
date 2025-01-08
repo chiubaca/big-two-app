@@ -21,3 +21,5 @@ pocketbase/*
 !pocketbase/pb_migrations/
 !pocketbase/fly.toml
 !pocketbase/Dockerfile
+db/store.db-wal
+db/store.db-shm
