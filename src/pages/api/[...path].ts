@@ -74,4 +74,6 @@ app.get("/sse2", async (c) => {
   });
 });
 
-export const ALL: APIRoute = (context) => app.fetch(context.request);
+export const ALL: APIRoute = (context) => {
+  return app.fetch(context.request);
+};

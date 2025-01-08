@@ -4,6 +4,6 @@ export default defineConfig({
   dbCredentials: {
     url: "./db/store.db",
   },
-  schema: "./db/schema.ts",
+  schema: "./db/schemas",
   out: "./drizzle",
 });

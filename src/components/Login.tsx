@@ -1,5 +1,6 @@
 import Cookies from "js-cookie";
 import { useEffect, useState } from "react";
+import { authReactClient } from "src/utils/auth-client";
 import pbClient from "~libs/pocketbase/pocketbase-client";
 
 export const Login = () => {
@@ -12,16 +13,30 @@ export const Login = () => {
           e.preventDefault();
           const formData = new FormData(e.target as HTMLFormElement);
 
-          await fetch("/api/login", {
-            method: "post",
-            body: formData,
+          const email = formData.get("email")?.toString();
+          const password = formData.get("email")?.toString();
+
+          if (!email || !password) {
+            return;
+          }
+
+          const { data, error } = await authReactClient.signIn.email({
+            email,
+            password,
           });
+          console.log("🚀 ~ onSubmit={ ~ error:", error);
+          console.log("🚀 ~ onSubmit={ ~ data:", data);
 
-          const cookies = document.cookie;
+          // await fetch("/api/login", {
+          //   method: "post",
+          //   body: formData,
+          // });
 
-          pbClient.authStore.loadFromCookie(cookies);
+          // const cookies = document.cookie;
 
-          console.log("USER LOGGED IN");
+          // pbClient.authStore.loadFromCookie(cookies);
+
+          // console.log("USER LOGGED IN");
           location.reload();
         }}
       >
