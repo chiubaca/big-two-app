@@ -96,7 +96,7 @@ app.get("/sse2", async (c) => {
   });
 });
 
-app.get("/test", authMiddleware, async (c) => {
+const testRoute = app.get("/test", authMiddleware, async (c) => {
   return c.json(["'you're in!"]);
 });
 
@@ -104,3 +104,5 @@ export const ALL: APIRoute = (context) => {
   console.log("🚀 ~ context:", context.locals.user);
   return app.fetch(context.request);
 };
+
+export type TestType = typeof testRoute;
