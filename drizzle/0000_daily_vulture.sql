@@ -48,10 +48,10 @@ CREATE TABLE `verification` (
 	`updated_at` integer
 );
 --> statement-breakpoint
-CREATE TABLE `ideas` (
+CREATE TABLE `game_room` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`text` text,
-	`status` text,
-	`creator_id` integer,
+	`room_name` text NOT NULL,
+	`gameState` blob NOT NULL,
+	`creator_id` text NOT NULL,
 	FOREIGN KEY (`creator_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action
 );

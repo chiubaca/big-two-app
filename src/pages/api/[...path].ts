@@ -1,108 +1,145 @@
-import { Hono } from "hono";
+import { Hono, type MiddlewareHandler } from "hono";
 import { createMiddleware } from "hono/factory";
-
-import type { APIRoute } from "astro";
+import type { APIContext, APIRoute } from "astro";
 import { streamSSE } from "hono/streaming";
 import { EventEmitter } from "node:events";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
 import { auth } from "~auth";
+import {
+  makeBigTwoGameMachine,
+  type BigTwoGameMachineSnapshot,
+} from "~libs/helpers/gameStateMachine";
+import { createActor } from "xstate";
+import { db } from "~libs/drizzle-orm/db";
+import { gameRoom } from "db/schemas/schema";
+
+declare module "hono" {
+  interface ContextVariableMap {
+    locals: APIContext["locals"];
+  }
+}
 
 const emitter = new EventEmitter();
 
-const app = new Hono().basePath("/api/");
+const astroLocalsMiddleware = (
+  astroLocals: APIContext["locals"]
+): MiddlewareHandler => {
+  return async (c, next) => {
+    c.set("locals", astroLocals);
+    await next();
+  };
+};
 
-// Auth middleware remains the same
 const authMiddleware = createMiddleware(async (c, next) => {
-  const sessionToken = c.req.header("better-auth.session_token");
-  if (!sessionToken) {
+  const { session } = c.get("locals");
+
+  if (!session) {
     return c.json({ error: "Unauthorized" }, 401);
   }
 
   try {
-    const session = await auth.api.getSession({
-      headers: new Headers({
-        "better-auth.session_token": sessionToken,
-      }),
-    });
-    c.set("session", session);
     await next();
   } catch (error) {
     return c.json({ error: "Invalid session" }, 401);
   }
 });
 
-app.post(
-  "createUser",
-  zValidator(
-    "form",
-    z.object({
-      name: z.string(),
+// Create a factory function that returns the configured app
+const createApp = (astroLocals: APIContext["locals"]) => {
+  const app = new Hono()
+    .basePath("/api/")
+    .use("*", astroLocalsMiddleware(astroLocals))
+    .get("/test", authMiddleware, async (c) => {
+      return c.json(["'you're in!"]);
     })
-  ),
-  async (c) => {
-    const validated = c.req.valid("form");
-    // const user = await db
-    //   .insert(users)
-    //   .values({ name: validated.name })
-    //   .returning({
-    //     id: users.id,
-    //     name: users.name,
-    //   });
+    .get("/sse2", async (c) => {
+      return streamSSE(c, async (stream) => {
+        console.log("client connected!");
+        let running = true;
 
-    emitter.emit("userInserted", validated.name);
+        stream.writeSSE({
+          event: "userInserted",
+          data: "sse stream started..",
+        });
 
-    c.header("Content-Type", "text/plain");
-    return c.text("works!", 201);
-  }
-);
+        const userInsertedListener = (user: any) => {
+          console.log("🚀 ~ userInsertedListener ~ user:", user);
+          stream.writeSSE({
+            event: "userInserted",
+            data: JSON.stringify(user),
+          });
+        };
 
-app.get("/sse2", async (c) => {
-  return streamSSE(c, async (stream) => {
-    console.log("client connected!");
-    let running = true;
+        stream.onAbort(() => {
+          running = false;
+          emitter.off("userInserted", userInsertedListener); // Clean up listener
+        });
 
-    stream.writeSSE({
-      event: "userInserted",
-      data: "sse stream started..",
-    });
+        emitter.on("userInserted", userInsertedListener);
 
-    // Listen for user insertion events
-    const userInsertedListener = (user: any) => {
-      console.log("🚀 ~ userInsertedListener ~ user:", user);
-      stream.writeSSE({
-        event: "userInserted",
-        data: JSON.stringify(user),
+        while (running) {
+          await new Promise((resolve) => {
+            console.log("keep alive...");
+            setTimeout(resolve, 10000);
+          });
+        }
+
+        console.log("disconnected");
       });
-    };
+    })
+    .post(
+      "createRoom",
+      zValidator("form", z.object({ roomName: z.string() })),
+      async (c) => {
+        const { roomName } = c.req.valid("form");
+        const { user } = c.get("locals");
 
-    stream.onAbort(() => {
-      running = false;
-    }); // Handle disconnection
+        if (!user) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
 
-    emitter.on("userInserted", userInsertedListener);
+        const bigTwoGameMachine = makeBigTwoGameMachine();
+        const gameStateMachineActor = createActor(bigTwoGameMachine).start();
+        gameStateMachineActor.send({
+          type: "JOIN_GAME",
+          playerId: user.id,
+          playerName: user.name,
+        });
+        const gameStateSnapshot =
+          gameStateMachineActor.getPersistedSnapshot() as BigTwoGameMachineSnapshot;
 
-    while (running) {
-      // Keep SSE connection alive; actual event listening is done via emitter
-      await new Promise((resolve) => {
-        console.log("keep alive...");
-        setTimeout(resolve, 10000);
-      }); // Keep connection alive with periodic pings if needed
-    }
+        await db.insert(gameRoom).values({
+          roomName,
+          creatorId: user.id,
+          gameState: gameStateSnapshot,
+        });
 
-    console.log("disconneted");
-    // // Cleanup listener when client disconnects
-    // emitter.off("userInserted", userInsertedListener);
-  });
-});
+        return c.text("room created");
+      }
+    )
+    .post(
+      "createUser",
+      zValidator(
+        "form",
+        z.object({
+          name: z.string(),
+        })
+      ),
+      async (c) => {
+        const validated = c.req.valid("form");
+        emitter.emit("userInserted", validated.name);
+        c.header("Content-Type", "text/plain");
+        return c.text("works!", 201);
+      }
+    );
 
-const testRoute = app.get("/test", authMiddleware, async (c) => {
-  return c.json(["'you're in!"]);
-});
+  return app;
+};
 
 export const ALL: APIRoute = (context) => {
-  console.log("🚀 ~ context:", context.locals.user);
+  const app = createApp(context.locals);
   return app.fetch(context.request);
 };
 
-export type TestType = typeof testRoute;
+export type AppType = ReturnType<typeof createApp>;

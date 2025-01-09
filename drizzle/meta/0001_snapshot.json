@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "63a5f6ea-42cf-442c-a9ea-867238fb5a8d",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "534690cd-a268-4731-b49b-7ceff46ba75e",
+  "prevId": "63a5f6ea-42cf-442c-a9ea-867238fb5a8d",
   "tables": {
     "account": {
       "name": "account",
@@ -343,8 +343,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "gameState": {
-          "name": "gameState",
+        "game_state": {
+          "name": "game_state",
           "type": "blob",
           "primaryKey": false,
           "notNull": true,
@@ -384,7 +384,9 @@
   "_meta": {
     "schemas": {},
     "tables": {},
-    "columns": {}
+    "columns": {
+      "\"game_room\".\"gameState\"": "\"game_room\".\"game_state\""
+    }
   },
   "internal": {
     "indexes": {}

@@ -1,0 +1,1 @@
+ALTER TABLE `game_room` RENAME COLUMN "gameState" TO "game_state";

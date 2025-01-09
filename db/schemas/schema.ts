@@ -1,11 +1,15 @@
-import { integer, text, sqliteTable } from "drizzle-orm/sqlite-core";
+import { integer, text, blob, sqliteTable } from "drizzle-orm/sqlite-core";
 import { user } from "./auth-schema";
 
-export const ideas = sqliteTable("ideas", {
-  id: integer("id", { mode: "number" }).primaryKey({ autoIncrement: true }),
-  text: text("text"),
-  status: text("status", { enum: ["approved", "rejected", "pending"] }),
-  creator: integer("creator_id").references(() => user.id),
+export const gameRoom = sqliteTable("game_room", {
+  id: integer("id", { mode: "number" })
+    .primaryKey({ autoIncrement: true })
+    .notNull(),
+  roomName: text("room_name").notNull(),
+  gameState: blob("game_state", { mode: "json" }).notNull(), //.$type<{ foo: string }>()
+  creatorId: text("creator_id")
+    .references(() => user.id)
+    .notNull(),
 });
 
 // export type User = typeof users.$inferSelect;
