@@ -20,8 +20,6 @@ declare module "hono" {
   }
 }
 
-const emitter = new EventEmitter();
-
 const astroLocalsMiddleware = (
   astroLocals: APIContext["locals"]
 ): MiddlewareHandler => {
@@ -45,6 +43,7 @@ const authMiddleware = createMiddleware(async (c, next) => {
   }
 });
 
+const emitter = new EventEmitter();
 // Create a factory function that returns the configured app
 const createHonoApp = (astroLocals: APIContext["locals"]) => {
   const app = new Hono()
@@ -58,10 +57,10 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         console.log("client connected!");
         let running = true;
 
-        // stream.writeSSE({
-        //   event: "gameStateUpdated",
-        //   data: "sse stream started..",
-        // });
+        stream.writeSSE({
+          event: "gameStateUpdated",
+          data: "sse stream started..",
+        });
 
         const userInsertedListener = (gameState: any) => {
           console.log("🚀 ~ userInsertedListener ~ user:", gameState);
@@ -73,10 +72,10 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
 
         stream.onAbort(() => {
           running = false;
-          emitter.off("userInserted", userInsertedListener); // Clean up listener
+          emitter.off("gameStateUpdated", userInsertedListener); // Clean up listener
         });
 
-        emitter.on("userInserted", userInsertedListener);
+        emitter.on("gameStateUpdated", userInsertedListener);
 
         while (running) {
           await new Promise((resolve) => {
@@ -118,21 +117,21 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         return c.text("room created");
       }
     )
-    .post(
-      "createUser",
-      zValidator(
-        "form",
-        z.object({
-          name: z.string(),
-        })
-      ),
-      async (c) => {
-        const validated = c.req.valid("form");
-        emitter.emit("userInserted", validated.name);
-        c.header("Content-Type", "text/plain");
-        return c.text("works!", 201);
-      }
-    )
+    // .post(
+    //   "createUser",
+    //   zValidator(
+    //     "form",
+    //     z.object({
+    //       name: z.string(),
+    //     })
+    //   ),
+    //   async (c) => {
+    //     const validated = c.req.valid("form");
+    //     emitter.emit("userInserted", validated.name);
+    //     c.header("Content-Type", "text/plain");
+    //     return c.text("works!", 201);
+    //   }
+    // )
     .post(
       "startGame",
       zValidator(
@@ -165,6 +164,7 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
           .where(eq(gameRoom.id, Number(roomId)));
 
         emitter.emit("gameStateUpdated", gameStateSnapshot);
+        return c.text("game state updated");
       }
     );
 

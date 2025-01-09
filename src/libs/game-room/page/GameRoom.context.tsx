@@ -7,6 +7,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { honoClient } from "~libs/hono-actions";
 // import pbClient from "~libs/pocketbase/pocketbase-client";
 import type { Room } from "~libs/types/Room";
 
@@ -79,29 +80,14 @@ const useSubscribeToPlayers = ({
   // };
 
   useEffect(() => {
-    console.log("yo clientside!");
-    // const evtSource = new EventSource("http://localhost:3000/sse2");
+    console.log("yo clientside!", honoClient.api.sse2.$url().toString());
 
-    // Subscribe to changes in posts collection
-    // pbClient.collection("rooms").subscribe(
-    //   roomId,
-    //   async (event) => {
-    //     const { action, record } = event;
-    //     console.log({ action, record });
+    const evtSource = new EventSource(honoClient.api.sse2.$url().toString());
 
-    //     if (action === "update") {
-    //       await handleUpdatePlayers(record);
-    //       handleNewGameState(record);
-    //     }
-
-    //     // Cleanup subscription on component unmount
-    //     return () => {
-    //       console.log("cleanup");
-    //       pbClient.collection("rooms").unsubscribe();
-    //     };
-    //   },
-    //   []
-    // );
+    evtSource.addEventListener("gameStateUpdated", (event) => {
+      const gameContext = JSON.parse(event.data);
+      console.log("🚀 ~ app.get ~ event:", gameContext);
+    });
   });
 
   return { gameState };
