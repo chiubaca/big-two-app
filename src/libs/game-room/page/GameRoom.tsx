@@ -70,8 +70,8 @@ const JoinRoom = () => {
   const { roomId } = useContext(GameRoomContext);
 
   const handleJoinRoom = async () => {
-    await actions.joinGame({
-      roomId,
+    await honoClient.api.joinGame.$post({
+      json: { roomId },
     });
   };
 

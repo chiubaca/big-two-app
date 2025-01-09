@@ -87,6 +87,7 @@ const useSubscribeToPlayers = ({
     evtSource.addEventListener("gameStateUpdated", (event) => {
       const gameContext = JSON.parse(event.data);
       console.log("🚀 ~ app.get ~ event:", gameContext);
+      // setGameState(gameContext);
     });
   });
 

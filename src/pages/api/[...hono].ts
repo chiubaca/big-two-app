@@ -57,13 +57,13 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         console.log("client connected!");
         let running = true;
 
-        stream.writeSSE({
-          event: "gameStateUpdated",
-          data: "sse stream started..",
-        });
+        // stream.writeSSE({
+        //   event: "gameStateUpdated",
+        //   data: JSON.stringify("stream started"),
+        // });
 
         const userInsertedListener = (gameState: BigTwoGameMachineSnapshot) => {
-          console.log("🚀 ~ userInsertedListener ~ user:", gameState);
+          // console.log("🚀 ~ userInsertedListener ~ user:", gameState);
           stream.writeSSE({
             event: "gameStateUpdated",
             data: JSON.stringify(gameState),
@@ -159,6 +159,11 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
       async (c) => {
         const { roomId } = c.req.valid("json");
         const { user } = c.get("locals");
+
+        if (!user) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+
         const { gameState } = (
           await db
             .select()
@@ -166,9 +171,29 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
             .where(eq(gameRoom.id, Number(roomId)))
         )[0];
 
-        // if (gameState.){
+        if (gameState.context.players.map((p) => p.id).includes(user.id)) {
+          return c.text("you have already joined this room");
+        }
 
-        // }
+        const bigTwoGameMachine = makeBigTwoGameMachine();
+        const gameStateMachineActor = createActor(bigTwoGameMachine, {
+          snapshot: gameState,
+        }).start();
+
+        gameStateMachineActor.send({
+          type: "JOIN_GAME",
+          playerId: user.id,
+          playerName: user.name,
+        });
+        const gameStateSnapshot =
+          gameStateMachineActor.getPersistedSnapshot() as BigTwoGameMachineSnapshot;
+
+        await db
+          .update(gameRoom)
+          .set({ gameState: gameStateSnapshot })
+          .where(eq(gameRoom.id, Number(roomId)));
+
+        emitter.emit("gameStateUpdated", gameStateSnapshot);
 
         return c.text("joined game");
       }

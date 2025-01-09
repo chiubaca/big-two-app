@@ -11,10 +11,7 @@ const session = Astro.locals.session;
 const user = Astro.locals.user;
 
 export async function getGameRoomsForUser(userId: string) {
-  const gameRooms = await db
-    .select()
-    .from(gameRoom)
-    .where(eq(gameRoom.creatorId, userId));
+  const gameRooms = await db.select().from(gameRoom);
   return gameRooms;
 }
 // const currentUserId = Astro.locals.pb.authStore.model?.id;
