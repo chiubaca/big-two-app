@@ -46,7 +46,7 @@ const authMiddleware = createMiddleware(async (c, next) => {
 });
 
 // Create a factory function that returns the configured app
-const createApp = (astroLocals: APIContext["locals"]) => {
+const createHonoApp = (astroLocals: APIContext["locals"]) => {
   const app = new Hono()
     .basePath("/api/")
     .use("*", astroLocalsMiddleware(astroLocals))
@@ -138,8 +138,8 @@ const createApp = (astroLocals: APIContext["locals"]) => {
 };
 
 export const ALL: APIRoute = (context) => {
-  const app = createApp(context.locals);
+  const app = createHonoApp(context.locals);
   return app.fetch(context.request);
 };
 
-export type AppType = ReturnType<typeof createApp>;
+export type AppType = ReturnType<typeof createHonoApp>;
