@@ -1,6 +1,6 @@
 import { actions } from "astro:actions";
 import { useState } from "react";
-import { authReactClient } from "src/utils/auth-client";
+import { authReactClient } from "../auth-client";
 
 export const SignUp = () => {
   const [error, setError] = useState<string>("");

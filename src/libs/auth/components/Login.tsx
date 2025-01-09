@@ -1,7 +1,4 @@
-import Cookies from "js-cookie";
-import { useEffect, useState } from "react";
-import { authReactClient } from "src/utils/auth-client";
-import pbClient from "~libs/pocketbase/pocketbase-client";
+import { authReactClient } from "../auth-client";
 
 export const Login = () => {
   return (
@@ -27,16 +24,6 @@ export const Login = () => {
           console.log("🚀 ~ onSubmit={ ~ error:", error);
           console.log("🚀 ~ onSubmit={ ~ data:", data);
 
-          // await fetch("/api/login", {
-          //   method: "post",
-          //   body: formData,
-          // });
-
-          // const cookies = document.cookie;
-
-          // pbClient.authStore.loadFromCookie(cookies);
-
-          // console.log("USER LOGGED IN");
           location.reload();
         }}
       >
@@ -50,17 +37,6 @@ export const Login = () => {
         </label>
         <button type="submit">Login</button>
       </form>
-      <button
-        type="button"
-        onClick={() => {
-          pbClient.authStore.clear();
-          Cookies.set("pb_auth", "");
-          console.log("USER LOGGED OUT");
-          location.reload();
-        }}
-      >
-        Log out
-      </button>
     </>
   );
 };
