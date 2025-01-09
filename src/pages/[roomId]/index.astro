@@ -1,39 +1,43 @@
 ---
+import { gameRoom } from "db/schemas/schema";
+import { eq } from "drizzle-orm";
+import { db } from "~libs/drizzle-orm/db";
 import { GameRoom } from "~libs/game-room/page/GameRoom";
 import pbAdmin from "~libs/pocketbase/pocketbase-admin";
 import type { Room } from "~libs/types/Room";
 
 const { roomId } = Astro.params;
+const userId = Astro.locals.user?.id;
+const userName = Astro.locals.user?.name;
+console.log("🚀 ~ roomId:", { roomId, userId, userName });
 
-const { pb } = Astro.locals;
-
-if (!pb.authStore.isValid) {
-  console.log("redirect back to home page!");
+if (!roomId || !userId || !userName) {
   return Astro.redirect("/");
 }
 
-if (!roomId) {
-  return Astro.redirect("/");
-}
-
-const currentUserId = pb.authStore.model?.id;
-const userName = pb.authStore.model?.name;
+const roomRecord = (
+  await db
+    .select()
+    .from(gameRoom)
+    .where(eq(gameRoom.id, Number(roomId)))
+)[0];
+console.log("🚀 ~ roomRecord:", roomRecord);
 
 // // check players in this room
-const roomDetails = await pbAdmin.collection("rooms").getOne<Room>(roomId);
+// const roomDetails = await pbAdmin.collection("rooms").getOne<Room>(roomId);
 ---
 
 <a href="/">Back to Home</a>
 
 <h1 class="m-3 text-2xl">
-  Welcome to room {roomId}, {userName} (<code>{currentUserId}</code>)
+  Welcome to room {roomId}, {userId} (<code>{userName}</code>)
 </h1>
 
 <GameRoom
-  currentUserId={currentUserId}
+  currentUserId={userId}
   roomId={roomId}
-  players={roomDetails.players}
-  gameState={roomDetails.gameState}
+  players={[]}
+  gameState={roomRecord.gameState}
   client:load
 />
-<script src="https://unpkg.com/react-scan/dist/auto.global.js"></script>
+<!-- <script src="https://unpkg.com/react-scan/dist/auto.global.js"></script> -->

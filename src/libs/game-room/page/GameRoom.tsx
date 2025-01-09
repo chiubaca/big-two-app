@@ -10,19 +10,20 @@ import {
 import "../../../base.css";
 import { PlayingCard } from "../components/PlayingCard";
 import { detectHandType } from "~libs/helpers/gameStateMachine";
+import { honoClient } from "~libs/hono-actions";
 interface GameRoomProps extends InitialGameRoomContextProps {}
 
 export const GameRoom = ({
   currentUserId,
   roomId,
-  players,
+  // players,
   gameState,
 }: GameRoomProps) => {
   return (
     <GameRoomProvider
       roomId={roomId}
       gameState={gameState}
-      players={players}
+      // players={players}
       currentUserId={currentUserId}
     >
       <Player />
@@ -133,7 +134,7 @@ const Game = () => {
       <button
         className="btn"
         type="button"
-        onClick={() => actions.startGame({ roomId })}
+        onClick={() => honoClient.api.startGame.$post({ json: { roomId } })}
       >
         Start Game
       </button>

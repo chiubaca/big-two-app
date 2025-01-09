@@ -9,9 +9,10 @@ import {
   makeBigTwoGameMachine,
   type BigTwoGameMachineSnapshot,
 } from "~libs/helpers/gameStateMachine";
-import { createActor } from "xstate";
+import { createActor, type Snapshot } from "xstate";
 import { db } from "~libs/drizzle-orm/db";
 import { gameRoom } from "db/schemas/schema";
+import { eq } from "drizzle-orm";
 
 declare module "hono" {
   interface ContextVariableMap {
@@ -57,16 +58,16 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         console.log("client connected!");
         let running = true;
 
-        stream.writeSSE({
-          event: "userInserted",
-          data: "sse stream started..",
-        });
+        // stream.writeSSE({
+        //   event: "gameStateUpdated",
+        //   data: "sse stream started..",
+        // });
 
-        const userInsertedListener = (user: any) => {
-          console.log("🚀 ~ userInsertedListener ~ user:", user);
+        const userInsertedListener = (gameState: any) => {
+          console.log("🚀 ~ userInsertedListener ~ user:", gameState);
           stream.writeSSE({
-            event: "userInserted",
-            data: JSON.stringify(user),
+            event: "gameStateUpdated",
+            data: JSON.stringify(gameState),
           });
         };
 
@@ -130,6 +131,40 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         emitter.emit("userInserted", validated.name);
         c.header("Content-Type", "text/plain");
         return c.text("works!", 201);
+      }
+    )
+    .post(
+      "startGame",
+      zValidator(
+        "json",
+        z.object({
+          roomId: z.string(),
+        })
+      ),
+      async (c) => {
+        const { roomId } = c.req.valid("json");
+        const { user } = c.get("locals");
+        const { gameState } = (
+          await db
+            .select()
+            .from(gameRoom)
+            .where(eq(gameRoom.id, Number(roomId)))
+        )[0];
+
+        const bigTwoGameMachine = makeBigTwoGameMachine();
+        const gameStateMachineActor = createActor(bigTwoGameMachine, {
+          snapshot: gameState as BigTwoGameMachineSnapshot,
+        }).start();
+
+        gameStateMachineActor.send({ type: "START_GAME" });
+        const gameStateSnapshot = gameStateMachineActor.getPersistedSnapshot();
+
+        await db
+          .update(gameRoom)
+          .set({ gameState: gameStateSnapshot })
+          .where(eq(gameRoom.id, Number(roomId)));
+
+        emitter.emit("gameStateUpdated", gameStateSnapshot);
       }
     );
 

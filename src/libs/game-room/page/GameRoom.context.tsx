@@ -1,5 +1,5 @@
 import { type SafeResult, actions } from "astro:actions";
-import type { RecordModel } from "pocketbase";
+// import type { RecordModel } from "pocketbase";
 import {
   type FC,
   type PropsWithChildren,
@@ -7,38 +7,38 @@ import {
   useEffect,
   useState,
 } from "react";
-import pbClient from "~libs/pocketbase/pocketbase-client";
+// import pbClient from "~libs/pocketbase/pocketbase-client";
 import type { Room } from "~libs/types/Room";
 
 type GameRoomContextType = {
   roomId: string;
-  players: string[];
+  // players: string[];
   currentUserId: string;
   gameState: Room["gameState"];
 };
 
 export type InitialGameRoomContextProps = Pick<
   GameRoomContextType,
-  "roomId" | "players" | "currentUserId" | "gameState"
+  "roomId" | "currentUserId" | "gameState"
 >;
 
 export const GameRoomContext = createContext<GameRoomContextType>({
   roomId: "",
-  players: [],
+  // players: [],
   currentUserId: "",
   gameState: {} as Room["gameState"],
 });
 
 export const GameRoomProvider = ({
   currentUserId,
-  players: initialPlayers,
+  // players: initialPlayers,
   roomId,
   children,
   gameState: initialGameState,
 }: PropsWithChildren<InitialGameRoomContextProps>) => {
   const { players, gameState } = useSubscribeToPlayers({
     roomId,
-    initialPlayers,
+    // initialPlayers,
     initialGameState,
   });
 
@@ -46,7 +46,7 @@ export const GameRoomProvider = ({
     <GameRoomContext.Provider
       value={{
         roomId,
-        players,
+        // players,
         currentUserId,
         gameState,
       }}
@@ -58,50 +58,51 @@ export const GameRoomProvider = ({
 
 const useSubscribeToPlayers = ({
   roomId,
-  initialPlayers,
+  // initialPlayers,
   initialGameState,
 }: {
   roomId: string;
-  initialPlayers: string[];
+  // initialPlayers: string[];
   initialGameState: Room["gameState"];
 }) => {
-  const [players, setPlayers] = useState<string[]>(initialPlayers);
+  // const [players, setPlayers] = useState<string[]>(initialPlayers);
 
   const [gameState, setGameState] = useState(initialGameState);
 
-  const handleUpdatePlayers = async (record: RecordModel) => {
-    // TODO: later will need to lookup each player to get names
-    setPlayers(record.players);
-  };
+  // const handleUpdatePlayers = async (record: RecordModel) => {
+  //   // TODO: later will need to lookup each player to get names
+  //   setPlayers(record.players);
+  // };
 
-  const handleNewGameState = (record: RecordModel) => {
-    setGameState(record.gameState);
-  };
+  // const handleNewGameState = (record: RecordModel) => {
+  //   setGameState(record.gameState);
+  // };
 
   useEffect(() => {
-    console.log(`subscribing to room ${roomId}`, pbClient.authStore);
+    console.log("yo clientside!");
+    // const evtSource = new EventSource("http://localhost:3000/sse2");
 
     // Subscribe to changes in posts collection
-    pbClient.collection("rooms").subscribe(
-      roomId,
-      async (event) => {
-        const { action, record } = event;
-        console.log({ action, record });
+    // pbClient.collection("rooms").subscribe(
+    //   roomId,
+    //   async (event) => {
+    //     const { action, record } = event;
+    //     console.log({ action, record });
 
-        if (action === "update") {
-          await handleUpdatePlayers(record);
-          handleNewGameState(record);
-        }
+    //     if (action === "update") {
+    //       await handleUpdatePlayers(record);
+    //       handleNewGameState(record);
+    //     }
 
-        // Cleanup subscription on component unmount
-        return () => {
-          console.log("cleanup");
-          pbClient.collection("rooms").unsubscribe();
-        };
-      },
-      []
-    );
+    //     // Cleanup subscription on component unmount
+    //     return () => {
+    //       console.log("cleanup");
+    //       pbClient.collection("rooms").unsubscribe();
+    //     };
+    //   },
+    //   []
+    // );
   });
 
-  return { players, gameState };
+  return { gameState };
 };
