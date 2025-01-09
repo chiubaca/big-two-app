@@ -62,7 +62,7 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
           data: "sse stream started..",
         });
 
-        const userInsertedListener = (gameState: any) => {
+        const userInsertedListener = (gameState: BigTwoGameMachineSnapshot) => {
           console.log("🚀 ~ userInsertedListener ~ user:", gameState);
           stream.writeSSE({
             event: "gameStateUpdated",
@@ -117,21 +117,6 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         return c.text("room created");
       }
     )
-    // .post(
-    //   "createUser",
-    //   zValidator(
-    //     "form",
-    //     z.object({
-    //       name: z.string(),
-    //     })
-    //   ),
-    //   async (c) => {
-    //     const validated = c.req.valid("form");
-    //     emitter.emit("userInserted", validated.name);
-    //     c.header("Content-Type", "text/plain");
-    //     return c.text("works!", 201);
-    //   }
-    // )
     .post(
       "startGame",
       zValidator(
@@ -152,11 +137,12 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
 
         const bigTwoGameMachine = makeBigTwoGameMachine();
         const gameStateMachineActor = createActor(bigTwoGameMachine, {
-          snapshot: gameState as BigTwoGameMachineSnapshot,
+          snapshot: gameState,
         }).start();
 
         gameStateMachineActor.send({ type: "START_GAME" });
-        const gameStateSnapshot = gameStateMachineActor.getPersistedSnapshot();
+        const gameStateSnapshot =
+          gameStateMachineActor.getPersistedSnapshot() as BigTwoGameMachineSnapshot;
 
         await db
           .update(gameRoom)
@@ -165,6 +151,26 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
 
         emitter.emit("gameStateUpdated", gameStateSnapshot);
         return c.text("game state updated");
+      }
+    )
+    .post(
+      "joinGame",
+      zValidator("json", z.object({ roomId: z.string() })),
+      async (c) => {
+        const { roomId } = c.req.valid("json");
+        const { user } = c.get("locals");
+        const { gameState } = (
+          await db
+            .select()
+            .from(gameRoom)
+            .where(eq(gameRoom.id, Number(roomId)))
+        )[0];
+
+        // if (gameState.){
+
+        // }
+
+        return c.text("joined game");
       }
     );
 
