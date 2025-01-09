@@ -1,4 +1,4 @@
-import { auth } from "~auth";
+import { auth } from "~libs/auth/better-auth-config";
 import { defineMiddleware } from "astro:middleware";
 
 export const onRequest = defineMiddleware(async (context, next) => {

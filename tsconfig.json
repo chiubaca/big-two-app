@@ -5,8 +5,7 @@
     "jsxImportSource": "react",
     "baseUrl": ".",
     "paths": {
-      "~libs/*": ["src/libs/*"],
-      "~auth": ["src/utils/auth.ts"]
+      "~libs/*": ["src/libs/*"]
     }
   }
 }

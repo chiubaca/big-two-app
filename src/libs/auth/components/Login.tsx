@@ -1,4 +1,4 @@
-import { authReactClient } from "../auth-client";
+import { authReactClient } from "../auth-clients";
 
 export const Login = () => {
   return (

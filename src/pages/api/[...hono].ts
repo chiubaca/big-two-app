@@ -5,7 +5,6 @@ import { streamSSE } from "hono/streaming";
 import { EventEmitter } from "node:events";
 import { zValidator } from "@hono/zod-validator";
 import { z } from "zod";
-import { auth } from "~auth";
 import {
   makeBigTwoGameMachine,
   type BigTwoGameMachineSnapshot,
