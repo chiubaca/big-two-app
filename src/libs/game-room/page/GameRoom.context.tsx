@@ -59,37 +59,39 @@ export const GameRoomProvider = ({
 
 const useSubscribeToPlayers = ({
   roomId,
-  // initialPlayers,
   initialGameState,
 }: {
   roomId: string;
-  // initialPlayers: string[];
   initialGameState: Room["gameState"];
 }) => {
-  // const [players, setPlayers] = useState<string[]>(initialPlayers);
-
   const [gameState, setGameState] = useState(initialGameState);
 
   useEffect(() => {
-    console.log(
-      "yo clientside!",
-      honoClient.api.realtime.gamestate[":roomId"]
-        .$url({ param: { roomId } })
-        .toString()
-    );
-
     const evtSource = new EventSource(
       honoClient.api.realtime.gamestate[":roomId"]
         .$url({ param: { roomId } })
         .toString()
     );
 
-    evtSource.addEventListener(`gameStateUpdated:${roomId}`, (event) => {
+    const gameStateUpdatedListener = (event: MessageEvent) => {
       const gameContext = JSON.parse(event.data);
       console.log("🚀 ~ app.get ~ event:", gameContext);
       setGameState(gameContext);
-    });
-  });
+    };
+
+    evtSource.addEventListener(
+      `gameStateUpdated:${roomId}`,
+      gameStateUpdatedListener
+    );
+
+    return () => {
+      evtSource.removeEventListener(
+        `gameStateUpdated:${roomId}`,
+        gameStateUpdatedListener
+      );
+      evtSource.close(); // Clean up the EventSource
+    };
+  }, [roomId]); // Add roomId as a dependency
 
   return { gameState };
 };
