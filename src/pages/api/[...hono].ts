@@ -84,6 +84,7 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
 
         stream.onAbort(() => {
           running = false;
+          console.log("disconnected in abort signal");
           emitter.off(`gameStateUpdated:${roomId}`, gameStateUpdatedListener); // Clean up listener
         });
 
@@ -91,12 +92,12 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
 
         while (running) {
           await new Promise((resolve) => {
-            console.log(`monitoring room ${roomId} for ${user?.name}`);
+            // console.log(`monitoring room ${roomId} for ${user?.name}`);
             setTimeout(resolve, 10000);
           });
         }
 
-        console.log("disconnected");
+        console.log("disconnected after while loop");
       });
     })
     .post(
@@ -208,6 +209,46 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
 
         return c.text("joined game");
+      }
+    )
+    .post(
+      "resetGame",
+      zValidator("json", z.object({ roomId: z.string() })),
+      async (c) => {
+        const { roomId } = c.req.valid("json");
+        const { user } = c.get("locals");
+
+        if (!user) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        const { gameState } = (
+          await db
+            .select()
+            .from(gameRoom)
+            .where(eq(gameRoom.id, Number(roomId)))
+        )[0];
+
+        const bigTwoGameMachine = makeBigTwoGameMachine();
+        const gameStateMachineActor = createActor(bigTwoGameMachine, {
+          snapshot: gameState,
+        }).start();
+
+        gameStateMachineActor.send({
+          type: "RESET_GAME",
+        });
+
+        const gameStateSnapshot =
+          gameStateMachineActor.getPersistedSnapshot() as BigTwoGameMachineSnapshot;
+
+        await db
+          .update(gameRoom)
+          .set({ gameState: gameStateSnapshot })
+          .where(eq(gameRoom.id, Number(roomId)));
+
+        emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
+
+        return c.text("game reset");
       }
     );
 
