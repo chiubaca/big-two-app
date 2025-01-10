@@ -37,9 +37,9 @@ export const GameRoomProvider = ({
   children,
   gameState: initialGameState,
 }: PropsWithChildren<InitialGameRoomContextProps>) => {
-  const { players, gameState } = useSubscribeToPlayers({
+  const { gameState } = useSubscribeToPlayers({
     roomId,
-    // initialPlayers,
+
     initialGameState,
   });
 
@@ -70,24 +70,24 @@ const useSubscribeToPlayers = ({
 
   const [gameState, setGameState] = useState(initialGameState);
 
-  // const handleUpdatePlayers = async (record: RecordModel) => {
-  //   // TODO: later will need to lookup each player to get names
-  //   setPlayers(record.players);
-  // };
-
-  // const handleNewGameState = (record: RecordModel) => {
-  //   setGameState(record.gameState);
-  // };
-
   useEffect(() => {
-    console.log("yo clientside!", honoClient.api.sse2.$url().toString());
+    console.log(
+      "yo clientside!",
+      honoClient.api.realtime.gamestate[":roomId"]
+        .$url({ param: { roomId } })
+        .toString()
+    );
 
-    const evtSource = new EventSource(honoClient.api.sse2.$url().toString());
+    const evtSource = new EventSource(
+      honoClient.api.realtime.gamestate[":roomId"]
+        .$url({ param: { roomId } })
+        .toString()
+    );
 
-    evtSource.addEventListener("gameStateUpdated", (event) => {
+    evtSource.addEventListener(`gameStateUpdated:${roomId}`, (event) => {
       const gameContext = JSON.parse(event.data);
       console.log("🚀 ~ app.get ~ event:", gameContext);
-      // setGameState(gameContext);
+      setGameState(gameContext);
     });
   });
 

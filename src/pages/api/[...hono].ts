@@ -14,11 +14,18 @@ import { db } from "~libs/drizzle-orm/db";
 import { gameRoom } from "db/schemas/schema";
 import { eq } from "drizzle-orm";
 
+import type TypedEmitter from "typed-emitter";
 declare module "hono" {
   interface ContextVariableMap {
     locals: APIContext["locals"];
   }
 }
+
+type MessageEvents = {
+  [key: `gameStateUpdated:${string}`]: (
+    body: BigTwoGameMachineSnapshot
+  ) => void;
+};
 
 const astroLocalsMiddleware = (
   astroLocals: APIContext["locals"]
@@ -43,7 +50,7 @@ const authMiddleware = createMiddleware(async (c, next) => {
   }
 });
 
-const emitter = new EventEmitter();
+const emitter = new EventEmitter() as TypedEmitter<MessageEvents>;
 // Create a factory function that returns the configured app
 const createHonoApp = (astroLocals: APIContext["locals"]) => {
   const app = new Hono()
@@ -52,9 +59,12 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
     .get("/test", authMiddleware, async (c) => {
       return c.json(["'you're in!"]);
     })
-    .get("/sse2", async (c) => {
+    .get("/realtime/gamestate/:roomId", async (c) => {
+      const roomId = c.req.param("roomId");
+      const { user } = c.get("locals");
+
       return streamSSE(c, async (stream) => {
-        console.log("client connected!");
+        console.log(`${user?.name} has connected to room ${roomId}`);
         let running = true;
 
         // stream.writeSSE({
@@ -62,24 +72,26 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         //   data: JSON.stringify("stream started"),
         // });
 
-        const userInsertedListener = (gameState: BigTwoGameMachineSnapshot) => {
+        const gameStateUpdatedListener = (
+          gameState: BigTwoGameMachineSnapshot
+        ) => {
           // console.log("🚀 ~ userInsertedListener ~ user:", gameState);
           stream.writeSSE({
-            event: "gameStateUpdated",
+            event: `gameStateUpdated:${roomId}`,
             data: JSON.stringify(gameState),
           });
         };
 
         stream.onAbort(() => {
           running = false;
-          emitter.off("gameStateUpdated", userInsertedListener); // Clean up listener
+          emitter.off(`gameStateUpdated:${roomId}`, gameStateUpdatedListener); // Clean up listener
         });
 
-        emitter.on("gameStateUpdated", userInsertedListener);
+        emitter.on(`gameStateUpdated:${roomId}`, gameStateUpdatedListener);
 
         while (running) {
           await new Promise((resolve) => {
-            console.log("keep alive...");
+            console.log(`monitoring room ${roomId} for ${user?.name}`);
             setTimeout(resolve, 10000);
           });
         }
@@ -149,7 +161,7 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
           .set({ gameState: gameStateSnapshot })
           .where(eq(gameRoom.id, Number(roomId)));
 
-        emitter.emit("gameStateUpdated", gameStateSnapshot);
+        emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
         return c.text("game state updated");
       }
     )
@@ -193,7 +205,7 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
           .set({ gameState: gameStateSnapshot })
           .where(eq(gameRoom.id, Number(roomId)));
 
-        emitter.emit("gameStateUpdated", gameStateSnapshot);
+        emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
 
         return c.text("joined game");
       }
