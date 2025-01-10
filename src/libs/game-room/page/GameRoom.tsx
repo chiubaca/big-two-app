@@ -87,7 +87,7 @@ const JoinRoom = () => {
       <button
         className="btn btn-warning m-3"
         type="button"
-        onClick={() => actions.resetGame({ roomId })}
+        onClick={() => honoClient.api.resetGame.$post({ json: { roomId } })}
       >
         reset game
       </button>
