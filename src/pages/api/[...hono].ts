@@ -305,6 +305,46 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
         return c.text("player played next move");
       }
+    )
+    .post(
+      "passTurn",
+      zValidator(
+        "json",
+        z.object({
+          roomId: z.string(),
+        })
+      ),
+      async (c) => {
+        const { roomId } = c.req.valid("json");
+        const { user } = c.get("locals");
+
+        if (!user) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        const { gameState } = (
+          await db.select().from(gameRoom).where(eq(gameRoom.id, roomId))
+        )[0];
+
+        const bigTwoGameMachine = makeBigTwoGameMachine();
+        const gameStateMachineActor = createActor(bigTwoGameMachine, {
+          snapshot: gameState,
+        }).start();
+
+        console.log("🟢 Player passing turn");
+        gameStateMachineActor.send({
+          type: "PASS_TURN",
+          playerId: user.id,
+        });
+
+        await db
+          .update(gameRoom)
+          .set({ gameState })
+          .where(eq(gameRoom.id, roomId));
+
+        emitter.emit(`gameStateUpdated:${roomId}`, gameState);
+        return c.text("player passed");
+      }
     );
 
   return app;
