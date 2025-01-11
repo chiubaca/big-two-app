@@ -1,12 +1,16 @@
-# fly.toml app configuration file generated for big-two-app on 2024-12-21T18:16:27Z
+# fly.toml app configuration file generated for big-two-app-v2 on 2025-01-11T22:22:03Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'big-two-app'
+app = 'big-two-app-v2'
 primary_region = 'lhr'
 
 [build]
+
+[[mounts]]
+  source = 'big-two-db'
+  destination = '/db'
 
 [http_service]
   internal_port = 4321
