@@ -49,9 +49,9 @@ CREATE TABLE `verification` (
 );
 --> statement-breakpoint
 CREATE TABLE `game_room` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`id` text NOT NULL,
 	`room_name` text NOT NULL,
-	`gameState` blob NOT NULL,
+	`game_state` blob NOT NULL,
 	`creator_id` text NOT NULL,
 	FOREIGN KEY (`creator_id`) REFERENCES `user`(`id`) ON UPDATE no action ON DELETE no action
 );

@@ -1,4 +1,3 @@
-import { actions } from "astro:actions";
 import type { Card } from "@chiubaca/big-two-utils";
 import { useContext, useState } from "react";
 import {

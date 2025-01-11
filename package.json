@@ -10,6 +10,7 @@
     "test": "vitest",
     "check": "astro check",
     "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "auth:generate": "npx @better-auth/cli generate --config src/libs/auth/better-auth.ts --output db/schemas/auth-schema.ts --y"

@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "63a5f6ea-42cf-442c-a9ea-867238fb5a8d",
+  "id": "6bd0aacf-6244-4fba-8a49-5387fb51c01f",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -331,10 +331,10 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
-          "primaryKey": true,
+          "type": "text",
+          "primaryKey": false,
           "notNull": true,
-          "autoincrement": true
+          "autoincrement": false
         },
         "room_name": {
           "name": "room_name",
@@ -343,8 +343,8 @@
           "notNull": true,
           "autoincrement": false
         },
-        "gameState": {
-          "name": "gameState",
+        "game_state": {
+          "name": "game_state",
           "type": "blob",
           "primaryKey": false,
           "notNull": true,
