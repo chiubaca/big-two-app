@@ -15,6 +15,7 @@ import { gameRoom } from "db/schemas/schema";
 import { eq } from "drizzle-orm";
 
 import type TypedEmitter from "typed-emitter";
+import type { Card } from "@chiubaca/big-two-utils";
 declare module "hono" {
   interface ContextVariableMap {
     locals: APIContext["locals"];
@@ -249,6 +250,69 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
 
         return c.text("game reset");
+      }
+    )
+    .post(
+      "playTurn",
+      zValidator(
+        "json",
+        z.object({
+          roomId: z.string(),
+          cards: z.array(z.custom<Card>()),
+        })
+      ),
+      async (c) => {
+        const { roomId, cards } = c.req.valid("json");
+        const { user } = c.get("locals");
+
+        if (!user) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        const { gameState } = (
+          await db.select().from(gameRoom).where(eq(gameRoom.id, roomId))
+        )[0];
+
+        const bigTwoGameMachine = makeBigTwoGameMachine();
+        const gameStateMachineActor = createActor(bigTwoGameMachine, {
+          snapshot: gameState,
+        }).start();
+
+        if (gameState.value === "ROUND_FIRST_MOVE") {
+          console.log("🟢 Playing round first move");
+          gameStateMachineActor.send({
+            type: "PLAY_FIRST_MOVE",
+            cards,
+          });
+
+          const gameStateSnapshot =
+            gameStateMachineActor.getPersistedSnapshot() as BigTwoGameMachineSnapshot;
+
+          await db
+            .update(gameRoom)
+            .set({ gameState: gameStateSnapshot })
+            .where(eq(gameRoom.id, roomId));
+
+          emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
+          return c.text("player played the first move");
+        }
+
+        console.log("🟢 Playing next player cards");
+        gameStateMachineActor.send({
+          type: "PLAY_CARDS",
+          cards,
+        });
+
+        const gameStateSnapshot =
+          gameStateMachineActor.getPersistedSnapshot() as BigTwoGameMachineSnapshot;
+
+        await db
+          .update(gameRoom)
+          .set({ gameState: gameStateSnapshot })
+          .where(eq(gameRoom.id, roomId));
+
+        emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
+        return c.text("player played next move");
       }
     );
 

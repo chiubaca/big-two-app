@@ -207,9 +207,11 @@ const Game = () => {
         disabled={!isCurrentPlayerTurn}
         onClick={async () => {
           setSelectedCards([]);
-          await actions.playTurn({
-            roomId,
-            cards: selectedCards,
+          await honoClient.api.playTurn.$post({
+            json: {
+              roomId,
+              cards: selectedCards,
+            },
           });
         }}
       >
