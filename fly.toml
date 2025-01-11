@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for big-two-app-v2 on 2025-01-11T22:22:03Z
+# fly.toml app configuration file generated for big-two-app-v2 on 2025-01-11T22:23:31Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -9,8 +9,8 @@ primary_region = 'lhr'
 [build]
 
 [[mounts]]
-  source = 'big-two-db'
-  destination = '/db'
+  destination = '/app/db'
+  source = 'big_two_db'
 
 [http_service]
   internal_port = 4321
@@ -24,3 +24,8 @@ primary_region = 'lhr'
   memory = '1gb'
   cpu_kind = 'shared'
   cpus = 1
+
+
+[env]
+  BETTER_AUTH_URL='https://big-two-app-v2.fly.dev'
+  BETTER_AUTH_SECRET='MSsXTsUHL6Jh0aAcN1Ls45NV30mY5GOa'
