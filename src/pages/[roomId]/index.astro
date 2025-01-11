@@ -3,8 +3,6 @@ import { gameRoom } from "db/schemas/schema";
 import { eq } from "drizzle-orm";
 import { db } from "~libs/drizzle-orm/db";
 import { GameRoom } from "~libs/game-room/page/GameRoom";
-import pbAdmin from "~libs/pocketbase/pocketbase-admin";
-import type { Room } from "~libs/types/Room";
 
 const { roomId } = Astro.params;
 const userId = Astro.locals.user?.id;
