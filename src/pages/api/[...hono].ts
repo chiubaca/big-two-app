@@ -143,10 +143,7 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         const { roomId } = c.req.valid("json");
         const { user } = c.get("locals");
         const { gameState } = (
-          await db
-            .select()
-            .from(gameRoom)
-            .where(eq(gameRoom.id, Number(roomId)))
+          await db.select().from(gameRoom).where(eq(gameRoom.id, roomId))
         )[0];
 
         const bigTwoGameMachine = makeBigTwoGameMachine();
@@ -161,7 +158,7 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         await db
           .update(gameRoom)
           .set({ gameState: gameStateSnapshot })
-          .where(eq(gameRoom.id, Number(roomId)));
+          .where(eq(gameRoom.id, roomId));
 
         emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
         return c.text("game state updated");
@@ -179,10 +176,7 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         }
 
         const { gameState } = (
-          await db
-            .select()
-            .from(gameRoom)
-            .where(eq(gameRoom.id, Number(roomId)))
+          await db.select().from(gameRoom).where(eq(gameRoom.id, roomId))
         )[0];
 
         if (gameState.context.players.map((p) => p.id).includes(user.id)) {
@@ -205,7 +199,7 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         await db
           .update(gameRoom)
           .set({ gameState: gameStateSnapshot })
-          .where(eq(gameRoom.id, Number(roomId)));
+          .where(eq(gameRoom.id, roomId));
 
         emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
 
@@ -224,10 +218,7 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         }
 
         const { gameState } = (
-          await db
-            .select()
-            .from(gameRoom)
-            .where(eq(gameRoom.id, Number(roomId)))
+          await db.select().from(gameRoom).where(eq(gameRoom.id, roomId))
         )[0];
 
         const bigTwoGameMachine = makeBigTwoGameMachine();
@@ -245,7 +236,7 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         await db
           .update(gameRoom)
           .set({ gameState: gameStateSnapshot })
-          .where(eq(gameRoom.id, Number(roomId)));
+          .where(eq(gameRoom.id, roomId));
 
         emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
 

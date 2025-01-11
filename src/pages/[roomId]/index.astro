@@ -16,10 +16,7 @@ if (!roomId || !userId || !userName) {
 }
 
 const roomRecord = (
-  await db
-    .select()
-    .from(gameRoom)
-    .where(eq(gameRoom.id, Number(roomId)))
+  await db.select().from(gameRoom).where(eq(gameRoom.id, roomId))
 )[0];
 // console.log("🚀 ~ roomRecord:", roomRecord);
 
@@ -36,7 +33,6 @@ const roomRecord = (
 <GameRoom
   currentUserId={userId}
   roomId={roomId}
-  players={[]}
   gameState={roomRecord.gameState}
   client:load
 />
