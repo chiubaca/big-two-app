@@ -48,10 +48,8 @@ COPY --from=build /app/db /app/db
 ENV PORT=4321
 ENV HOST=0.0.0.0
 
-VOLUME /app/db
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 4321
-ENV DATABASE_URL="file:///app/db/store.db"
 
 CMD [ "node", "./dist/server/entry.mjs" ]

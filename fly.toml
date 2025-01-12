@@ -9,7 +9,7 @@ primary_region = 'lhr'
 [build]
 
 [[mounts]]
-  destination = '/app/db'
+  destination = '/db'
   source = 'big_two_db'
 
 [http_service]
