@@ -29,3 +29,4 @@ primary_region = 'lhr'
 [env]
   BETTER_AUTH_URL='https://big-two-app-v2.fly.dev'
   BETTER_AUTH_SECRET='MSsXTsUHL6Jh0aAcN1Ls45NV30mY5GOa'
+  PUBLIC_BASE_URL='https://big-two-app-v2.fly.dev'

@@ -68,11 +68,6 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         console.log(`${user?.name} has connected to room ${roomId}`);
         let running = true;
 
-        // stream.writeSSE({
-        //   event: "gameStateUpdated",
-        //   data: JSON.stringify("stream started"),
-        // });
-
         const gameStateUpdatedListener = (
           gameState: BigTwoGameMachineSnapshot
         ) => {
@@ -103,9 +98,11 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
     })
     .post(
       "createRoom",
-      zValidator("form", z.object({ roomName: z.string() })),
+      zValidator("json", z.object({ roomName: z.string() })),
       async (c) => {
-        const { roomName } = c.req.valid("form");
+        console.log("create room api");
+
+        const { roomName } = c.req.valid("json");
         const { user } = c.get("locals");
 
         if (!user) {

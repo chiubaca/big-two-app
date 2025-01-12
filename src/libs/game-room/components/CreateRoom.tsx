@@ -6,13 +6,18 @@ export const CreateRoom = () => {
       <form
         onSubmit={async (e) => {
           e.preventDefault();
-          console.log("create room!");
-          const formData = new FormData(e.target as HTMLFormElement);
-          const name = formData.get("roomName")?.toString() || "";
-          await honoClient.api.createRoom.$post({
-            form: { roomName: name },
-          });
-          location.reload();
+          try {
+            const formData = new FormData(e.target as HTMLFormElement);
+            const name = formData.get("roomName")?.toString() || "";
+
+            const foo = await honoClient.api.createRoom.$post({
+              json: { roomName: name },
+            });
+
+            location.reload();
+          } catch (error) {
+            console.log("🚀 ~ onSubmit={ ~ error:", error);
+          }
         }}
       >
         <label>
