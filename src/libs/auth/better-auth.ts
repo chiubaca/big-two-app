@@ -10,6 +10,7 @@ import { account, session, user, verification } from "db/schemas/auth-schema";
 import { db } from "~libs/drizzle-orm/db";
 
 export const auth = betterAuth({
+  secret: "secret",
   database: drizzleAdapter(db, {
     provider: "sqlite",
     // Comment out schema object if generate doesn't work
