@@ -13,6 +13,9 @@ npm-debug.log*
 # misc
 .DS_Store
 
+db/store.db
+
+
 # environment variables
 .env
 .env.production

@@ -11,6 +11,7 @@ WORKDIR /app
 
 # Set production environment
 ENV NODE_ENV="production"
+ENV PUBLIC_BASE_URL="https://big-two-app-v2.fly.dev/"
 
 # Throw-away build stage to reduce size of final image
 FROM base as build
@@ -26,8 +27,6 @@ RUN npm ci --include=dev
 # Copy application code
 COPY . .
 
-# Apply database migrations
-RUN npm run db:migrate
 
 # Build application
 RUN npm run build
@@ -43,13 +42,23 @@ COPY --from=build /app/node_modules /app/node_modules
 COPY --from=build /app/dist /app/dist
 
 # Copy the SQLite database
+# Copy Drizzle-related files
 COPY --from=build /app/db /app/db
+COPY --from=build /app/drizzle /app/drizzle 
 
+# Copy package.json and package-lock.json
+COPY --from=build /app/package.json /app/package.json
+COPY --from=build /app/package-lock.json /app/package-lock.json
+
+# Copy drizzle.config.ts
+COPY --from=build /app/drizzle.config.ts /app/drizzle.config.ts 
+
+# Set environment variables
 ENV PORT=4321
 ENV HOST=0.0.0.0
-
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 4321
 
-CMD [ "node", "./dist/server/entry.mjs" ]
+# Run migrations and then start the server
+CMD [ "sh", "-c", "npm run db:migrate && node ./dist/server/entry.mjs" ]
