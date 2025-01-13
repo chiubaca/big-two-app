@@ -285,6 +285,25 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
           return c.text("player played the first move");
         }
 
+        if (gameState.value === "PLAY_NEW_ROUND") {
+          console.log("🟢 Playing new round first move");
+          gameStateMachineActor.send({
+            type: "PLAY_NEW_ROUND_FIRST_MOVE",
+            cards,
+          });
+
+          const gameStateSnapshot =
+            gameStateMachineActor.getPersistedSnapshot() as BigTwoGameMachineSnapshot;
+
+          await db
+            .update(gameRoom)
+            .set({ gameState: gameStateSnapshot })
+            .where(eq(gameRoom.id, roomId));
+
+          emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
+          return c.text("player played the new round first move");
+        }
+
         console.log("🟢 Playing next player cards");
         gameStateMachineActor.send({
           type: "PLAY_CARDS",
@@ -334,12 +353,15 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
           playerId: user.id,
         });
 
+        const gameStateSnapshot =
+          gameStateMachineActor.getPersistedSnapshot() as BigTwoGameMachineSnapshot;
+
         await db
           .update(gameRoom)
-          .set({ gameState })
+          .set({ gameState: gameStateSnapshot })
           .where(eq(gameRoom.id, roomId));
 
-        emitter.emit(`gameStateUpdated:${roomId}`, gameState);
+        emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
         return c.text("player passed");
       }
     );
