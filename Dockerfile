@@ -41,17 +41,12 @@ FROM base
 COPY --from=build /app/node_modules /app/node_modules
 COPY --from=build /app/dist /app/dist
 
-# Copy the SQLite database
-# Copy Drizzle-related files
-COPY --from=build /app/db /app/db
-COPY --from=build /app/drizzle /app/drizzle 
+# Copy ORM files
+COPY --from=build /app/drizzle /app/drizzle
 
 # Copy package.json and package-lock.json
 COPY --from=build /app/package.json /app/package.json
 COPY --from=build /app/package-lock.json /app/package-lock.json
-
-# Copy drizzle.config.ts
-COPY --from=build /app/drizzle.config.ts /app/drizzle.config.ts 
 
 # Set environment variables
 ENV PORT=4321

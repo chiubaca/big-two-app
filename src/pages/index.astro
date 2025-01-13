@@ -4,7 +4,7 @@ import { Login } from "~libs/auth/components/Login";
 import { SignUp } from "~libs/auth/components/SignUp";
 import { SignOut } from "~libs/auth/components/SignOut";
 import { db } from "~libs/drizzle-orm/db";
-import { gameRoom } from "db/schemas/schema";
+import { gameRoom } from "drizzle/schemas/schema";
 import { eq } from "drizzle-orm";
 
 const session = Astro.locals.session;

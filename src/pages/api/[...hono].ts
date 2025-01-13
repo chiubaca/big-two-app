@@ -11,7 +11,7 @@ import {
 } from "~libs/helpers/gameStateMachine";
 import { createActor, type Snapshot } from "xstate";
 import { db } from "~libs/drizzle-orm/db";
-import { gameRoom } from "db/schemas/schema";
+import { gameRoom } from "drizzle/schemas/schema";
 import { eq } from "drizzle-orm";
 
 import type TypedEmitter from "typed-emitter";

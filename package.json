@@ -9,11 +9,11 @@
     "astro": "astro",
     "test": "vitest",
     "check": "astro check",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
-    "auth:generate": "npx @better-auth/cli generate --config src/libs/auth/better-auth.ts --output db/schemas/auth-schema.ts --y"
+    "db:generate": "drizzle-kit generate --config=drizzle/config.ts",
+    "db:migrate": "drizzle-kit migrate  --config=drizzle/config.ts",
+    "db:push": "drizzle-kit push  --config=drizzle/config.ts",
+    "db:studio": "drizzle-kit studio  --config=drizzle/config.ts",
+    "auth:generate": "npx @better-auth/cli generate --config src/libs/auth/better-auth.ts --output schemas/auth-schema.ts --y"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.4",
