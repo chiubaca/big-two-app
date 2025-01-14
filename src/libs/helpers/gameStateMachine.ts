@@ -125,7 +125,6 @@ export const makeBigTwoGameMachine = () =>
     },
     actions: {
       addPlayer: ({ context, event }) => {
-        console.log("🚀 ~ context:", context.players);
         if (event.type !== "JOIN_GAME") {
           console.warn("🚨 wrong event type was sent: ", event.type);
           return;
@@ -147,7 +146,7 @@ export const makeBigTwoGameMachine = () =>
           context.players[index].hand = sortCards(dealtCards[index]);
         });
 
-        console.log("✅ Cards dealt:", context);
+        console.log("✅ Cards dealt");
       },
       playFirstMove: ({ context, event }) => {
         if (event.type !== "PLAY_FIRST_MOVE") {

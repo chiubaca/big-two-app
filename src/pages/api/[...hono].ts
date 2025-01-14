@@ -52,7 +52,7 @@ const authMiddleware = createMiddleware(async (c, next) => {
 });
 
 const emitter = new EventEmitter() as TypedEmitter<MessageEvents>;
-// Create a factory function that returns the configured app
+
 const createHonoApp = (astroLocals: APIContext["locals"]) => {
   const app = new Hono()
     .basePath("/api/")
@@ -64,14 +64,14 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
       const roomId = c.req.param("roomId");
       const { user } = c.get("locals");
 
+      console.log(`🔵 User ${user?.name} connected to room ${roomId}`);
+
       return streamSSE(c, async (stream) => {
-        console.log(`${user?.name} has connected to room ${roomId}`);
         let running = true;
 
         const gameStateUpdatedListener = (
           gameState: BigTwoGameMachineSnapshot
         ) => {
-          // console.log("🚀 ~ userInsertedListener ~ user:", gameState);
           stream.writeSSE({
             event: `gameStateUpdated:${roomId}`,
             data: JSON.stringify(gameState),
@@ -80,30 +80,32 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
 
         stream.onAbort(() => {
           running = false;
-          console.log("disconnected in abort signal");
-          emitter.off(`gameStateUpdated:${roomId}`, gameStateUpdatedListener); // Clean up listener
+          console.log(
+            `🔴 User ${user?.name} disconnected from room ${roomId} in abort signal`
+          );
+          emitter.off(`gameStateUpdated:${roomId}`, gameStateUpdatedListener);
         });
 
         emitter.on(`gameStateUpdated:${roomId}`, gameStateUpdatedListener);
 
         while (running) {
           await new Promise((resolve) => {
-            // console.log(`monitoring room ${roomId} for ${user?.name}`);
             setTimeout(resolve, 10000);
           });
         }
-
-        console.log("disconnected after while loop");
+        console.log(
+          `🔴 User ${user?.name} disconnected from room ${roomId} in while loop`
+        );
       });
     })
     .post(
       "createRoom",
       zValidator("json", z.object({ roomName: z.string() })),
       async (c) => {
-        console.log("create room api");
-
         const { roomName } = c.req.valid("json");
         const { user } = c.get("locals");
+
+        console.log(`🟢 User ${user?.name} creating room: ${roomName}`);
 
         if (!user) {
           return c.json({ error: "Unauthorized" }, 401);
@@ -139,6 +141,9 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
       async (c) => {
         const { roomId } = c.req.valid("json");
         const { user } = c.get("locals");
+
+        console.log(`🟢 User ${user?.name} starting game in room: ${roomId}`);
+
         const { gameState } = (
           await db.select().from(gameRoom).where(eq(gameRoom.id, roomId))
         )[0];
@@ -167,6 +172,8 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
       async (c) => {
         const { roomId } = c.req.valid("json");
         const { user } = c.get("locals");
+
+        console.log(`🟢 User ${user?.name} joining room: ${roomId}`);
 
         if (!user) {
           return c.json({ error: "Unauthorized" }, 401);
@@ -209,6 +216,8 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
       async (c) => {
         const { roomId } = c.req.valid("json");
         const { user } = c.get("locals");
+
+        console.log(`🟢 User ${user?.name} resetting game in room: ${roomId}`);
 
         if (!user) {
           return c.json({ error: "Unauthorized" }, 401);
@@ -267,7 +276,9 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         }).start();
 
         if (gameState.value === "ROUND_FIRST_MOVE") {
-          console.log("🟢 Playing round first move");
+          console.log(
+            `🟢 User ${user?.name} playing first move in room ${roomId}`
+          );
           gameStateMachineActor.send({
             type: "PLAY_FIRST_MOVE",
             cards,
@@ -286,7 +297,9 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         }
 
         if (gameState.value === "PLAY_NEW_ROUND") {
-          console.log("🟢 Playing new round first move");
+          console.log(
+            `🟢 User ${user?.name} playing new round first move in room ${roomId}`
+          );
           gameStateMachineActor.send({
             type: "PLAY_NEW_ROUND_FIRST_MOVE",
             cards,
@@ -304,7 +317,7 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
           return c.text("player played the new round first move");
         }
 
-        console.log("🟢 Playing next player cards");
+        console.log(`🟢 User ${user?.name} playing cards in room ${roomId}`);
         gameStateMachineActor.send({
           type: "PLAY_CARDS",
           cards,
@@ -334,6 +347,8 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         const { roomId } = c.req.valid("json");
         const { user } = c.get("locals");
 
+        console.log(`🟢 User ${user?.name} passing turn in room ${roomId}`);
+
         if (!user) {
           return c.json({ error: "Unauthorized" }, 401);
         }
@@ -347,7 +362,6 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
           snapshot: gameState,
         }).start();
 
-        console.log("🟢 Player passing turn");
         gameStateMachineActor.send({
           type: "PASS_TURN",
           playerId: user.id,
