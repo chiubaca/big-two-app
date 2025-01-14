@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for big-two-app-v2 on 2025-01-11T22:23:31Z
+# fly.toml app configuration file generated for big-two on 2025-01-14T23:19:38Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'big-two-app-v2'
+app = 'big-two'
 primary_region = 'lhr'
 
 [build]
@@ -24,8 +24,6 @@ processes = ['app']
 memory = '1gb'
 cpu_kind = 'shared'
 cpus = 1
-
-
 [env]
-BETTER_AUTH_URL = 'https://big-two-app-v2.fly.dev'
+BETTER_AUTH_URL = 'https://big-two.fly.dev'
 BETTER_AUTH_SECRET = 'MSsXTsUHL6Jh0aAcN1Ls45NV30mY5GOa'

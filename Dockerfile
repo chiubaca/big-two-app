@@ -11,7 +11,7 @@ WORKDIR /app
 
 # Set production environment
 ENV NODE_ENV="production"
-ENV PUBLIC_BASE_URL="https://big-two-app-v2.fly.dev/"
+ENV PUBLIC_BASE_URL="https://big-two.fly.dev/"
 
 # Throw-away build stage to reduce size of final image
 FROM base as build
