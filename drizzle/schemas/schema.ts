@@ -1,10 +1,15 @@
 import { integer, text, blob, sqliteTable } from "drizzle-orm/sqlite-core";
 import { user } from "./auth-schema";
 import type { BigTwoGameMachineSnapshot } from "~libs/helpers/gameStateMachine";
-import { createId } from "@paralleldrive/cuid2";
+import { init } from "@paralleldrive/cuid2";
+
+const createId = init({
+  length: 5,
+});
 
 export const gameRoom = sqliteTable("game_room", {
   id: text("id")
+    .primaryKey()
     .$defaultFn(() => createId())
     .notNull(),
   roomName: text("room_name").notNull(),
