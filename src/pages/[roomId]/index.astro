@@ -7,7 +7,6 @@ import { GameRoom } from "~libs/game-room/page/GameRoom";
 const { roomId } = Astro.params;
 const userId = Astro.locals.user?.id;
 const userName = Astro.locals.user?.name;
-// console.log("🚀 ~ roomId:", { roomId, userId, userName });
 
 if (!roomId || !userId || !userName) {
   return Astro.redirect("/");
@@ -16,10 +15,6 @@ if (!roomId || !userId || !userName) {
 const roomRecord = (
   await db.select().from(gameRoom).where(eq(gameRoom.id, roomId))
 )[0];
-// console.log("🚀 ~ roomRecord:", roomRecord);
-
-// // check players in this room
-// const roomDetails = await pbAdmin.collection("rooms").getOne<Room>(roomId);
 ---
 
 <a href="/">Back to Home</a>

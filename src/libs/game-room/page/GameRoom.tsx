@@ -15,14 +15,12 @@ interface GameRoomProps extends InitialGameRoomContextProps {}
 export const GameRoom = ({
   currentUserId,
   roomId,
-  // players,
   gameState,
 }: GameRoomProps) => {
   return (
     <GameRoomProvider
       roomId={roomId}
       gameState={gameState}
-      // players={players}
       currentUserId={currentUserId}
     >
       <Player />

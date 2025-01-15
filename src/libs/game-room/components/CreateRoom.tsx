@@ -10,7 +10,7 @@ export const CreateRoom = () => {
             const formData = new FormData(e.target as HTMLFormElement);
             const name = formData.get("roomName")?.toString() || "";
 
-            const foo = await honoClient.api.createRoom.$post({
+            await honoClient.api.createRoom.$post({
               json: { roomName: name },
             });
 

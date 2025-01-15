@@ -6,7 +6,6 @@ import {
   useState,
 } from "react";
 import { honoClient } from "~libs/hono-actions";
-// import pbClient from "~libs/pocketbase/pocketbase-client";
 import type { Room } from "~libs/types/Room";
 
 type GameRoomContextType = {
@@ -30,7 +29,6 @@ export const GameRoomContext = createContext<GameRoomContextType>({
 
 export const GameRoomProvider = ({
   currentUserId,
-  // players: initialPlayers,
   roomId,
   children,
   gameState: initialGameState,
@@ -73,7 +71,6 @@ const useSubscribeToPlayers = ({
 
     const gameStateUpdatedListener = (event: MessageEvent) => {
       const gameContext = JSON.parse(event.data);
-      console.log("🚀 ~ app.get ~ event:", gameContext);
       setGameState(gameContext);
     };
 
@@ -83,13 +80,14 @@ const useSubscribeToPlayers = ({
     );
 
     return () => {
+      // Clean up the EventSource
       evtSource.removeEventListener(
         `gameStateUpdated:${roomId}`,
         gameStateUpdatedListener
       );
-      evtSource.close(); // Clean up the EventSource
+      evtSource.close();
     };
-  }, [roomId]); // Add roomId as a dependency
+  }, [roomId]);
 
   return { gameState };
 };
