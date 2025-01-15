@@ -15,7 +15,7 @@ import {
 import { db } from "~libs/drizzle-orm/db";
 
 export const auth = betterAuth({
-  secret: "secret",
+  secret: process.env.BETTER_AUTH_SECRET,
   baseURL: process.env.PUBLIC_BASE_URL,
   database: drizzleAdapter(db, {
     provider: "sqlite",
