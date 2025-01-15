@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from "astro:transitions";
 import { eq } from "drizzle-orm";
 import { gameRoom } from "drizzle/schemas/schema";
 
@@ -17,6 +18,8 @@ const roomRecord = (
   await db.select().from(gameRoom).where(eq(gameRoom.id, roomId))
 )[0];
 ---
+
+<ClientRouter />
 
 <a href="/">Back to Home</a>
 

@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from "astro:transitions";
 import { CreateRoom } from "~libs/game-room/components/CreateRoom";
 import { Auth } from "~libs/auth/components/Auth";
 import { SignOut } from "~libs/auth/components/SignOut";
@@ -32,12 +33,16 @@ const gameRooms = user?.id ? await getGameRooms() : [];
     <meta name="viewport" content="width=device-width" />
     <meta name="generator" content={Astro.generator} />
     <title>Lets play, Big Two ♠</title>
+    <ClientRouter />
   </head>
   <body class="container mx-auto px-4 max-w-2xl min-h-screen py-8 grid">
     <div class="flex flex-col justify-center gap-8">
-      <h1 class="flex flex-col text-center justify-center font-bold mb-2">
+      <h1
+        class="flex flex-col text-center justify-center font-bold mb-2"
+        transition:name="title"
+      >
         <span class="text-sm">Lets play</span>
-        <span class="text-4xl"> Big Two ♠</span>
+        <span class="text-4xl">♦️ Big Two ♠</span>
         {user && <div class="pt-2 text-gray-600">Welcome, {user.name}</div>}
       </h1>
 
@@ -53,36 +58,33 @@ const gameRooms = user?.id ? await getGameRooms() : [];
         {
           user && (
             <div class="w-full flex flex-col gap-6">
-              <div class="card bg-base-100 rounded-xl p-6  border-4 border-black">
-                <CreateRoom client:load />
+              <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Rooms ({gameRooms?.length})</h2>
+                <SignOut client:load />
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                {gameRooms?.map((room) => (
+                  <a
+                    href={`/${room.id}`}
+                    class=" p-4 bg-base-200 rounded-lg hover:bg-primary hover:text-primary-content transition-all duration-200"
+                  >
+                    <div class="text-lg font-bold">{room.roomName}</div>
+                    <div class="text-sm opacity-70">
+                      Created by {room.creatorName}
+                    </div>
+                  </a>
+                ))}
               </div>
 
-              <div class="card bg-base-100 rounded-xl p-6  border-4 border-black">
-                <div class="flex justify-between items-center mb-6">
-                  <h2 class="text-xl font-bold">Rooms ({gameRooms?.length})</h2>
-                  <SignOut client:load />
-                </div>
-                <div class="flex flex-col gap-3">
-                  {gameRooms?.map((room) => (
-                    <a
-                      href={`/${room.id}`}
-                      class="p-4 bg-base-200 rounded-lg hover:bg-primary hover:text-primary-content transition-all duration-200"
-                    >
-                      <div class="text-lg font-bold">{room.roomName}</div>
-                      <div class="text-sm opacity-70">
-                        Created by {room.creatorName}
-                      </div>
-                    </a>
-                  ))}
-                </div>
+              <div class="card bg-zinc-100 rounded-xl p-6 ">
+                <CreateRoom client:load />
               </div>
             </div>
           )
         }
       </div>
     </div>
-  </body>
-  <script>
+  </body><script>
     import { honoClient } from "~libs/hono-actions";
 
     honoClient.api.test.$get().then(async (resp) => {

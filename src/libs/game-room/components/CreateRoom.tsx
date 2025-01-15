@@ -22,14 +22,14 @@ export const CreateRoom = () => {
         }}
       >
         <label className="w-full flex flex-col gap-3">
-          <h2 className="text-xl font-bold">Create a room</h2>
           <input
             className="input input-lg input-primary w-full"
             name="roomName"
+            required
           />
         </label>
-        <button className="btn btn-primary btn-lg" type="submit">
-          Create
+        <button className="btn btn-secondary btn-lg" type="submit">
+          Create new room
         </button>
       </form>
     </>
