@@ -4,6 +4,7 @@ export const CreateRoom = () => {
   return (
     <>
       <form
+        className="flex flex-col gap-3"
         onSubmit={async (e) => {
           e.preventDefault();
           try {
@@ -20,15 +21,15 @@ export const CreateRoom = () => {
           }
         }}
       >
-        <label>
-          Create a room
+        <label className="w-full flex flex-col gap-3">
+          <h2 className="text-xl font-bold">Create a room</h2>
           <input
-            className="input input-bordered w-full max-w-xs"
+            className="input input-lg input-primary w-full"
             name="roomName"
           />
         </label>
-        <button className="btn" type="submit">
-          Create a room
+        <button className="btn btn-primary btn-lg" type="submit">
+          Create
         </button>
       </form>
     </>
