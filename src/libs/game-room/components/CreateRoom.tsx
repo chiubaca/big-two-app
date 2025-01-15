@@ -1,4 +1,4 @@
-import { actions } from "astro:actions";
+import { honoClient } from "~libs/hono-actions";
 
 export const CreateRoom = () => {
   return (
@@ -6,9 +6,18 @@ export const CreateRoom = () => {
       <form
         onSubmit={async (e) => {
           e.preventDefault();
-          const formData = new FormData(e.target as HTMLFormElement);
-          await actions.createRoom(formData);
-          location.reload();
+          try {
+            const formData = new FormData(e.target as HTMLFormElement);
+            const name = formData.get("roomName")?.toString() || "";
+
+            await honoClient.api.createRoom.$post({
+              json: { roomName: name },
+            });
+
+            location.reload();
+          } catch (error) {
+            console.log("🚀 ~ onSubmit={ ~ error:", error);
+          }
         }}
       >
         <label>

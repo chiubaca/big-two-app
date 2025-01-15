@@ -1,5 +1,3 @@
-import { type SafeResult, actions } from "astro:actions";
-import type { RecordModel } from "pocketbase";
 import {
   type FC,
   type PropsWithChildren,
@@ -7,38 +5,37 @@ import {
   useEffect,
   useState,
 } from "react";
-import pbClient from "~libs/pocketbase/pocketbase-client";
+import { honoClient } from "~libs/hono-actions";
 import type { Room } from "~libs/types/Room";
 
 type GameRoomContextType = {
   roomId: string;
-  players: string[];
+  // players: string[];
   currentUserId: string;
   gameState: Room["gameState"];
 };
 
 export type InitialGameRoomContextProps = Pick<
   GameRoomContextType,
-  "roomId" | "players" | "currentUserId" | "gameState"
+  "roomId" | "currentUserId" | "gameState"
 >;
 
 export const GameRoomContext = createContext<GameRoomContextType>({
   roomId: "",
-  players: [],
+  // players: [],
   currentUserId: "",
   gameState: {} as Room["gameState"],
 });
 
 export const GameRoomProvider = ({
   currentUserId,
-  players: initialPlayers,
   roomId,
   children,
   gameState: initialGameState,
 }: PropsWithChildren<InitialGameRoomContextProps>) => {
-  const { players, gameState } = useSubscribeToPlayers({
+  const { gameState } = useSubscribeToPlayers({
     roomId,
-    initialPlayers,
+
     initialGameState,
   });
 
@@ -46,7 +43,7 @@ export const GameRoomProvider = ({
     <GameRoomContext.Provider
       value={{
         roomId,
-        players,
+        // players,
         currentUserId,
         gameState,
       }}
@@ -58,50 +55,39 @@ export const GameRoomProvider = ({
 
 const useSubscribeToPlayers = ({
   roomId,
-  initialPlayers,
   initialGameState,
 }: {
   roomId: string;
-  initialPlayers: string[];
   initialGameState: Room["gameState"];
 }) => {
-  const [players, setPlayers] = useState<string[]>(initialPlayers);
-
   const [gameState, setGameState] = useState(initialGameState);
 
-  const handleUpdatePlayers = async (record: RecordModel) => {
-    // TODO: later will need to lookup each player to get names
-    setPlayers(record.players);
-  };
-
-  const handleNewGameState = (record: RecordModel) => {
-    setGameState(record.gameState);
-  };
-
   useEffect(() => {
-    console.log(`subscribing to room ${roomId}`, pbClient.authStore);
-
-    // Subscribe to changes in posts collection
-    pbClient.collection("rooms").subscribe(
-      roomId,
-      async (event) => {
-        const { action, record } = event;
-        console.log({ action, record });
-
-        if (action === "update") {
-          await handleUpdatePlayers(record);
-          handleNewGameState(record);
-        }
-
-        // Cleanup subscription on component unmount
-        return () => {
-          console.log("cleanup");
-          pbClient.collection("rooms").unsubscribe();
-        };
-      },
-      []
+    const evtSource = new EventSource(
+      honoClient.api.realtime.gamestate[":roomId"]
+        .$url({ param: { roomId } })
+        .toString()
     );
-  });
 
-  return { players, gameState };
+    const gameStateUpdatedListener = (event: MessageEvent) => {
+      const gameContext = JSON.parse(event.data);
+      setGameState(gameContext);
+    };
+
+    evtSource.addEventListener(
+      `gameStateUpdated:${roomId}`,
+      gameStateUpdatedListener
+    );
+
+    return () => {
+      // Clean up the EventSource
+      evtSource.removeEventListener(
+        `gameStateUpdated:${roomId}`,
+        gameStateUpdatedListener
+      );
+      evtSource.close();
+    };
+  }, [roomId]);
+
+  return { gameState };
 };

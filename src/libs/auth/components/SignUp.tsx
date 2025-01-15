@@ -1,5 +1,5 @@
-import { actions } from "astro:actions";
 import { useState } from "react";
+import { authReactClient } from "../auth-clients";
 
 export const SignUp = () => {
   const [error, setError] = useState<string>("");
@@ -13,18 +13,20 @@ export const SignUp = () => {
           e.preventDefault();
           const formData = new FormData(e.target as HTMLFormElement);
 
-          const resp = await actions.signUp(formData);
+          const name = formData.get("name")?.toString();
+          const email = formData.get("email")?.toString();
+          const password = formData.get("password")?.toString();
 
-          if (resp.error) {
-            setError(JSON.stringify(resp.error.message));
+          if (!name || !email || !password) {
             return;
           }
 
-          await fetch("/api/login", {
-            method: "POST",
-            body: formData,
+          const data = await authReactClient.signUp.email({
+            email,
+            name,
+            password,
           });
-          location.reload();
+          console.log("🚀 ~ onSubmit={ ~ data:", data);
         }}
       >
         <label>

@@ -11,8 +11,7 @@ WORKDIR /app
 
 # Set production environment
 ENV NODE_ENV="production"
-ENV PUBLIC_PB_ENDPOINT="https://big-two-pb.fly.dev"
-
+ENV PUBLIC_BASE_URL=${PUBLIC_BASE_URL}
 
 # Throw-away build stage to reduce size of final image
 FROM base as build
@@ -27,15 +26,13 @@ RUN npm ci --include=dev
 
 # Copy application code
 COPY . .
-RUN echo "PUBLIC_PB_ENDPOINT=$PUBLIC_PB_ENDPOINT" > /app.env
-RUN rm -rf /app/pocketbase
+
 
 # Build application
 RUN npm run build
 
 # Remove development dependencies
 RUN npm prune --omit=dev
-
 
 # Final stage for app image
 FROM base
@@ -44,9 +41,19 @@ FROM base
 COPY --from=build /app/node_modules /app/node_modules
 COPY --from=build /app/dist /app/dist
 
+# Copy ORM files
+COPY --from=build /app/drizzle /app/drizzle
+
+# Copy package.json and package-lock.json
+COPY --from=build /app/package.json /app/package.json
+COPY --from=build /app/package-lock.json /app/package-lock.json
+
+# Set environment variables
 ENV PORT=4321
 ENV HOST=0.0.0.0
 
 # Start the server by default, this can be overwritten at runtime
 EXPOSE 4321
-CMD [ "node", "./dist/server/entry.mjs" ]
+
+# Run migrations and then start the server
+CMD [ "sh", "-c", "npm run db:migrate && node ./dist/server/entry.mjs" ]

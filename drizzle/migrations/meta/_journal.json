@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1736632826384,
+      "tag": "0000_cool_prowler",
+      "breakpoints": true
+    }
+  ]
+}

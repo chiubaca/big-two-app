@@ -1,4 +1,3 @@
-import { actions } from "astro:actions";
 import type { Card } from "@chiubaca/big-two-utils";
 import { useContext, useState } from "react";
 import {
@@ -10,19 +9,18 @@ import {
 import "../../../base.css";
 import { PlayingCard } from "../components/PlayingCard";
 import { detectHandType } from "~libs/helpers/gameStateMachine";
+import { honoClient } from "~libs/hono-actions";
 interface GameRoomProps extends InitialGameRoomContextProps {}
 
 export const GameRoom = ({
   currentUserId,
   roomId,
-  players,
   gameState,
 }: GameRoomProps) => {
   return (
     <GameRoomProvider
       roomId={roomId}
       gameState={gameState}
-      players={players}
       currentUserId={currentUserId}
     >
       <Player />
@@ -69,8 +67,8 @@ const JoinRoom = () => {
   const { roomId } = useContext(GameRoomContext);
 
   const handleJoinRoom = async () => {
-    await actions.joinGame({
-      roomId,
+    await honoClient.api.joinGame.$post({
+      json: { roomId },
     });
   };
 
@@ -86,7 +84,7 @@ const JoinRoom = () => {
       <button
         className="btn btn-warning m-3"
         type="button"
-        onClick={() => actions.resetGame({ roomId })}
+        onClick={() => honoClient.api.resetGame.$post({ json: { roomId } })}
       >
         reset game
       </button>
@@ -133,7 +131,7 @@ const Game = () => {
       <button
         className="btn"
         type="button"
-        onClick={() => actions.startGame({ roomId })}
+        onClick={() => honoClient.api.startGame.$post({ json: { roomId } })}
       >
         Start Game
       </button>
@@ -206,9 +204,11 @@ const Game = () => {
         disabled={!isCurrentPlayerTurn}
         onClick={async () => {
           setSelectedCards([]);
-          await actions.playTurn({
-            roomId,
-            cards: selectedCards,
+          await honoClient.api.playTurn.$post({
+            json: {
+              roomId,
+              cards: selectedCards,
+            },
           });
         }}
       >
@@ -219,7 +219,7 @@ const Game = () => {
         disabled={!isCurrentPlayerTurn}
         type="button"
         className={`ml-2 btn btn-secondary ${isCurrentPlayerTurn ? "btn-secondary" : "btn-disabled"}`}
-        onClick={() => actions.passTurn({ roomId })}
+        onClick={() => honoClient.api.passTurn.$post({ json: { roomId } })}
       >
         Pass
       </button>
