@@ -127,42 +127,13 @@ const Game = () => {
   };
 
   return (
-    <div className="p-5">
-      <button
-        className="btn"
-        type="button"
-        onClick={() => honoClient.api.startGame.$post({ json: { roomId } })}
-      >
-        Start Game
-      </button>
-
-      <div>{gameState.value}</div>
-
-      {/* DEBUGGING STUFF */}
-      <details className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-gray-400">
-        <h1> Everyones cards for debugging!</h1>
-        {gameState.context.players.map((player) => {
-          return (
-            <div key={player.id}>
-              {player.name}'s cards:
-              <div className="flex flex-wrap gap-2">
-                {player.hand.map((card) => {
-                  return (
-                    <PlayingCard key={card.suit + card.value} card={card} />
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </details>
-
+    <div className="p-5 border-black border relative">
       <div>
-        <div className="flex flex-col gap-5 py-10 border p-5 my-5 border-gray-400">
+        <div className="flex flex-col gap-5 py-10 border p-5 my-5">
           <p className="font-bold text-center"> Cards </p>
 
           {lastHandPlayed && (
-            <div className="flex justify-center">
+            <div className="flex justify-center gap-1">
               {lastHandPlayed.map((card) => {
                 return (
                   <PlayingCard key={`${card.suit}${card.value}`} card={card} />
@@ -176,21 +147,24 @@ const Game = () => {
           {gameState.context.players[thisPlayerIndex] && (
             <div className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-orange-400">
               Your hand (You are player {thisPlayerIndex + 1})
-              <div className="flex flex-wrap gap-2">
-                {gameState.context.players[thisPlayerIndex].hand.map((card) => {
-                  return (
-                    <PlayingCard
-                      key={card.suit + card.value}
-                      card={card}
-                      onSelect={() => toggleSelectedCard(card)}
-                      selected={selectedCards.some(
-                        (selectedCard) =>
-                          selectedCard.suit === card.suit &&
-                          selectedCard.value === card.value
-                      )}
-                    />
-                  );
-                })}
+              <div className="flex flex-wrap  ">
+                {gameState.context.players[thisPlayerIndex].hand.map(
+                  (card, index) => {
+                    return (
+                      <PlayingCard
+                        key={card.suit + card.value}
+                        className="cursor-pointer transition-transform hover:-translate-y-2 -ml-6 mb-2"
+                        card={card}
+                        onSelect={() => toggleSelectedCard(card)}
+                        selected={selectedCards.some(
+                          (selectedCard) =>
+                            selectedCard.suit === card.suit &&
+                            selectedCard.value === card.value
+                        )}
+                      />
+                    );
+                  }
+                )}
               </div>
               <div>{isValidPlay ? isValidPlay : "invalid play"}</div>
             </div>
@@ -223,6 +197,34 @@ const Game = () => {
       >
         Pass
       </button>
+      <button
+        className="btn"
+        type="button"
+        onClick={() => honoClient.api.startGame.$post({ json: { roomId } })}
+      >
+        Start Game
+      </button>
+
+      <div>{gameState.value}</div>
+
+      {/* DEBUGGING STUFF */}
+      <details className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-gray-400">
+        <h1> Everyones cards for debugging!</h1>
+        {gameState.context.players.map((player) => {
+          return (
+            <div key={player.id}>
+              {player.name}'s cards:
+              <div className="flex flex-wrap gap-2">
+                {player.hand.map((card) => {
+                  return (
+                    <PlayingCard key={card.suit + card.value} card={card} />
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </details>
     </div>
   );
 };
