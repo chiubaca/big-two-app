@@ -10,28 +10,16 @@ import "../../../base.css";
 import { PlayingCard } from "../components/PlayingCard";
 import { detectHandType } from "~libs/helpers/gameStateMachine";
 import { honoClient } from "~libs/hono-actions";
-interface GameRoomProps extends InitialGameRoomContextProps {}
-//**
-/* console.log(getPlayerOrder(0)); // [0, 1, 2, 3]
-/* console.log(getPlayerOrder(1)); // [1, 2, 3, 0]
-/* console.log(getPlayerOrder(2)); // [2, 3, 0, 1]
-/* console.log(getPlayerOrder(3)); // [3, 0, 1, 2]
-*/
-function getPlayerOrder(
-  startingIndex: number
-): [number, number, number, number] {
-  const indices = [0, 1, 2, 3];
-  const rotated = [
-    ...indices.slice(startingIndex),
-    ...indices.slice(0, startingIndex),
-  ];
-  return rotated as [number, number, number, number];
+import { makePlayerOrder } from "../helpers/makePlayerOrder";
+interface GameRoomProps extends InitialGameRoomContextProps {
+  roomName: string;
 }
 
 export const GameRoom = ({
   currentUserId,
   roomId,
   gameState,
+  roomName,
 }: GameRoomProps) => {
   return (
     <GameRoomProvider
@@ -39,40 +27,8 @@ export const GameRoom = ({
       gameState={gameState}
       currentUserId={currentUserId}
     >
-      <Game />
+      <Game roomName={roomName} />
     </GameRoomProvider>
-  );
-};
-
-const Player = () => {
-  const { gameState, currentUserId } = useContext(GameRoomContext);
-
-  return (
-    <>
-      {gameState.context.winner && (
-        <div className="text-4xl">
-          {gameState.context.winner.id === currentUserId
-            ? "You win 🎉"
-            : `You lost 😭, ${gameState.context.winner.name} won. Better luck next time!`}{" "}
-        </div>
-      )}
-      <div className="m-3 text-lg">
-        Players in this room:
-        <ol>
-          <>
-            {gameState.context.players.map((player) => (
-              <div key={player.id}>
-                <li>
-                  {player.name} (<code>{player.id}</code>)
-                  {player.id === currentUserId && "(you)"}
-                </li>
-              </div>
-            ))}
-            <span>{gameState.context.players.length} / 4 players</span>
-          </>
-        </ol>
-      </div>
-    </>
   );
 };
 
@@ -105,7 +61,7 @@ const JoinRoom = () => {
   );
 };
 
-const Game = () => {
+const Game = ({ roomName }: { roomName: string }) => {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const isValidPlay = detectHandType(selectedCards);
 
@@ -119,8 +75,9 @@ const Game = () => {
   const thisPlayerIndex = gameState.context.players.findIndex(
     (player) => player.id === currentUserId
   );
+  const thisPlayerName = gameState.context.players[thisPlayerIndex].name;
 
-  const [player, left, top, right] = getPlayerOrder(thisPlayerIndex);
+  const [, left, top, right] = makePlayerOrder(thisPlayerIndex);
 
   const lastHandPlayed = gameState.context.cardPile.at(-1);
 
@@ -143,154 +100,154 @@ const Game = () => {
 
   return (
     <>
-      {/* <Player />
-      <div>{gameState.value}</div> */}
-      <main className="table p-2 h-svh">
-        <div className="table-center">
-          <div className="flex flex-col gap-5 py-10 border p-5 my-5">
-            <p className="font-bold text-center"> Cards </p>
+      <main className="grid self-center items-center bg-green-400 p-2 h-svh">
+        <div>
+          <a href="/">Back to Home</a>
+          <h1 className="m-3 text-2xl">
+            Welcome to {roomName}, {thisPlayerName}
+          </h1>
+        </div>
 
-            {lastHandPlayed && (
-              <div className="flex justify-center gap-1">
-                {lastHandPlayed.map((card) => {
-                  return (
-                    <PlayingCard
-                      key={`${card.suit}${card.value}`}
-                      card={card}
-                    />
-                  );
-                })}
+        <div className="table p-5">
+          <div className="table-center scale-75">
+            <div className=" ">
+              {lastHandPlayed && (
+                <div className="flex justify-center gap-1 flex-wrap">
+                  {lastHandPlayed.map((card) => {
+                    return (
+                      <PlayingCard
+                        key={`${card.suit}${card.value}`}
+                        card={card}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+          <div className="current-player">
+            {gameState.context.players[thisPlayerIndex] && (
+              <div className="flex flex-wrap justify-center">
+                {gameState.context.players[thisPlayerIndex].hand.map(
+                  (card, index) => {
+                    return (
+                      <PlayingCard
+                        key={card.suit + card.value}
+                        className="cursor-pointer transition-transform hover:-translate-y-2  mb-2"
+                        card={card}
+                        onSelect={() => toggleSelectedCard(card)}
+                        selected={selectedCards.some(
+                          (selectedCard) =>
+                            selectedCard.suit === card.suit &&
+                            selectedCard.value === card.value
+                        )}
+                      />
+                    );
+                  }
+                )}
               </div>
+            )}
+            <div>{isValidPlay ? isValidPlay : "invalid play"}</div>
+          </div>
+          <div className="player-left">
+            {gameState.context.players[left]?.name ? (
+              <>
+                {gameState.context.players[left].name}
+                <div className="flex flex-col">
+                  {gameState.context.players[1].hand.map((card, idx) => {
+                    return (
+                      <div
+                        // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                        key={idx}
+                        className="pattern h-8 w-10 border-2 rounded-sm -mb-4"
+                      />
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <>empty seat</>
             )}
           </div>
-        </div>
-        <div className="current-player">
-          <div>
-            {gameState.context.players[thisPlayerIndex] && (
-              <div className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-orange-400">
-                Your hand (You are player {thisPlayerIndex + 1})
-                <div className="flex flex-wrap  ">
-                  {gameState.context.players[thisPlayerIndex].hand.map(
-                    (card, index) => {
-                      return (
-                        <PlayingCard
-                          key={card.suit + card.value}
-                          className="cursor-pointer transition-transform hover:-translate-y-2 -ml-6 mb-2"
-                          card={card}
-                          onSelect={() => toggleSelectedCard(card)}
-                          selected={selectedCards.some(
-                            (selectedCard) =>
-                              selectedCard.suit === card.suit &&
-                              selectedCard.value === card.value
-                          )}
-                        />
-                      );
-                    }
-                  )}
+          <div className="player-top">
+            {gameState.context.players[2]?.name ? (
+              <>
+                {gameState.context.players[top].name}
+                <div className="flex">
+                  {gameState.context.players[top].hand.map((card, idx) => {
+                    return (
+                      <div
+                        // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                        key={idx}
+                        className="pattern w-8 h-10 border-2 rounded-sm -mb-4"
+                      />
+                    );
+                  })}
                 </div>
-                <div>{isValidPlay ? isValidPlay : "invalid play"}</div>
-              </div>
+              </>
+            ) : (
+              <>empty seat</>
             )}
-          </div>{" "}
+          </div>
+          <div className="player-right">
+            {gameState.context.players[right]?.name ? (
+              <>
+                {gameState.context.players[right].name}
+                <div className="flex flex-col">
+                  {gameState.context.players[3].hand.map((card, idx) => {
+                    return (
+                      <div
+                        // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                        key={idx}
+                        className="pattern h-8 w-10 border-2 rounded-sm -mb-4"
+                      />
+                    );
+                  })}
+                </div>
+              </>
+            ) : (
+              <>empty seat</>
+            )}{" "}
+          </div>
         </div>
-        <div className="player-left">
-          {gameState.context.players[left]?.name ? (
-            <>
-              {gameState.context.players[left].name}
-              <div className="flex flex-col">
-                {gameState.context.players[1].hand.map((card, idx) => {
-                  return (
-                    <div
-                      // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                      key={idx}
-                      className="pattern h-8 w-10 border-2 rounded-sm -mb-4"
-                    />
-                  );
-                })}
-              </div>
-            </>
-          ) : (
-            <>empty seat</>
-          )}
-        </div>
-        <div className="player-top">
-          {gameState.context.players[2]?.name ? (
-            <>
-              {gameState.context.players[top].name}
-              <div className="flex">
-                {gameState.context.players[top].hand.map((card, idx) => {
-                  return (
-                    <div
-                      // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                      key={idx}
-                      className="pattern w-8 h-10 border-2 rounded-sm -mb-4"
-                    />
-                  );
-                })}
-              </div>
-            </>
-          ) : (
-            <>empty seat</>
-          )}
-        </div>
-        <div className="player-right">
-          {gameState.context.players[right]?.name ? (
-            <>
-              {gameState.context.players[right].name}
-              <div className="flex flex-col">
-                {gameState.context.players[3].hand.map((card, idx) => {
-                  return (
-                    <div
-                      // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                      key={idx}
-                      className="pattern h-8 w-10 border-2 rounded-sm -mb-4"
-                    />
-                  );
-                })}
-              </div>
-            </>
-          ) : (
-            <>empty seat</>
-          )}{" "}
+
+        <div className="p-5 border-black border relative">
+          <button
+            className={`btn ${isCurrentPlayerTurn ? "btn-primary" : "btn-disabled"}`}
+            type="button"
+            disabled={!isCurrentPlayerTurn}
+            onClick={async () => {
+              setSelectedCards([]);
+              await honoClient.api.playTurn.$post({
+                json: {
+                  roomId,
+                  cards: selectedCards,
+                },
+              });
+            }}
+          >
+            {isCurrentPlayerTurn ? "Play your turn" : "Its not your turn"}
+          </button>
+
+          <button
+            disabled={!isCurrentPlayerTurn}
+            type="button"
+            className={`ml-2 btn btn-secondary ${isCurrentPlayerTurn ? "btn-secondary" : "btn-disabled"}`}
+            onClick={() => honoClient.api.passTurn.$post({ json: { roomId } })}
+          >
+            Pass
+          </button>
+          <button
+            className="btn"
+            type="button"
+            onClick={() => honoClient.api.startGame.$post({ json: { roomId } })}
+          >
+            Start Game
+          </button>
+
+          <JoinRoom />
         </div>
       </main>
-
-      <div className="p-5 border-black border relative">
-        <button
-          className={`btn ${isCurrentPlayerTurn ? "btn-primary" : "btn-disabled"}`}
-          type="button"
-          disabled={!isCurrentPlayerTurn}
-          onClick={async () => {
-            setSelectedCards([]);
-            await honoClient.api.playTurn.$post({
-              json: {
-                roomId,
-                cards: selectedCards,
-              },
-            });
-          }}
-        >
-          {isCurrentPlayerTurn ? "Play your turn" : "Its not your turn"}
-        </button>
-
-        <button
-          disabled={!isCurrentPlayerTurn}
-          type="button"
-          className={`ml-2 btn btn-secondary ${isCurrentPlayerTurn ? "btn-secondary" : "btn-disabled"}`}
-          onClick={() => honoClient.api.passTurn.$post({ json: { roomId } })}
-        >
-          Pass
-        </button>
-        <button
-          className="btn"
-          type="button"
-          onClick={() => honoClient.api.startGame.$post({ json: { roomId } })}
-        >
-          Start Game
-        </button>
-
-        <JoinRoom />
-      </div>
 
       <details className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-gray-400">
         {/* DEBUGGING STUFF */}
@@ -310,10 +267,12 @@ const Game = () => {
           );
         })}
       </details>
+
       <style>{
         /* css */ ` 
       .table { 
         display: grid;
+        gap:3rem;
         justify-content: space-around;
         align-items: center;
         background-color: green;
