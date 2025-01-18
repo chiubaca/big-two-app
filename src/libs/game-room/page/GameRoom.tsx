@@ -11,8 +11,13 @@ import { PlayingCard } from "../components/PlayingCard";
 import { detectHandType } from "~libs/helpers/gameStateMachine";
 import { honoClient } from "~libs/hono-actions";
 import { makePlayerOrder } from "../helpers/makePlayerOrder";
+
+import texture from "./noisy-texture.png";
+import { twMerge } from "tailwind-merge";
+
 interface GameRoomProps extends InitialGameRoomContextProps {
   roomName: string;
+  creatorId: string;
 }
 
 export const GameRoom = ({
@@ -20,6 +25,7 @@ export const GameRoom = ({
   roomId,
   gameState,
   roomName,
+  creatorId,
 }: GameRoomProps) => {
   return (
     <GameRoomProvider
@@ -27,43 +33,21 @@ export const GameRoom = ({
       gameState={gameState}
       currentUserId={currentUserId}
     >
-      <Game roomName={roomName} />
+      <Game roomName={roomName} creatorId={creatorId} />
     </GameRoomProvider>
   );
 };
 
-const JoinRoom = () => {
-  const { roomId } = useContext(GameRoomContext);
-
-  const handleJoinRoom = async () => {
-    await honoClient.api.joinGame.$post({
-      json: { roomId },
-    });
-  };
-
-  return (
-    <div>
-      <button
-        className="btn btn-primary m-3"
-        type="button"
-        onClick={handleJoinRoom}
-      >
-        Join room
-      </button>
-      <button
-        className="btn btn-warning m-3"
-        type="button"
-        onClick={() => honoClient.api.resetGame.$post({ json: { roomId } })}
-      >
-        reset game
-      </button>
-    </div>
-  );
-};
-
-const Game = ({ roomName }: { roomName: string }) => {
+const Game = ({
+  roomName,
+  creatorId,
+}: {
+  roomName: string;
+  creatorId: string;
+}) => {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const isValidPlay = detectHandType(selectedCards);
+  console.log("🚀 ~ isValidPlay:", isValidPlay);
 
   const { gameState, currentUserId, roomId } = useContext(GameRoomContext);
 
@@ -75,7 +59,13 @@ const Game = ({ roomName }: { roomName: string }) => {
   const thisPlayerIndex = gameState.context.players.findIndex(
     (player) => player.id === currentUserId
   );
-  const thisPlayerName = gameState.context.players[thisPlayerIndex].name;
+  const isThisPlayerInRoom = gameState.context.players
+    .map((p) => p.id)
+    .find((id) => id === currentUserId);
+
+  const isThisPlayerTheCreator = creatorId === currentUserId;
+
+  // const thisPlayerName = gameState.context.players[thisPlayerIndex].name;
 
   const [, left, top, right] = makePlayerOrder(thisPlayerIndex);
 
@@ -100,15 +90,52 @@ const Game = ({ roomName }: { roomName: string }) => {
 
   return (
     <>
-      <main className="grid self-center items-center bg-green-400 p-2 h-svh">
-        <div>
-          <a href="/">Back to Home</a>
-          <h1 className="m-3 text-2xl">
-            Welcome to {roomName}, {thisPlayerName}
-          </h1>
-        </div>
+      <main className="wood-floor grid self-center items-center p-2 h-svh text-white">
+        <nav className="flex items-center justify-between">
+          <a className="btn  btn-ghost text-xl" href="/">
+            ← 🏠 Home
+          </a>
 
-        <div className="table p-5">
+          <div className="flex gap-3">
+            {gameState.value === "WAITING_FOR_PLAYERS" && (
+              <button
+                className="btn"
+                type="button"
+                onClick={async () =>
+                  await honoClient.api.startGame.$post({ json: { roomId } })
+                }
+              >
+                Start Game
+              </button>
+            )}
+            {!isThisPlayerInRoom && (
+              <button
+                className="btn btn-primary "
+                type="button"
+                onClick={async () =>
+                  await honoClient.api.joinGame.$post({
+                    json: { roomId },
+                  })
+                }
+              >
+                Join room
+              </button>
+            )}
+            {isThisPlayerTheCreator && (
+              <button
+                className="btn btn-warning btn-sm bg-red-500"
+                type="button"
+                onClick={() =>
+                  honoClient.api.resetGame.$post({ json: { roomId } })
+                }
+              >
+                Reset game
+              </button>
+            )}
+          </div>
+        </nav>
+
+        <div className="table max-w-5xl mx-auto ">
           <div className="table-center scale-75">
             <div className=" ">
               {lastHandPlayed && (
@@ -125,7 +152,7 @@ const Game = ({ roomName }: { roomName: string }) => {
               )}
             </div>
           </div>
-          <div className="current-player">
+          <div className="current-player pt-10">
             {gameState.context.players[thisPlayerIndex] && (
               <div className="flex flex-wrap justify-center">
                 {gameState.context.players[thisPlayerIndex].hand.map(
@@ -147,7 +174,6 @@ const Game = ({ roomName }: { roomName: string }) => {
                 )}
               </div>
             )}
-            <div>{isValidPlay ? isValidPlay : "invalid play"}</div>
           </div>
           <div className="player-left">
             {gameState.context.players[left]?.name ? (
@@ -169,7 +195,7 @@ const Game = ({ roomName }: { roomName: string }) => {
               <>empty seat</>
             )}
           </div>
-          <div className="player-top">
+          <div className="player-top pt-10">
             {gameState.context.players[2]?.name ? (
               <>
                 {gameState.context.players[top].name}
@@ -179,7 +205,7 @@ const Game = ({ roomName }: { roomName: string }) => {
                       <div
                         // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
                         key={idx}
-                        className="pattern w-8 h-10 border-2 rounded-sm -mb-4"
+                        className="pattern w-8 h-10 border-2 rounded-sm -ml-2"
                       />
                     );
                   })}
@@ -211,71 +237,77 @@ const Game = ({ roomName }: { roomName: string }) => {
           </div>
         </div>
 
-        <div className="p-5 border-black border relative">
-          <button
-            className={`btn ${isCurrentPlayerTurn ? "btn-primary" : "btn-disabled"}`}
-            type="button"
-            disabled={!isCurrentPlayerTurn}
-            onClick={async () => {
-              setSelectedCards([]);
-              await honoClient.api.playTurn.$post({
-                json: {
-                  roomId,
-                  cards: selectedCards,
-                },
-              });
-            }}
-          >
-            {isCurrentPlayerTurn ? "Play your turn" : "Its not your turn"}
-          </button>
+        <div className="flex flex-col justify-center items-center p-5 ">
+          <div className="badge  badge-lg badge-info text-xl">
+            {isCurrentPlayerTurn ? (
+              "It's your turn!"
+            ) : (
+              <>
+                Waiting for{" "}
+                {
+                  gameState.context.players[
+                    gameState.context.currentPlayerIndex
+                  ].name
+                }{" "}
+                to play...
+              </>
+            )}
+          </div>
 
-          <button
-            disabled={!isCurrentPlayerTurn}
-            type="button"
-            className={`ml-2 btn btn-secondary ${isCurrentPlayerTurn ? "btn-secondary" : "btn-disabled"}`}
-            onClick={() => honoClient.api.passTurn.$post({ json: { roomId } })}
-          >
-            Pass
-          </button>
-          <button
-            className="btn"
-            type="button"
-            onClick={() => honoClient.api.startGame.$post({ json: { roomId } })}
-          >
-            Start Game
-          </button>
-
-          <JoinRoom />
+          {selectedCards.length > 0 && (
+            <div>{isValidPlay ? isValidPlay : "Not a valid hand... 🫤"}</div>
+          )}
+          <div className="flex justify-center items-center p-5">
+            <button
+              className={twMerge([
+                isCurrentPlayerTurn ? "btn-primary" : "btn-disabled",
+                "btn btn-lg",
+              ])}
+              type="button"
+              disabled={!isCurrentPlayerTurn || !isValidPlay}
+              onClick={async () => {
+                setSelectedCards([]);
+                await honoClient.api.playTurn.$post({
+                  json: {
+                    roomId,
+                    cards: selectedCards,
+                  },
+                });
+              }}
+            >
+              Play 👍🏼
+            </button>
+            <button
+              disabled={!isCurrentPlayerTurn}
+              type="button"
+              className={`ml-2 btn btn-secondary ${isCurrentPlayerTurn ? "btn-secondary" : "btn-disabled"}`}
+              onClick={() =>
+                honoClient.api.passTurn.$post({ json: { roomId } })
+              }
+            >
+              Pass 🫳🏼
+            </button>
+          </div>
         </div>
       </main>
 
-      <details className="flex flex-col gap-5 py-10 border border-dashed p-5 my-5 border-gray-400">
-        {/* DEBUGGING STUFF */}
-        <h1> Everyones cards for debugging!</h1>
-        {gameState.context.players.map((player) => {
-          return (
-            <div key={player.id}>
-              {player.name}'s cards:
-              <div className="flex flex-wrap gap-2">
-                {player.hand.map((card) => {
-                  return (
-                    <PlayingCard key={card.suit + card.value} card={card} />
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })}
-      </details>
-
       <style>{
         /* css */ ` 
+
+      .wood-floor{
+        background-color: #1a0100;
+        background-image: url("https://www.transparenttextures.com/patterns/wood-pattern.png");
+      }
+
       .table { 
+        border: solid 5px black;
         display: grid;
         gap:3rem;
         justify-content: space-around;
         align-items: center;
         background-color: green;
+        background-image: url(${texture.src});
+        background-repeat: repeat;  
         justify-items: center;
         grid-template-areas: 
             "     .            player-top           .      "
