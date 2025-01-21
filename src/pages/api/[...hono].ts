@@ -378,6 +378,36 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
         return c.text("player passed");
       }
+    )
+    .post(
+      "pushGameState",
+      zValidator(
+        "json",
+        z.object({
+          roomId: z.string(),
+          adminKey: z.string(),
+          bigTwoGameMachineSnapshot: z.custom<BigTwoGameMachineSnapshot>(),
+        })
+      ),
+      async (c) => {
+        const { roomId, bigTwoGameMachineSnapshot } = c.req.valid("json");
+
+        const bigTwoGameMachine = makeBigTwoGameMachine();
+        const gameStateMachineActor = createActor(bigTwoGameMachine, {
+          snapshot: bigTwoGameMachineSnapshot,
+        }).start();
+
+        const gameStateSnapshot =
+          gameStateMachineActor.getPersistedSnapshot() as BigTwoGameMachineSnapshot;
+
+        await db
+          .update(gameRoom)
+          .set({ gameState: gameStateSnapshot })
+          .where(eq(gameRoom.id, roomId));
+
+        emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
+        return c.text("game state forcefully updated");
+      }
     );
 
   return app;
