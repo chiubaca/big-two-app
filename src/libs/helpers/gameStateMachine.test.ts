@@ -1,7 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { makeBigTwoGameMachine } from "./gameStateMachine";
+import {
+  makeBigTwoGameMachine,
+  type BigTwoGameMachineSnapshot,
+} from "./gameStateMachine";
 import { createActor } from "xstate";
 import type { Card } from "@chiubaca/big-two-utils";
+
+import PLAYER_ABOUT_TO_WIN from "./mocks/PLAYER_ABOUT_TO_WIN.json";
 
 describe("Big Two Game State Machine", () => {
   // Helper function to create a fresh game instance
@@ -146,6 +151,24 @@ describe("Big Two Game State Machine", () => {
         consecutivePasses: 0,
         winner: undefined,
       });
+    });
+  });
+
+  describe("Game end", () => {
+    it("will end once a player has played all their cards", () => {
+      const bigTwoGameMachine = makeBigTwoGameMachine();
+
+      const gameActor = createActor(bigTwoGameMachine, {
+        snapshot: PLAYER_ABOUT_TO_WIN as BigTwoGameMachineSnapshot,
+      }).start();
+
+      gameActor.send({
+        type: "PLAY_CARDS",
+        cards: [{ suit: "SPADE", value: "2" }],
+      });
+      const state = gameActor.getSnapshot();
+      expect(state.value).toEqual("GAME_END");
+      expect(state.context.winner?.name).toEqual("test2");
     });
   });
 });
