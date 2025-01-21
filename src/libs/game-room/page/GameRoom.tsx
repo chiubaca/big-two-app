@@ -180,7 +180,7 @@ const Game = ({
               <>
                 {gameState.context.players[left].name}
                 <div className="flex flex-col">
-                  {gameState.context.players[1].hand.map((card, idx) => {
+                  {gameState.context.players[left].hand.map((card, idx) => {
                     return (
                       <div
                         // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
@@ -220,7 +220,7 @@ const Game = ({
               <>
                 {gameState.context.players[right].name}
                 <div className="flex flex-col">
-                  {gameState.context.players[3].hand.map((card, idx) => {
+                  {gameState.context.players[right].hand.map((card, idx) => {
                     return (
                       <div
                         // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
