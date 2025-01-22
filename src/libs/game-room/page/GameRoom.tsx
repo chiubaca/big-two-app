@@ -201,7 +201,7 @@ const Game = ({
           <div className="current-player mt-10">
             {gameState.context.players[thisPlayerIndex] && (
               <div className="w-full ">
-                <div className=" grid grid-rows-2 gap-1 justify-start overflow-x-auto p-4">
+                <div className=" grid grid-rows-2 gap-1 justify-center overflow-x-auto p-4">
                   {gameState.context.players[thisPlayerIndex].hand.map(
                     (card, index) => {
                       // Put first half of cards in first row, second half in second row
