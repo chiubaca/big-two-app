@@ -140,7 +140,6 @@ const Game = ({
 
         <div className="table max-w-5xl mx-auto ">
           <div className="played-cards-center">
-            {" "}
             {lastHandPlayed && (
               <div className="flex justify-center gap-1 flex-wrap">
                 {lastHandPlayed.map((card) => {
@@ -380,14 +379,15 @@ const Game = ({
       .played-cards-center {
         position: absolute;
         border-radius: 10px;
-        top: 40%;
+        top: 30%;
         left: 50%;
         transform: translateX(-50%);
-        width: 120px;
+        min-width: 120px;
         border: white dashed 1px;
-        height: 120px;
+        min-height: 120px;
         display: grid;
         align-items: center;
+        padding: 2px
       }
 
       .top-player-position {
