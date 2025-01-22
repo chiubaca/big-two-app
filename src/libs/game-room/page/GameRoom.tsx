@@ -139,6 +139,10 @@ const Game = ({
           </div>
         </nav>
         <div className="table max-w-5xl mx-auto ">
+          <div className="position-circle top-circle" />
+          <div className="position-circle left-circle" />
+          <div className="position-circle right-circle" />
+          <div className="position-circle bottom-circle" />
           <div className="table-center scale-75">
             <div className=" ">
               {lastHandPlayed && (
@@ -335,6 +339,7 @@ const Game = ({
       }
 
       .table { 
+        height: 80vh;
         border: solid 5px black;
         display: grid;
         gap:3rem;
@@ -348,6 +353,7 @@ const Game = ({
             "     .            player-top           .      "
             "player-left      table-center    player-right "
             "current-player  current-player  current-player";
+        position: relative;
       } 
 
       .table-center{
@@ -385,6 +391,38 @@ const Game = ({
           var(--_g0),var(--_g0) var(--s) var(--s),
           var(--_g1),var(--_g1) var(--s) var(--s) var(--c2);
         background-size: calc(2*var(--s)) calc(2*var(--s));
+      }
+
+      .position-circle {
+        width: 60px;
+        height: 60px;
+        border: 2px dashed rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        position: absolute;
+      }
+
+      .top-circle {
+        top: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .bottom-circle {
+        bottom: 1rem;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+
+      .left-circle {
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+      }
+
+      .right-circle {
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
       }
       `
       }</style>
