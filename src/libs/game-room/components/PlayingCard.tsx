@@ -1,6 +1,4 @@
-import { twMerge } from "tailwind-merge";
 import type { Card } from "@chiubaca/big-two-utils";
-import { Style } from "hono/css";
 
 const suitIconMapper = (suit: Card["suit"]) => {
   const mapper: Record<Card["suit"], string> = {
@@ -30,30 +28,81 @@ export const PlayingCard = ({
   style?: React.HTMLAttributes<HTMLLabelElement>["style"];
 }) => {
   return (
-    <label
-      style={style}
-      key={card.value + card.suit}
-      className={twMerge([
-        className,
-        cardColourMapper(card.suit),
-        selected && "-translate-y-2 border-2 border-black",
-        "border rounded-lg text-sm w-24 h-32  flex flex-col justify-around bg-white shadow-sm z-10",
-      ])}
-    >
-      <input
-        type="checkbox"
-        className="hidden"
-        checked={selected}
-        onChange={onSelect}
-      />
-      <span className="pl-4">
-        {suitIconMapper(card.suit)} {card.value}
-      </span>
-      <span className="text-center text-2xl">{suitIconMapper(card.suit)}</span>
+    <>
+      <label
+        style={style}
+        key={card.value + card.suit}
+        className={`playing-card ${cardColourMapper(card.suit)} ${className || ""} ${selected ? "selected" : ""}`}
+      >
+        <input
+          type="checkbox"
+          className="card-checkbox"
+          checked={selected}
+          onChange={onSelect}
+        />
+        <span className="card-corner">
+          {suitIconMapper(card.suit)} {card.value}
+        </span>
+        <span className="card-center">{suitIconMapper(card.suit)}</span>
+        <span className="card-corner rotated">
+          {suitIconMapper(card.suit)} {card.value}
+        </span>
+      </label>
 
-      <span className="pl-4 rotate-180">
-        {suitIconMapper(card.suit)} {card.value}
-      </span>
-    </label>
+      <style>{
+        /* css */ `
+        .playing-card {
+          width: 13vmin;
+          height: 17vmin;
+          min-width: 60px;
+          min-height: 80px;
+          max-width: 96px;
+          max-height: 128px;
+          border: 1px solid #ccc;
+          border-radius: 0.5rem;
+          display: flex;
+          flex-direction: column;
+          justify-content: space-around;
+          background-color: white;
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+          z-index: 10;
+          transition: transform 0.2s ease;
+        }
+
+        .playing-card.selected {
+          transform: translateY(-0.5rem);
+          border: 2px solid black;
+        }
+
+        .card-checkbox {
+          display: none;
+        }
+
+        .card-corner {
+          padding-left: 1vmin;
+          font-size: 1.8vmin;
+          min-font-size: 10px;
+        }
+
+        .card-center {
+          text-align: center;
+          font-size: 3vmin;
+          min-font-size: 16px;
+        }
+
+        .rotated {
+          transform: rotate(180deg);
+        }
+
+        .text-red-500 {
+          color: #ef4444;
+        }
+
+        .text-black {
+          color: #000000;
+        }
+      `
+      }</style>
+    </>
   );
 };
