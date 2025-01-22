@@ -66,7 +66,7 @@ export const PlayingCard = ({
           background-color: white;
           box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
           z-index: 10;
-          transition: transform 0.2s ease;
+         
         }
 
         .playing-card.selected {

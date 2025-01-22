@@ -201,7 +201,7 @@ const Game = ({
           <div className="current-player mt-10">
             {gameState.context.players[thisPlayerIndex] && (
               <div className="w-full ">
-                <div className=" grid grid-rows-2 gap-1 justify-center overflow-x-auto p-4">
+                <div className=" grid grid-rows-2 gap-1 justify-center items-center overflow-x-auto p-4">
                   {gameState.context.players[thisPlayerIndex].hand.map(
                     (card, index) => {
                       // Put first half of cards in first row, second half in second row
@@ -209,12 +209,13 @@ const Game = ({
                         gameState.context.players[thisPlayerIndex].hand.length;
                       const cardsPerRow = Math.ceil(totalCards / 2);
                       const row = index < cardsPerRow ? 0 : 1;
-                      const offset = row === 1 ? "translate-x-6" : "";
 
                       return (
                         <PlayingCard
                           key={card.suit + card.value}
-                          className={`cursor-pointer transition-transform hover:-translate-y-2 mb-2 shrink-0 ${offset} `}
+                          className={
+                            "cursor-pointer mb-2 transition-transform hover:-translate-y-2 "
+                          }
                           style={{
                             gridRow: row + 1,
                             gridColumn: "auto",
