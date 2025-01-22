@@ -322,6 +322,9 @@ const Game = ({
                   <div className="text-2xl flex flex-col items-center gap-5">
                     Waiting for new game to begin
                     <span className="loading loading-dots loading-lg" />
+                    <a className="btn btn-ghost btn-link" href="/">
+                      🏠 Home page
+                    </a>
                   </div>
                 )}
               </div>
