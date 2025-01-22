@@ -142,8 +142,8 @@ const Game = ({
                     ♦️ Deal cards ♠️
                   </button>
                 ) : (
-                  <div className="text-2xl flex flex-col items-center gap-5 text-center">
-                    Waiting for new game to begin
+                  <div className="text-2xl flex flex-col items-center text-center p-5">
+                    Waiting for new <br /> game to begin
                     <span className="loading loading-dots loading-lg" />
                   </div>
                 )}
