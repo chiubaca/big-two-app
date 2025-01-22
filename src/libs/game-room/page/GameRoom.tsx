@@ -100,17 +100,6 @@ const Game = ({
             ← 🏠 Home
           </a>
           <div className="flex gap-3">
-            {gameState.value === "WAITING_FOR_PLAYERS" && (
-              <button
-                className="btn"
-                type="button"
-                onClick={async () =>
-                  await honoClient.api.startGame.$post({ json: { roomId } })
-                }
-              >
-                Start Game
-              </button>
-            )}
             {!isThisPlayerInRoom && (
               <button
                 className="btn btn-primary "
@@ -140,6 +129,26 @@ const Game = ({
 
         <div className="table max-w-5xl mx-auto ">
           <div className="played-cards-center">
+            {gameState.value === "WAITING_FOR_PLAYERS" && (
+              <div>
+                {isThisPlayerTheCreator ? (
+                  <button
+                    className="btn"
+                    type="button"
+                    onClick={() =>
+                      honoClient.api.startGame.$post({ json: { roomId } })
+                    }
+                  >
+                    ♦️ Deal cards ♠️
+                  </button>
+                ) : (
+                  <div className="text-2xl flex flex-col items-center gap-5 text-center">
+                    Waiting for new game to begin
+                    <span className="loading loading-dots loading-lg" />
+                  </div>
+                )}
+              </div>
+            )}
             {lastHandPlayed && (
               <div className="flex justify-center gap-1 flex-wrap">
                 {lastHandPlayed.map((card) => {
