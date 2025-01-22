@@ -17,10 +17,16 @@ if (!roomId || !userId || !userName) {
 const roomRecord = (
   await db.select().from(gameRoom).where(eq(gameRoom.id, roomId))
 )[0];
-console.log("🚀 ~ roomRecord:", roomRecord);
 ---
 
-<ClientRouter />
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="viewport" content="width=device-width" />
+  <meta name="generator" content={Astro.generator} />
+  <title>Lets play, Big Two ♠</title>
+  <ClientRouter />
+</head>
 
 <GameRoom
   currentUserId={userId}
@@ -30,4 +36,3 @@ console.log("🚀 ~ roomRecord:", roomRecord);
   creatorId={roomRecord.creatorId}
   client:load
 />
-<!-- <script src="https://unpkg.com/react-scan/dist/auto.global.js"></script> -->
