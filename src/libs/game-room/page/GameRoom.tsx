@@ -1,6 +1,5 @@
 import type { Card } from "@chiubaca/big-two-utils";
 import { useContext, useState } from "react";
-import ConfettiExplosion from "react-confetti-explosion";
 import {
   GameRoomContext,
   GameRoomProvider,
@@ -15,6 +14,7 @@ import { makePlayerOrder } from "../helpers/makePlayerOrder";
 
 import texture from "./noisy-texture.png";
 import { twMerge } from "tailwind-merge";
+import { Confetti } from "~libs/confetti";
 
 interface GameRoomProps extends InitialGameRoomContextProps {
   roomName: string;
@@ -300,7 +300,7 @@ const Game = ({
           <dialog open id="my_modal_1" className="modal">
             <div className="modal-box text-slate-900">
               <div className="flex flex-col justify-center items-center gap-5">
-                {hasPlayerWon && <ConfettiExplosion />}
+                {hasPlayerWon && <Confetti />}
                 <h3 className="font-bold text-5xl">
                   {hasPlayerWon ? "You won! 🎉" : "You lost 😭"}
                 </h3>
