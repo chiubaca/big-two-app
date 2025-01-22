@@ -201,7 +201,7 @@ const Game = ({
           <div className="current-player mt-10">
             {gameState.context.players[thisPlayerIndex] && (
               <div className="w-full ">
-                <div className=" grid grid-rows-2 gap-1 justify-center items-center overflow-x-auto p-4">
+                <div className="grid grid-rows-2 justify-items-center gap-1  overflow-x-auto p-4">
                   {gameState.context.players[thisPlayerIndex].hand.map(
                     (card, index) => {
                       // Put first half of cards in first row, second half in second row
@@ -214,7 +214,7 @@ const Game = ({
                         <PlayingCard
                           key={card.suit + card.value}
                           className={
-                            "cursor-pointer mb-2 transition-transform hover:-translate-y-2 "
+                            "cursor-pointer transition-transform hover:-translate-y-2 mb-2 shrink-0  "
                           }
                           style={{
                             gridRow: row + 1,
@@ -420,15 +420,7 @@ const Game = ({
         transform: translateY(-50%);
       }
 
-      /* Hide scrollbar but keep functionality */
-      .no-scrollbar::-webkit-scrollbar {
-          display: none;
-      }
-      .no-scrollbar {
-          -ms-overflow-x: scroll;  /* IE and Edge */
-          scrollbar-width: none;  /* Firefox */
-          -webkit-overflow-scrolling: touch;
-      }
+   
       `
       }</style>
     </>

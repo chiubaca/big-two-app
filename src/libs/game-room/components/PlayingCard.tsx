@@ -56,8 +56,8 @@ export const PlayingCard = ({
           height: 13vmin;
           min-width: 50px;
           min-height: 70px;
-          max-width: 96px;
-          max-height: 128px;
+          max-width: 80px;
+          max-height: 100px;
           border: 1px solid #ccc;
           border-radius: 0.5rem;
           display: flex;
