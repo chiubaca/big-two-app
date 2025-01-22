@@ -19,6 +19,8 @@ export const Confetti: React.FC = () => {
   const animationFrameId = React.useRef<number>(null);
 
   const createConfettiPiece = useCallback((): ConfettiPiece => {
+    if (typeof window === "undefined") return {} as ConfettiPiece;
+
     return {
       x: Math.random() * window.innerWidth,
       y: Math.random() * window.innerHeight,
@@ -74,22 +76,21 @@ export const Confetti: React.FC = () => {
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    if (!canvas || typeof window === "undefined") return;
 
-    // Set canvas size
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Start animation
     animate();
 
-    // Cleanup on unmount only
     return () => {
       if (animationFrameId.current) {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
   }, [animate]);
+
+  if (typeof window === "undefined") return null;
 
   return createPortal(
     <canvas
