@@ -80,14 +80,12 @@ export const PlayingCard = ({
 
         .card-corner {
           padding-left: 1vmin;
-          font-size: 1.8vmin;
-          min-font-size: 10px;
+          font-size: minmax(14px, 3vmin) ;
         }
 
         .card-center {
           text-align: center;
-          font-size: 3vmin;
-          min-font-size: 16px;
+          font-size: minmax(16px, 5vmin) ;
         }
 
         .rotated {
