@@ -99,7 +99,6 @@ const Game = ({
           <a className="btn  btn-ghost text-xl" href="/">
             ← 🏠 Home
           </a>
-          {gameState.value}
           <div className="flex gap-3">
             {gameState.value === "WAITING_FOR_PLAYERS" && (
               <button
@@ -138,30 +137,71 @@ const Game = ({
             )}
           </div>
         </nav>
+
         <div className="table max-w-5xl mx-auto ">
-          <div className="position-circle top-circle" />
-          <div className="position-circle left-circle" />
-          <div className="position-circle right-circle" />
-          <div className="position-circle bottom-circle" />
-          <div className="table-center scale-75">
-            <div className=" ">
-              {lastHandPlayed && (
-                <div className="flex justify-center gap-1 flex-wrap">
-                  {lastHandPlayed.map((card) => {
-                    return (
-                      <PlayingCard
-                        key={`${card.suit}${card.value}`}
-                        card={card}
-                      />
-                    );
-                  })}
-                </div>
-              )}
+          <div className="played-cards-center">
+            {" "}
+            {lastHandPlayed && (
+              <div className="flex justify-center gap-1 flex-wrap">
+                {lastHandPlayed.map((card) => {
+                  return (
+                    <PlayingCard
+                      key={`${card.suit}${card.value}`}
+                      card={card}
+                    />
+                  );
+                })}
+              </div>
+            )}{" "}
+          </div>
+
+          <div className=" top-player-position ">
+            <div className="flex">
+              {gameState.context.players[top]?.hand.map((card, idx) => {
+                return (
+                  <div
+                    // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                    key={idx}
+                    className="pattern w-8 h-10 border-2 rounded-sm -ml-2"
+                  />
+                );
+              })}
             </div>
           </div>
-          <div className="current-player pt-10">
+
+          <div className="left-player-position">
+            <div className="flex flex-col">
+              {gameState.context.players[left]?.hand.map((card, idx) => {
+                return (
+                  <div
+                    // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                    key={idx}
+                    className="pattern h-8 w-10 border-2 rounded-sm -mb-10"
+                  />
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="right-player-position relative">
+            <div className="flex flex-col ">
+              {gameState.context.players[right]?.hand.map((card, idx) => {
+                return (
+                  <div
+                    // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                    key={idx}
+                    className="pattern h-8 w-10 border-2 rounded-sm -mb-10"
+                  />
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="bottom-player-position" />
+
+          <div className="current-player">
             {gameState.context.players[thisPlayerIndex] && (
-              <div className="flex flex-wrap justify-center">
+              <div className="flex flex-wrap justify-center ">
                 {gameState.context.players[thisPlayerIndex].hand.map(
                   (card, index) => {
                     return (
@@ -181,66 +221,6 @@ const Game = ({
                 )}
               </div>
             )}
-          </div>
-          <div className="player-left">
-            {gameState.context.players[left]?.name ? (
-              <>
-                {gameState.context.players[left].name}
-                <div className="flex flex-col">
-                  {gameState.context.players[left].hand.map((card, idx) => {
-                    return (
-                      <div
-                        // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                        key={idx}
-                        className="pattern h-8 w-10 border-2 rounded-sm -mb-4"
-                      />
-                    );
-                  })}
-                </div>
-              </>
-            ) : (
-              <>empty seat</>
-            )}
-          </div>
-          <div className="player-top pt-10">
-            {gameState.context.players[2]?.name ? (
-              <>
-                {gameState.context.players[top].name}
-                <div className="flex">
-                  {gameState.context.players[top].hand.map((card, idx) => {
-                    return (
-                      <div
-                        // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                        key={idx}
-                        className="pattern w-8 h-10 border-2 rounded-sm -ml-2"
-                      />
-                    );
-                  })}
-                </div>
-              </>
-            ) : (
-              <>empty seat</>
-            )}
-          </div>
-          <div className="player-right">
-            {gameState.context.players[right]?.name ? (
-              <>
-                {gameState.context.players[right].name}
-                <div className="flex flex-col">
-                  {gameState.context.players[right].hand.map((card, idx) => {
-                    return (
-                      <div
-                        // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                        key={idx}
-                        className="pattern h-8 w-10 border-2 rounded-sm -mb-4"
-                      />
-                    );
-                  })}
-                </div>
-              </>
-            ) : (
-              <>empty seat</>
-            )}{" "}
           </div>
         </div>
         <div className="flex flex-col justify-center items-center p-5 ">
@@ -342,16 +322,18 @@ const Game = ({
       }
 
       .table { 
-        height: 80vh;
+        height: 75vh;
         border: solid 5px black;
         display: grid;
-        gap:3rem;
-        justify-content: space-around;
-        align-items: center;
         background-color: green;
         background-image: url(${texture.src});
         background-repeat: repeat;  
         justify-items: center;
+        align-items:end;
+        /* we dont need to use this grid template area any more
+        * refactor to be a simple 3 row grid. we're using  
+        * absolute position for the other player cards now
+        */
         grid-template-areas: 
             "     .            player-top           .      "
             "player-left      table-center    player-right "
@@ -359,24 +341,8 @@ const Game = ({
         position: relative;
       } 
 
-      .table-center{
-        grid-area: table-center;
-      }
-
       .current-player{
         grid-area: current-player; 
-      }
-
-      .player-left{
-        grid-area: player-left;
-      }
-
-      .player-top{
-        grid-area: player-top;
-      }
-
-      .player-right{
-        grid-area: player-right;
       }
 
       .pattern {
@@ -396,33 +362,43 @@ const Game = ({
         background-size: calc(2*var(--s)) calc(2*var(--s));
       }
 
-      .position-circle {
-        width: 60px;
-        height: 60px;
-        border: 2px dashed rgba(255, 255, 255, 0.3);
-        border-radius: 50%;
+      .played-cards-center {
         position: absolute;
+        border-radius: 10px;
+        top: 40%;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 120px;
+        border: white dashed 1px;
+        height: 120px;
+        display: grid;
+        align-items: center;
       }
 
-      .top-circle {
+      .top-player-position {
+        position: absolute;
         top: 1rem;
         left: 50%;
         transform: translateX(-50%);
+        width: 40%
       }
 
-      .bottom-circle {
+      .bottom-player-position {
+        position: absolute;
         bottom: 1rem;
         left: 50%;
         transform: translateX(-50%);
       }
 
-      .left-circle {
+      .left-player-position {
+        position: absolute;
         left: 1rem;
         top: 50%;
         transform: translateY(-50%);
       }
 
-      .right-circle {
+      .right-player-position {
+        position: absolute;
         right: 1rem;
         top: 50%;
         transform: translateY(-50%);
