@@ -199,26 +199,39 @@ const Game = ({
 
           <div className="bottom-player-position" />
 
-          <div className="current-player">
+          <div className="current-player mt-10">
             {gameState.context.players[thisPlayerIndex] && (
-              <div className="flex flex-wrap justify-center ">
-                {gameState.context.players[thisPlayerIndex].hand.map(
-                  (card, index) => {
-                    return (
-                      <PlayingCard
-                        key={card.suit + card.value}
-                        className="cursor-pointer transition-transform hover:-translate-y-2  mb-2"
-                        card={card}
-                        onSelect={() => toggleSelectedCard(card)}
-                        selected={selectedCards.some(
-                          (selectedCard) =>
-                            selectedCard.suit === card.suit &&
-                            selectedCard.value === card.value
-                        )}
-                      />
-                    );
-                  }
-                )}
+              <div className="w-full ">
+                <div className=" grid grid-rows-2 gap-1 justify-start overflow-x-auto p-4">
+                  {gameState.context.players[thisPlayerIndex].hand.map(
+                    (card, index) => {
+                      // Put first half of cards in first row, second half in second row
+                      const totalCards =
+                        gameState.context.players[thisPlayerIndex].hand.length;
+                      const cardsPerRow = Math.ceil(totalCards / 2);
+                      const row = index < cardsPerRow ? 0 : 1;
+                      const offset = row === 1 ? "translate-x-6" : "";
+
+                      return (
+                        <PlayingCard
+                          key={card.suit + card.value}
+                          className={`cursor-pointer transition-transform hover:-translate-y-2 mb-2 shrink-0 ${offset} `}
+                          style={{
+                            gridRow: row + 1,
+                            gridColumn: "auto",
+                          }}
+                          card={card}
+                          onSelect={() => toggleSelectedCard(card)}
+                          selected={selectedCards.some(
+                            (selectedCard) =>
+                              selectedCard.suit === card.suit &&
+                              selectedCard.value === card.value
+                          )}
+                        />
+                      );
+                    }
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -316,24 +329,24 @@ const Game = ({
       <style>{
         /* css */ ` 
 
-      .wood-floor{
+      .wood-floor {
         background-color: #1a0100;
         background-image: url("https://www.transparenttextures.com/patterns/wood-pattern.png");
+        height: 100vh;
+        overflow: hidden;
       }
 
       .table { 
-        height: 75vh;
+        height: 65vh;
+        max-width: 800px;
         border: solid 5px black;
         display: grid;
         background-color: green;
         background-image: url(${texture.src});
         background-repeat: repeat;  
         justify-items: center;
-        align-items:end;
-        /* we dont need to use this grid template area any more
-        * refactor to be a simple 3 row grid. we're using  
-        * absolute position for the other player cards now
-        */
+        align-items: end;
+        margin: 0 auto;
         grid-template-areas: 
             "     .            player-top           .      "
             "player-left      table-center    player-right "
@@ -341,8 +354,10 @@ const Game = ({
         position: relative;
       } 
 
-      .current-player{
-        grid-area: current-player; 
+      .current-player {
+        grid-area: current-player;
+        width: 100%;
+        overflow: hidden;
       }
 
       .pattern {
@@ -402,6 +417,16 @@ const Game = ({
         right: 1rem;
         top: 50%;
         transform: translateY(-50%);
+      }
+
+      /* Hide scrollbar but keep functionality */
+      .no-scrollbar::-webkit-scrollbar {
+          display: none;
+      }
+      .no-scrollbar {
+          -ms-overflow-x: scroll;  /* IE and Edge */
+          scrollbar-width: none;  /* Firefox */
+          -webkit-overflow-scrolling: touch;
       }
       `
       }</style>

@@ -52,10 +52,10 @@ export const PlayingCard = ({
       <style>{
         /* css */ `
         .playing-card {
-          width: 13vmin;
-          height: 17vmin;
-          min-width: 60px;
-          min-height: 80px;
+          width: 10vmin;
+          height: 13vmin;
+          min-width: 50px;
+          min-height: 70px;
           max-width: 96px;
           max-height: 128px;
           border: 1px solid #ccc;
