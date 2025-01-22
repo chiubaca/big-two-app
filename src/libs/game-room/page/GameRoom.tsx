@@ -1,5 +1,6 @@
 import type { Card } from "@chiubaca/big-two-utils";
 import { useContext, useState } from "react";
+import ConfettiExplosion from "react-confetti-explosion";
 import {
   GameRoomContext,
   GameRoomProvider,
@@ -47,7 +48,6 @@ const Game = ({
 }) => {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const isValidPlay = detectHandType(selectedCards);
-  console.log("🚀 ~ isValidPlay:", isValidPlay);
 
   const { gameState, currentUserId, roomId } = useContext(GameRoomContext);
 
@@ -88,6 +88,10 @@ const Game = ({
     }
   };
 
+  const hasPlayerWon =
+    gameState.value === "GAME_END" &&
+    gameState.context.winner?.id === currentUserId;
+
   return (
     <>
       <main className="wood-floor grid self-center items-center p-2 h-svh text-white">
@@ -95,7 +99,7 @@ const Game = ({
           <a className="btn  btn-ghost text-xl" href="/">
             ← 🏠 Home
           </a>
-
+          {gameState.value}
           <div className="flex gap-3">
             {gameState.value === "WAITING_FOR_PLAYERS" && (
               <button
@@ -134,7 +138,6 @@ const Game = ({
             )}
           </div>
         </nav>
-
         <div className="table max-w-5xl mx-auto ">
           <div className="table-center scale-75">
             <div className=" ">
@@ -236,7 +239,6 @@ const Game = ({
             )}{" "}
           </div>
         </div>
-
         <div className="flex flex-col justify-center items-center p-5 ">
           <div className="badge  badge-lg badge-info text-xl">
             {isCurrentPlayerTurn ? (
@@ -289,6 +291,39 @@ const Game = ({
             </button>
           </div>
         </div>
+
+        {gameState.value === "GAME_END" && (
+          <dialog open id="my_modal_1" className="modal">
+            <div className="modal-box text-slate-900">
+              <div className="flex flex-col justify-center items-center gap-5">
+                {hasPlayerWon && <ConfettiExplosion />}
+                <h3 className="font-bold text-5xl">
+                  {hasPlayerWon ? "You won! 🎉" : "You lost 😭"}
+                </h3>
+                {!hasPlayerWon && (
+                  <p className="text-xl">better luck next time!</p>
+                )}
+
+                {isThisPlayerTheCreator ? (
+                  <button
+                    className="btn btn-primary btn-lg btn-wide capitalize"
+                    type="button"
+                    onClick={() =>
+                      honoClient.api.resetGame.$post({ json: { roomId } })
+                    }
+                  >
+                    start new game
+                  </button>
+                ) : (
+                  <div className="text-2xl flex flex-col items-center gap-5">
+                    Waiting for new game to begin
+                    <span className="loading loading-dots loading-lg" />
+                  </div>
+                )}
+              </div>
+            </div>
+          </dialog>
+        )}
       </main>
 
       <style>{
