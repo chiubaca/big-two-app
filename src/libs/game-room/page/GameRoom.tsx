@@ -134,23 +134,7 @@ const Game = ({
             )}
           </div>
         </nav>
-        <div className="flex">
-          <code className="mx-auto badge badge-sm badge-info border-black p-3">
-            {isCurrentPlayerTurn ? (
-              "It's your turn!"
-            ) : (
-              <>
-                {
-                  gameState.context.players[
-                    gameState.context.currentPlayerIndex
-                  ].name
-                }{" "}
-                is playing
-                <span className="ml-2 loading loading-dots loading-sm" />
-              </>
-            )}
-          </code>
-        </div>
+
         <div className="p-3">
           <div className="table">
             <div className="played-cards-center">
@@ -187,8 +171,21 @@ const Game = ({
                 </div>
               )}{" "}
             </div>
-            <div className=" top-player-position ">
-              <div className="flex">
+
+            <div
+              className={twMerge([
+                "top-player-position p-2 rounded-lg",
+                top === gameState.context.currentPlayerIndex
+                  ? "bg-white/40"
+                  : "bg-white/10",
+              ])}
+            >
+              <div className="flex ml-2 relative">
+                {top === gameState.context.currentPlayerIndex && (
+                  <div className=" absolute -right-5 -top-5 badge badge-sm badge-info">
+                    <span className=" loading loading-dots loading-sm" />
+                  </div>
+                )}
                 {gameState.context.players[top]?.hand.map((card, idx) => {
                   return (
                     <div
@@ -200,27 +197,54 @@ const Game = ({
                 })}
               </div>
             </div>
-            <div className="left-player-position">
-              <div className="flex flex-col">
+
+            <div
+              className={twMerge([
+                "left-player-position p-2 pb-8 rounded-lg",
+                left === gameState.context.currentPlayerIndex
+                  ? "bg-white/40"
+                  : "bg-white/10",
+              ])}
+            >
+              <div className="flex flex-col relative">
+                {left === gameState.context.currentPlayerIndex && (
+                  <div className="absolute badge badge-sm badge-info -top-5 -right-5">
+                    <span className=" loading loading-dots loading-sm" />
+                  </div>
+                )}
                 {gameState.context.players[left]?.hand.map((card, idx) => {
                   return (
                     <div
                       // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
                       key={idx}
-                      className="pattern h-8 w-10 border-2 rounded-sm -mb-10"
+                      className="pattern h-8 w-10 border-2 rounded-sm  -mb-6"
                     />
                   );
                 })}
               </div>
             </div>
-            <div className="right-player-position relative">
-              <div className="flex flex-col ">
+
+            <div
+              className={twMerge([
+                "right-player-position p-2 pb-8 rounded-lg",
+                right === gameState.context.currentPlayerIndex
+                  ? "bg-white/40"
+                  : "bg-white/10",
+              ])}
+            >
+              <div className="flex flex-col relative">
+                {right === gameState.context.currentPlayerIndex && (
+                  <div className="absolute badge badge-sm badge-info -top-5 -left-5">
+                    <span className=" loading loading-dots loading-sm" />
+                  </div>
+                )}
+
                 {gameState.context.players[right]?.hand.map((card, idx) => {
                   return (
                     <div
                       // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
                       key={idx}
-                      className="pattern h-8 w-10 border-2 rounded-sm -mb-10"
+                      className="pattern h-8 w-10 border-2 rounded-sm -mb-6"
                     />
                   );
                 })}
@@ -348,9 +372,8 @@ const Game = ({
       }
 
       .table { 
-        
-        max-width: 64rem;
-        min-height: 65vh;
+        /* max-width: 80vh; */
+        min-height: 75vh;
         max-width: 800px;
         border: solid 5px black;
         display: grid;
@@ -422,14 +445,14 @@ const Game = ({
       .left-player-position {
         position: absolute;
         left: 1rem;
-        top: 50%;
+        top: 40%;
         transform: translateY(-50%);
       }
 
       .right-player-position {
         position: absolute;
         right: 1rem;
-        top: 50%;
+        top: 40%;
         transform: translateY(-50%);
       }
 
