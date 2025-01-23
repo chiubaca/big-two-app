@@ -47,7 +47,15 @@ const Game = ({
   creatorId: string;
 }) => {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
-  const isValidPlay = detectHandType(selectedCards);
+
+  const handType = detectHandType(selectedCards);
+  const isValidPlay = Boolean(handType);
+  const selectedCardsToPlayText =
+    selectedCards.length > 0
+      ? handType
+        ? `Play ${handType} 👍🏼`
+        : "Not valid 🫤"
+      : "Pick some cards";
 
   const { gameState, currentUserId, roomId } = useContext(GameRoomContext);
 
@@ -259,15 +267,12 @@ const Game = ({
           </div>
         </div>
 
-        <div className="flex flex-col justify-center items-center p-5 ">
-          {selectedCards.length > 0 && (
-            <div>{isValidPlay ? isValidPlay : "Not a valid hand... 🫤"}</div>
-          )}
-          <div className="flex justify-center items-center p-5">
+        <div className="flex flex-col justify-center items-center p-5  backdrop-blur bg-white/30 rounded-t-xl">
+          <div className="flex justify-center items-center">
             <button
               className={twMerge([
                 isCurrentPlayerTurn ? "btn-primary" : "btn-disabled",
-                "btn btn-lg",
+                "btn",
               ])}
               type="button"
               disabled={!isCurrentPlayerTurn || !isValidPlay}
@@ -281,12 +286,12 @@ const Game = ({
                 });
               }}
             >
-              Play 👍🏼
+              {selectedCardsToPlayText}
             </button>
             <button
               disabled={!isCurrentPlayerTurn}
               type="button"
-              className={`ml-2 btn btn-secondary ${isCurrentPlayerTurn ? "btn-secondary" : "btn-disabled"}`}
+              className={`ml-2 btn btn-secondary btn-sm ${isCurrentPlayerTurn ? "btn-secondary" : "btn-disabled"}`}
               onClick={() =>
                 honoClient.api.passTurn.$post({ json: { roomId } })
               }
