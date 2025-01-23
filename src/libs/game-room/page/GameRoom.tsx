@@ -39,13 +39,7 @@ export const GameRoom = ({
   );
 };
 
-const Game = ({
-  roomName,
-  creatorId,
-}: {
-  roomName: string;
-  creatorId: string;
-}) => {
+const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
 
   const handType = detectHandType(selectedCards);
@@ -102,9 +96,9 @@ const Game = ({
 
   return (
     <>
-      <main className="wood-floor  flex flex-col justify-between h-svh text-white">
+      <main className="wood-floor flex h-svh flex-col justify-between text-white">
         <nav className="flex items-center justify-between">
-          <a className="btn  btn-ghost text-xl" href="/">
+          <a className="btn btn-ghost text-xl" href="/">
             ← 🏠 Home
           </a>
           <div className="flex gap-3 pr-1">
@@ -151,7 +145,7 @@ const Game = ({
                       ♦️ Deal cards ♠️
                     </button>
                   ) : (
-                    <div className="text-2xl flex flex-col items-center text-center p-5">
+                    <div className="flex flex-col items-center p-5 text-center text-2xl">
                       Waiting for new <br /> game to begin
                       <span className="loading loading-dots loading-lg" />
                     </div>
@@ -159,7 +153,7 @@ const Game = ({
                 </div>
               )}
               {lastHandPlayed && (
-                <div className="flex justify-center gap-1 flex-wrap">
+                <div className="flex flex-wrap justify-center gap-1">
                   {lastHandPlayed.map((card) => {
                     return (
                       <PlayingCard
@@ -174,24 +168,24 @@ const Game = ({
 
             <div
               className={twMerge([
-                "top-player-position p-2 rounded-lg",
+                "top-player-position rounded-lg p-2",
                 top === gameState.context.currentPlayerIndex
                   ? "bg-white/40"
                   : "bg-white/10",
               ])}
             >
-              <div className="flex ml-2 relative">
+              <div className="relative ml-2 flex">
                 {top === gameState.context.currentPlayerIndex && (
-                  <div className=" absolute -right-5 -top-5 badge badge-sm badge-info">
+                  <div className=" -right-5 -top-5 badge badge-sm badge-info absolute">
                     <span className=" loading loading-dots loading-sm" />
                   </div>
                 )}
-                {gameState.context.players[top]?.hand.map((card, idx) => {
+                {gameState.context.players[top]?.hand.map((_card, idx) => {
                   return (
                     <div
                       // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
                       key={idx}
-                      className="pattern w-8 h-10 border-2 rounded-sm -ml-2"
+                      className="pattern -ml-2 h-10 w-8 rounded-sm border-2"
                     />
                   );
                 })}
@@ -200,24 +194,24 @@ const Game = ({
 
             <div
               className={twMerge([
-                "left-player-position p-2 pb-8 rounded-lg",
+                "left-player-position rounded-lg p-2 pb-8",
                 left === gameState.context.currentPlayerIndex
                   ? "bg-white/40"
                   : "bg-white/10",
               ])}
             >
-              <div className="flex flex-col relative">
+              <div className="relative flex flex-col">
                 {left === gameState.context.currentPlayerIndex && (
-                  <div className="absolute badge badge-sm badge-info -top-5 -right-5">
+                  <div className="badge badge-sm badge-info -top-5 -right-5 absolute">
                     <span className=" loading loading-dots loading-sm" />
                   </div>
                 )}
-                {gameState.context.players[left]?.hand.map((card, idx) => {
+                {gameState.context.players[left]?.hand.map((_card, idx) => {
                   return (
                     <div
                       // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
                       key={idx}
-                      className="pattern h-8 w-10 border-2 rounded-sm  -mb-6"
+                      className="pattern -mb-6 h-8 w-10 rounded-sm border-2"
                     />
                   );
                 })}
@@ -226,25 +220,25 @@ const Game = ({
 
             <div
               className={twMerge([
-                "right-player-position p-2 pb-8 rounded-lg",
+                "right-player-position rounded-lg p-2 pb-8",
                 right === gameState.context.currentPlayerIndex
                   ? "bg-white/40"
                   : "bg-white/10",
               ])}
             >
-              <div className="flex flex-col relative">
+              <div className="relative flex flex-col">
                 {right === gameState.context.currentPlayerIndex && (
-                  <div className="absolute badge badge-sm badge-info -top-5 -left-5">
+                  <div className="badge badge-sm badge-info -top-5 -left-5 absolute">
                     <span className=" loading loading-dots loading-sm" />
                   </div>
                 )}
 
-                {gameState.context.players[right]?.hand.map((card, idx) => {
+                {gameState.context.players[right]?.hand.map((_card, idx) => {
                   return (
                     <div
                       // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
                       key={idx}
-                      className="pattern h-8 w-10 border-2 rounded-sm -mb-6"
+                      className="pattern -mb-6 h-8 w-10 rounded-sm border-2"
                     />
                   );
                 })}
@@ -254,7 +248,7 @@ const Game = ({
             <div className="current-player mt-10">
               {gameState.context.players[thisPlayerIndex] && (
                 <div className="w-full ">
-                  <div className="grid grid-rows-2 justify-items-center gap-1  overflow-x-auto p-4">
+                  <div className="grid grid-rows-2 justify-items-center gap-1 overflow-x-auto p-4">
                     {gameState.context.players[thisPlayerIndex].hand.map(
                       (card, index) => {
                         // Put first half of cards in first row, second half in second row
@@ -267,7 +261,7 @@ const Game = ({
                           <PlayingCard
                             key={card.suit + card.value}
                             className={
-                              "cursor-pointer transition-transform hover:-translate-y-2 mb-2 shrink-0  "
+                              "hover:-translate-y-2 mb-2 shrink-0 cursor-pointer transition-transform "
                             }
                             style={{
                               gridRow: row + 1,
@@ -291,8 +285,8 @@ const Game = ({
           </div>
         </div>
 
-        <div className="flex flex-col justify-center items-center p-5  backdrop-blur bg-white/30 rounded-t-xl">
-          <div className="flex justify-center items-center">
+        <div className="flex flex-col items-center justify-center rounded-t-xl bg-white/30 p-5 backdrop-blur">
+          <div className="flex items-center justify-center">
             <button
               className={twMerge([
                 isCurrentPlayerTurn ? "btn-primary" : "btn-disabled",
@@ -315,7 +309,7 @@ const Game = ({
             <button
               disabled={!isCurrentPlayerTurn}
               type="button"
-              className={`ml-2 btn btn-secondary btn-sm ${isCurrentPlayerTurn ? "btn-secondary" : "btn-disabled"}`}
+              className={`btn btn-secondary btn-sm ml-2 ${isCurrentPlayerTurn ? "btn-secondary" : "btn-disabled"}`}
               onClick={() =>
                 honoClient.api.passTurn.$post({ json: { roomId } })
               }
@@ -328,7 +322,7 @@ const Game = ({
       {gameState.value === "GAME_END" && (
         <dialog open id="my_modal_1" className="modal">
           <div className="modal-box text-slate-900">
-            <div className="flex flex-col justify-center items-center gap-5">
+            <div className="flex flex-col items-center justify-center gap-5">
               {hasPlayerWon && <Confetti />}
               <h3 className="font-bold text-5xl">
                 {hasPlayerWon ? "You won! 🎉" : "You lost 😭"}
@@ -348,7 +342,7 @@ const Game = ({
                   start new game
                 </button>
               ) : (
-                <div className="text-2xl flex flex-col items-center gap-5">
+                <div className="flex flex-col items-center gap-5 text-2xl">
                   Waiting for new game to begin
                   <span className="loading loading-dots loading-lg" />
                   <a className="btn btn-ghost btn-link" href="/">
