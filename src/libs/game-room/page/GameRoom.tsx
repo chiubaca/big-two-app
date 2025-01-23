@@ -69,7 +69,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
 
   // const thisPlayerName = gameState.context.players[thisPlayerIndex].name;
 
-  const [, left, top, right] = makePlayerOrder(thisPlayerIndex);
+  const [bottomPlayerIdx, left, top, right] = makePlayerOrder(thisPlayerIndex);
 
   const lastHandPlayed = gameState.context.cardPile.at(-1);
 
@@ -166,6 +166,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
               )}{" "}
             </div>
 
+            {/* TOP PLAYER */}
             <div
               className={twMerge([
                 "top-player-position rounded-lg p-2",
@@ -192,6 +193,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
               </div>
             </div>
 
+            {/* LEFT PLAYER */}
             <div
               className={twMerge([
                 "left-player-position rounded-lg p-2 pb-8",
@@ -218,6 +220,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
               </div>
             </div>
 
+            {/* RIGHT PLAYER */}
             <div
               className={twMerge([
                 "right-player-position rounded-lg p-2 pb-8",
@@ -244,11 +247,22 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                 })}
               </div>
             </div>
-            <div className="bottom-player-position" />
-            <div className="current-player mt-10">
+
+            {/* CURRENT PLAYER */}
+            <div className="current-player mt-10 flex flex-col items-center">
+              {gameState.context.currentPlayerIndex === bottomPlayerIdx && (
+                <code className="badge badge-info">It's your turn!</code>
+              )}
               {gameState.context.players[thisPlayerIndex] && (
                 <div className="w-full ">
-                  <div className="grid grid-rows-2 justify-items-center gap-1 overflow-x-auto p-4">
+                  <div
+                    className={twMerge([
+                      "m-4 grid grid-rows-2 justify-items-center gap-1 overflow-x-auto rounded-lg p-4",
+                      thisPlayerIndex === gameState.context.currentPlayerIndex
+                        ? "bg-white/40"
+                        : "bg-white/10",
+                    ])}
+                  >
                     {gameState.context.players[thisPlayerIndex].hand.map(
                       (card, index) => {
                         // Put first half of cards in first row, second half in second row
