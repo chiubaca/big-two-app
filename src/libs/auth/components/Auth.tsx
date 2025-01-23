@@ -4,19 +4,24 @@ import { authReactClient } from "../auth-clients";
 export const Auth = () => {
   const [error, setError] = useState<string>("");
   return (
-    <div className="w-full ">
+    <div className="w-full relative ">
+      {error && (
+        <div className="flex">
+          <code className=" badge badge-error mx-auto  border border-red-800 text-lg p-5 ">
+            {error}
+          </code>
+        </div>
+      )}
+
       <h2 className="text-2xl font-bold pb-3">Login</h2>
       <form
+        className="flex flex-col gap-3"
         onSubmit={async (e) => {
-          console.log("submit..");
           e.preventDefault();
           const formData = new FormData(e.target as HTMLFormElement);
 
           const email = formData.get("email")?.toString();
-          console.log("🚀 ~ email:", email);
           const password = formData.get("password")?.toString();
-          console.log("🚀 ~ password:", password);
-
           if (!email || !password) {
             return;
           }
@@ -25,12 +30,14 @@ export const Auth = () => {
             email,
             password,
           });
-          console.log("🚀 ~ onSubmit={ ~ error:", error);
-          console.log("🚀 ~ onSubmit={ ~ data:", data);
 
-          location.reload();
+          if (error) {
+            setError(error.message || "something went wrong logging in");
+            return;
+          }
+
+          window.location.href = "/";
         }}
-        className="flex flex-col gap-3"
       >
         <EmailInput />
         <PasswordInput />
@@ -41,35 +48,36 @@ export const Auth = () => {
 
       <div className="divider text-base-content/50 ">or</div>
 
-      {error && <code>{error}</code>}
-
       <form
         onSubmit={async (e) => {
-          console.log("yo...");
           e.preventDefault();
           const formData = new FormData(e.target as HTMLFormElement);
 
           const name = formData.get("name")?.toString();
-          console.log("🚀 ~ onSubmit={ ~ name:", name);
           const email = formData.get("email")?.toString();
-          console.log("🚀 ~ email:", email);
           const password = formData.get("password")?.toString();
-          console.log("🚀 ~ password:", password);
 
           if (!name || !email || !password) {
             return;
           }
 
-          const data = await authReactClient.signUp.email({
+          const { data, error } = await authReactClient.signUp.email({
             email,
             name,
             password,
           });
-          console.log("🚀 ~ onSubmit={ ~ data:", data);
+
+          if (error) {
+            setError(error.message || "something went wrong ");
+            return;
+          }
+
+          window.location.href = "/";
         }}
         className="flex flex-col gap-3"
       >
         <h2 className="text-2xl font-bold pb-3">Sign up </h2>
+
         <UsernameInput />
         <EmailInput />
         <PasswordInput />
