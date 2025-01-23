@@ -94,12 +94,12 @@ const Game = ({
 
   return (
     <>
-      <main className="wood-floor grid self-center items-center p-2 h-svh text-white">
+      <main className="wood-floor  flex flex-col justify-between h-svh text-white">
         <nav className="flex items-center justify-between">
           <a className="btn  btn-ghost text-xl" href="/">
             ← 🏠 Home
           </a>
-          <div className="flex gap-3">
+          <div className="flex gap-3 pr-1">
             {!isThisPlayerInRoom && (
               <button
                 className="btn btn-primary "
@@ -115,7 +115,7 @@ const Game = ({
             )}
             {isThisPlayerTheCreator && (
               <button
-                className="btn btn-warning btn-sm bg-red-500"
+                className="btn btn-sm bg-red-500"
                 type="button"
                 onClick={() =>
                   honoClient.api.resetGame.$post({ json: { roomId } })
@@ -126,142 +126,140 @@ const Game = ({
             )}
           </div>
         </nav>
-
-        <div className="table max-w-5xl mx-auto ">
-          <div className="played-cards-center">
-            {gameState.value === "WAITING_FOR_PLAYERS" && (
-              <div>
-                {isThisPlayerTheCreator ? (
-                  <button
-                    className="btn"
-                    type="button"
-                    onClick={() =>
-                      honoClient.api.startGame.$post({ json: { roomId } })
-                    }
-                  >
-                    ♦️ Deal cards ♠️
-                  </button>
-                ) : (
-                  <div className="text-2xl flex flex-col items-center text-center p-5">
-                    Waiting for new <br /> game to begin
-                    <span className="loading loading-dots loading-lg" />
-                  </div>
-                )}
-              </div>
-            )}
-            {lastHandPlayed && (
-              <div className="flex justify-center gap-1 flex-wrap">
-                {lastHandPlayed.map((card) => {
-                  return (
-                    <PlayingCard
-                      key={`${card.suit}${card.value}`}
-                      card={card}
-                    />
-                  );
-                })}
-              </div>
-            )}{" "}
-          </div>
-
-          <div className=" top-player-position ">
-            <div className="flex">
-              {gameState.context.players[top]?.hand.map((card, idx) => {
-                return (
-                  <div
-                    // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                    key={idx}
-                    className="pattern w-8 h-10 border-2 rounded-sm -ml-2"
-                  />
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="left-player-position">
-            <div className="flex flex-col">
-              {gameState.context.players[left]?.hand.map((card, idx) => {
-                return (
-                  <div
-                    // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                    key={idx}
-                    className="pattern h-8 w-10 border-2 rounded-sm -mb-10"
-                  />
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="right-player-position relative">
-            <div className="flex flex-col ">
-              {gameState.context.players[right]?.hand.map((card, idx) => {
-                return (
-                  <div
-                    // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
-                    key={idx}
-                    className="pattern h-8 w-10 border-2 rounded-sm -mb-10"
-                  />
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="bottom-player-position" />
-
-          <div className="current-player mt-10">
-            {gameState.context.players[thisPlayerIndex] && (
-              <div className="w-full ">
-                <div className="grid grid-rows-2 justify-items-center gap-1  overflow-x-auto p-4">
-                  {gameState.context.players[thisPlayerIndex].hand.map(
-                    (card, index) => {
-                      // Put first half of cards in first row, second half in second row
-                      const totalCards =
-                        gameState.context.players[thisPlayerIndex].hand.length;
-                      const cardsPerRow = Math.ceil(totalCards / 2);
-                      const row = index < cardsPerRow ? 0 : 1;
-
-                      return (
-                        <PlayingCard
-                          key={card.suit + card.value}
-                          className={
-                            "cursor-pointer transition-transform hover:-translate-y-2 mb-2 shrink-0  "
-                          }
-                          style={{
-                            gridRow: row + 1,
-                            gridColumn: "auto",
-                          }}
-                          card={card}
-                          onSelect={() => toggleSelectedCard(card)}
-                          selected={selectedCards.some(
-                            (selectedCard) =>
-                              selectedCard.suit === card.suit &&
-                              selectedCard.value === card.value
-                          )}
-                        />
-                      );
-                    }
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="flex flex-col justify-center items-center p-5 ">
-          <div className="badge  badge-lg badge-info text-xl">
+        <div className="flex">
+          <code className="mx-auto badge badge-sm badge-info border-black p-3">
             {isCurrentPlayerTurn ? (
               "It's your turn!"
             ) : (
               <>
-                Waiting for{" "}
                 {
                   gameState.context.players[
                     gameState.context.currentPlayerIndex
                   ].name
                 }{" "}
-                to play...
+                is playing
+                <span className="ml-2 loading loading-dots loading-sm" />
               </>
             )}
+          </code>
+        </div>
+        <div className="p-3">
+          <div className="table">
+            <div className="played-cards-center">
+              {gameState.value === "WAITING_FOR_PLAYERS" && (
+                <div>
+                  {isThisPlayerTheCreator ? (
+                    <button
+                      className="btn"
+                      type="button"
+                      onClick={() =>
+                        honoClient.api.startGame.$post({ json: { roomId } })
+                      }
+                    >
+                      ♦️ Deal cards ♠️
+                    </button>
+                  ) : (
+                    <div className="text-2xl flex flex-col items-center text-center p-5">
+                      Waiting for new <br /> game to begin
+                      <span className="loading loading-dots loading-lg" />
+                    </div>
+                  )}
+                </div>
+              )}
+              {lastHandPlayed && (
+                <div className="flex justify-center gap-1 flex-wrap">
+                  {lastHandPlayed.map((card) => {
+                    return (
+                      <PlayingCard
+                        key={`${card.suit}${card.value}`}
+                        card={card}
+                      />
+                    );
+                  })}
+                </div>
+              )}{" "}
+            </div>
+            <div className=" top-player-position ">
+              <div className="flex">
+                {gameState.context.players[top]?.hand.map((card, idx) => {
+                  return (
+                    <div
+                      // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                      key={idx}
+                      className="pattern w-8 h-10 border-2 rounded-sm -ml-2"
+                    />
+                  );
+                })}
+              </div>
+            </div>
+            <div className="left-player-position">
+              <div className="flex flex-col">
+                {gameState.context.players[left]?.hand.map((card, idx) => {
+                  return (
+                    <div
+                      // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                      key={idx}
+                      className="pattern h-8 w-10 border-2 rounded-sm -mb-10"
+                    />
+                  );
+                })}
+              </div>
+            </div>
+            <div className="right-player-position relative">
+              <div className="flex flex-col ">
+                {gameState.context.players[right]?.hand.map((card, idx) => {
+                  return (
+                    <div
+                      // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
+                      key={idx}
+                      className="pattern h-8 w-10 border-2 rounded-sm -mb-10"
+                    />
+                  );
+                })}
+              </div>
+            </div>
+            <div className="bottom-player-position" />
+            <div className="current-player mt-10">
+              {gameState.context.players[thisPlayerIndex] && (
+                <div className="w-full ">
+                  <div className="grid grid-rows-2 justify-items-center gap-1  overflow-x-auto p-4">
+                    {gameState.context.players[thisPlayerIndex].hand.map(
+                      (card, index) => {
+                        // Put first half of cards in first row, second half in second row
+                        const totalCards =
+                          gameState.context.players[thisPlayerIndex].hand
+                            .length;
+                        const cardsPerRow = Math.ceil(totalCards / 2);
+                        const row = index < cardsPerRow ? 0 : 1;
+                        return (
+                          <PlayingCard
+                            key={card.suit + card.value}
+                            className={
+                              "cursor-pointer transition-transform hover:-translate-y-2 mb-2 shrink-0  "
+                            }
+                            style={{
+                              gridRow: row + 1,
+                              gridColumn: "auto",
+                            }}
+                            card={card}
+                            onSelect={() => toggleSelectedCard(card)}
+                            selected={selectedCards.some(
+                              (selectedCard) =>
+                                selectedCard.suit === card.suit &&
+                                selectedCard.value === card.value
+                            )}
+                          />
+                        );
+                      }
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
+        </div>
 
+        <div className="flex flex-col justify-center items-center p-5 ">
           {selectedCards.length > 0 && (
             <div>{isValidPlay ? isValidPlay : "Not a valid hand... 🫤"}</div>
           )}
@@ -297,43 +295,42 @@ const Game = ({
             </button>
           </div>
         </div>
-
-        {gameState.value === "GAME_END" && (
-          <dialog open id="my_modal_1" className="modal">
-            <div className="modal-box text-slate-900">
-              <div className="flex flex-col justify-center items-center gap-5">
-                {hasPlayerWon && <Confetti />}
-                <h3 className="font-bold text-5xl">
-                  {hasPlayerWon ? "You won! 🎉" : "You lost 😭"}
-                </h3>
-                {!hasPlayerWon && (
-                  <p className="text-xl">better luck next time!</p>
-                )}
-
-                {isThisPlayerTheCreator ? (
-                  <button
-                    className="btn btn-primary btn-lg btn-wide capitalize"
-                    type="button"
-                    onClick={() =>
-                      honoClient.api.resetGame.$post({ json: { roomId } })
-                    }
-                  >
-                    start new game
-                  </button>
-                ) : (
-                  <div className="text-2xl flex flex-col items-center gap-5">
-                    Waiting for new game to begin
-                    <span className="loading loading-dots loading-lg" />
-                    <a className="btn btn-ghost btn-link" href="/">
-                      🏠 Home page
-                    </a>
-                  </div>
-                )}
-              </div>
-            </div>
-          </dialog>
-        )}
       </main>
+      {gameState.value === "GAME_END" && (
+        <dialog open id="my_modal_1" className="modal">
+          <div className="modal-box text-slate-900">
+            <div className="flex flex-col justify-center items-center gap-5">
+              {hasPlayerWon && <Confetti />}
+              <h3 className="font-bold text-5xl">
+                {hasPlayerWon ? "You won! 🎉" : "You lost 😭"}
+              </h3>
+              {!hasPlayerWon && (
+                <p className="text-xl">better luck next time!</p>
+              )}
+
+              {isThisPlayerTheCreator ? (
+                <button
+                  className="btn btn-primary btn-lg btn-wide capitalize"
+                  type="button"
+                  onClick={() =>
+                    honoClient.api.resetGame.$post({ json: { roomId } })
+                  }
+                >
+                  start new game
+                </button>
+              ) : (
+                <div className="text-2xl flex flex-col items-center gap-5">
+                  Waiting for new game to begin
+                  <span className="loading loading-dots loading-lg" />
+                  <a className="btn btn-ghost btn-link" href="/">
+                    🏠 Home page
+                  </a>
+                </div>
+              )}
+            </div>
+          </div>
+        </dialog>
+      )}
 
       <style>{
         /* css */ ` 
@@ -346,7 +343,9 @@ const Game = ({
       }
 
       .table { 
-        height: 65vh;
+        
+        max-width: 64rem;
+        min-height: 65vh;
         max-width: 800px;
         border: solid 5px black;
         display: grid;
