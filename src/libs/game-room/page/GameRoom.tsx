@@ -53,6 +53,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
 
   const { gameState, currentUserId, roomId } = useContext(GameRoomContext);
 
+  console.log(gameState.value);
   const currentPlayerIdTurn =
     gameState.context.players[gameState.context.currentPlayerIndex].id;
 
@@ -69,14 +70,27 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
 
   // const thisPlayerName = gameState.context.players[thisPlayerIndex].name;
 
-  const [bottomPlayerIdx, left, top, right] = makePlayerOrder(thisPlayerIndex);
+  const [bottomPlayerIdx, leftPlayerIdx, topPlayerIdx, rightPlayerIdx] =
+    makePlayerOrder(thisPlayerIndex);
+
+  const leftPlayer = gameState.context.players[leftPlayerIdx] || null;
+  const isLeftPlayerFocused =
+    leftPlayerIdx === gameState.context.currentPlayerIndex;
+
+  const topPlayer = gameState.context.players[topPlayerIdx] || null;
+  const isTopPlayerFocused =
+    topPlayerIdx === gameState.context.currentPlayerIndex;
+
+  const rightPlayer = gameState.context.players[rightPlayerIdx] || null;
+  const isRightPlayerFocused =
+    rightPlayerIdx === gameState.context.currentPlayerIndex;
 
   const lastHandPlayed = gameState.context.cardPile.at(-1);
 
   const isCurrentPlayerFocused =
     gameState.context.currentPlayerIndex === bottomPlayerIdx &&
     (gameState.value === "NEXT_PLAYER_TURN" ||
-      gameState.value === "ROUND_FIRST_MOVE");
+      gameState.value === "PLAY_NEW_ROUND");
 
   const toggleSelectedCard = (card: Card) => {
     const isCardSelected = selectedCards.some(
@@ -175,18 +189,16 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
             <div
               className={twMerge([
                 "top-player-position min-h-14 rounded-lg p-2",
-                top === gameState.context.currentPlayerIndex
-                  ? "bg-white/40"
-                  : "bg-white/10",
+                isTopPlayerFocused ? "bg-white/40" : "bg-white/10",
               ])}
             >
               <div className="relative ml-2 flex">
-                {top === gameState.context.currentPlayerIndex && (
+                {isTopPlayerFocused && (
                   <div className=" -right-5 -top-5 badge badge-sm badge-info absolute">
                     <span className="loading loading-dots loading-sm" />
                   </div>
                 )}
-                {gameState.context.players[top]?.hand.map((_card, idx) => {
+                {topPlayer?.hand.map((_card, idx) => {
                   return (
                     <div
                       // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
@@ -196,9 +208,9 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                   );
                 })}
               </div>
-              {gameState.context.players[top]?.name && (
+              {topPlayer?.name && (
                 <code className="-bottom-5 absolute text-xs opacity-30">
-                  {gameState.context.players[top].name}
+                  {gameState.context.players[topPlayerIdx].name}
                 </code>
               )}
             </div>
@@ -207,18 +219,16 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
             <div
               className={twMerge([
                 "left-player-position min-h-36 min-w-12 rounded-lg p-2 pb-8",
-                left === gameState.context.currentPlayerIndex
-                  ? "bg-white/40"
-                  : "bg-white/10",
+                isLeftPlayerFocused ? "bg-white/40" : "bg-white/10",
               ])}
             >
               <div className="relative flex flex-col">
-                {left === gameState.context.currentPlayerIndex && (
+                {isLeftPlayerFocused && (
                   <div className="badge badge-sm badge-info -top-5 -right-5 absolute">
                     <span className=" loading loading-dots loading-sm" />
                   </div>
                 )}
-                {gameState.context.players[left]?.hand.map((_card, idx) => {
+                {leftPlayer?.hand.map((_card, idx) => {
                   return (
                     <div
                       // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
@@ -228,9 +238,9 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                   );
                 })}
               </div>
-              {gameState.context.players[left]?.name && (
+              {leftPlayer?.name && (
                 <code className="-bottom-4 absolute z-10 pt-28 text-xs opacity-30">
-                  {gameState.context.players[left].name}
+                  {gameState.context.players[leftPlayerIdx].name}
                 </code>
               )}
             </div>
@@ -239,19 +249,17 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
             <div
               className={twMerge([
                 "right-player-position min-h-36 min-w-12 rounded-lg p-2 pb-8",
-                right === gameState.context.currentPlayerIndex
-                  ? "bg-white/40"
-                  : "bg-white/10",
+                isRightPlayerFocused ? "bg-white/40" : "bg-white/10",
               ])}
             >
               <div className="relative flex flex-col">
-                {right === gameState.context.currentPlayerIndex && (
+                {rightPlayerIdx === gameState.context.currentPlayerIndex && (
                   <div className="badge badge-sm badge-info -top-5 -left-5 absolute">
                     <span className=" loading loading-dots loading-sm" />
                   </div>
                 )}
 
-                {gameState.context.players[right]?.hand.map((_card, idx) => {
+                {rightPlayer?.hand.map((_card, idx) => {
                   return (
                     <div
                       // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
@@ -261,9 +269,9 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                   );
                 })}
               </div>
-              {gameState.context.players[right]?.name && (
+              {rightPlayer?.name && (
                 <code className="-bottom-4 absolute z-10 pt-28 text-xs opacity-30">
-                  {gameState.context.players[right].name}
+                  {rightPlayer.name}
                 </code>
               )}
             </div>
