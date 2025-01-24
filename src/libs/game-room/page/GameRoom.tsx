@@ -116,14 +116,14 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
   return (
     <>
       <main className="wood-floor flex h-svh flex-col justify-between text-white">
-        <nav className="flex items-center justify-between">
+        <nav className="flex items-center justify-between p-3">
           <a className="btn btn-ghost text-xl" href="/">
             ← 🏠 Home
           </a>
           <div className="flex gap-3 pr-1">
             {!isThisPlayerInRoom && (
               <button
-                className="btn btn-primary "
+                className="btn btn-primary"
                 type="button"
                 onClick={async () =>
                   await honoClient.api.joinGame.$post({
