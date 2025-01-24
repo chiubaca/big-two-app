@@ -261,6 +261,7 @@ export const makeBigTwoGameMachine = () =>
     },
     guards: {
       hasMaxPlayers: ({ context }) => context.players.length !== 4,
+      hasMinPlayers: ({ context }) => context.players.length > 1,
       isValidFirstMove: ({ context, event }) => {
         if (event.type !== "PLAY_FIRST_MOVE") {
           console.warn("🚨 attempted PLAY_FIRST_MOVE on incorrect state");
@@ -353,6 +354,7 @@ export const makeBigTwoGameMachine = () =>
           START_GAME: {
             actions: ["dealCards"],
             target: "ROUND_FIRST_MOVE",
+            guard: "hasMinPlayers",
           },
         },
       },

@@ -80,6 +80,22 @@ describe("Big Two Game State Machine", () => {
   });
 
   describe("Game Flow", () => {
+    it("should not start game with less than 2 players", () => {
+      const gameActor = createNewGame();
+
+      // Add only 1 player
+      gameActor.send({
+        type: "JOIN_GAME",
+        playerId: "player1",
+        playerName: "Player 1",
+      });
+
+      gameActor.send({ type: "START_GAME" });
+
+      const snapshot = gameActor.getSnapshot();
+      expect(snapshot.value).toBe("WAITING_FOR_PLAYERS");
+    });
+
     it("should transition to ROUND_FIRST_MOVE when game starts", () => {
       const gameActor = createNewGame();
 
