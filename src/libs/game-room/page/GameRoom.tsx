@@ -198,7 +198,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                     <span className="loading loading-dots loading-sm" />
                   </div>
                 )}
-                {topPlayer?.hand.map((_card, idx) => {
+                {topPlayer?.hand.toSpliced(13).map((_card, idx) => {
                   return (
                     <div
                       // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
@@ -207,6 +207,13 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                     />
                   );
                 })}
+                {topPlayer?.hand.length > 13 && (
+                  <span className=" absolute grid h-full w-full items-center justify-center">
+                    <span className="badge badge-xs bg-white/10 py-2 text-white/70 text-xs backdrop-blur">
+                      {topPlayer.hand.length}
+                    </span>
+                  </span>
+                )}
               </div>
               {topPlayer?.name && (
                 <code className="-bottom-5 absolute text-xs opacity-30">
@@ -228,7 +235,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                     <span className=" loading loading-dots loading-sm" />
                   </div>
                 )}
-                {leftPlayer?.hand.map((_card, idx) => {
+                {leftPlayer?.hand.toSpliced(13).map((_card, idx) => {
                   return (
                     <div
                       // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
@@ -237,6 +244,13 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                     />
                   );
                 })}
+                {leftPlayer?.hand.length > 13 && (
+                  <span className=" absolute grid h-full w-full items-center justify-center">
+                    <span className="badge badge-xs bg-white/10 py-2 text-white/70 text-xs backdrop-blur">
+                      {leftPlayer.hand.length}
+                    </span>
+                  </span>
+                )}
               </div>
               {leftPlayer?.name && (
                 <code className="-bottom-4 absolute z-10 pt-28 text-xs opacity-30">
@@ -259,7 +273,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                   </div>
                 )}
 
-                {rightPlayer?.hand.map((_card, idx) => {
+                {rightPlayer?.hand.toSpliced(13).map((_card, idx) => {
                   return (
                     <div
                       // biome-ignore lint/suspicious/noArrayIndexKey: <explanation>
@@ -268,6 +282,13 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                     />
                   );
                 })}
+                {rightPlayer?.hand.length > 13 && (
+                  <span className=" absolute grid h-full w-full items-center justify-center">
+                    <span className="badge badge-xs bg-white/10 py-2 text-white/70 text-xs backdrop-blur">
+                      {rightPlayer.hand.length}
+                    </span>
+                  </span>
+                )}
               </div>
               {rightPlayer?.name && (
                 <code className="-bottom-4 absolute z-10 pt-28 text-xs opacity-30">
