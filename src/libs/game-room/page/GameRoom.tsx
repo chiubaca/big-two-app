@@ -131,7 +131,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
 
         <div className="p-3">
           <div className="table">
-            <div className="played-cards-center">
+            <div className="played-cards-center bg-white/10">
               {gameState.value === "WAITING_FOR_PLAYERS" && (
                 <div>
                   {isThisPlayerTheCreator ? (
@@ -169,7 +169,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
             {/* TOP PLAYER */}
             <div
               className={twMerge([
-                "top-player-position rounded-lg p-2",
+                "top-player-position min-h-14 rounded-lg p-2",
                 top === gameState.context.currentPlayerIndex
                   ? "bg-white/40"
                   : "bg-white/10",
@@ -178,7 +178,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
               <div className="relative ml-2 flex">
                 {top === gameState.context.currentPlayerIndex && (
                   <div className=" -right-5 -top-5 badge badge-sm badge-info absolute">
-                    <span className=" loading loading-dots loading-sm" />
+                    <span className="loading loading-dots loading-sm" />
                   </div>
                 )}
                 {gameState.context.players[top]?.hand.map((_card, idx) => {
@@ -192,7 +192,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                 })}
               </div>
               {gameState.context.players[top]?.name && (
-                <code className="absolute pt-2 opacity-30">
+                <code className="-bottom-5 absolute text-xs opacity-30">
                   {gameState.context.players[top].name}
                 </code>
               )}
@@ -201,7 +201,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
             {/* LEFT PLAYER */}
             <div
               className={twMerge([
-                "left-player-position rounded-lg p-2 pb-8",
+                "left-player-position min-h-36 min-w-12 rounded-lg p-2 pb-8",
                 left === gameState.context.currentPlayerIndex
                   ? "bg-white/40"
                   : "bg-white/10",
@@ -233,7 +233,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
             {/* RIGHT PLAYER */}
             <div
               className={twMerge([
-                "right-player-position rounded-lg p-2 pb-8",
+                "right-player-position min-h-36 min-w-12 rounded-lg p-2 pb-8",
                 right === gameState.context.currentPlayerIndex
                   ? "bg-white/40"
                   : "bg-white/10",
@@ -272,7 +272,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                 <div className="w-full ">
                   <div
                     className={twMerge([
-                      "m-4 grid grid-rows-2 justify-items-center gap-1 overflow-x-auto rounded-lg p-4",
+                      "m-4 grid min-h-40 grid-rows-2 justify-items-center gap-1 overflow-x-auto rounded-lg p-4",
                       thisPlayerIndex === gameState.context.currentPlayerIndex
                         ? "bg-white/40"
                         : "bg-white/10",
@@ -439,14 +439,14 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
       .played-cards-center {
         position: absolute;
         border-radius: 10px;
-        top: 30%;
+        top: 25%;
         left: 50%;
         transform: translateX(-50%);
-        min-width: 120px;
-        border: white dashed 1px;
-        min-height: 120px;
+        min-width: 160px;
+        min-height: 160px;
         display: grid;
         align-items: center;
+        justify-items: center;
         padding: 2px
       }
 
