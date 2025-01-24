@@ -1,8 +1,13 @@
-# Lets Play Big Two 2️⃣
+<div align="center">
 
-A multiplayer big two game.
+<h1>♦️♣️ Lets Play Big Two ♥️♠️</h1>
+
+<p>A multiplayer big two game.</p> 
+
 
 🚧 Currently under development, there is still a few things [to do](TODO.md) for v1 🚧
+
+---
 
 ## Local development
 
