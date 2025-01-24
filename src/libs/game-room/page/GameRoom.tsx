@@ -73,6 +73,11 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
 
   const lastHandPlayed = gameState.context.cardPile.at(-1);
 
+  const isCurrentPlayerFocused =
+    gameState.context.currentPlayerIndex === bottomPlayerIdx &&
+    (gameState.value === "NEXT_PLAYER_TURN" ||
+      gameState.value === "ROUND_FIRST_MOVE");
+
   const toggleSelectedCard = (card: Card) => {
     const isCardSelected = selectedCards.some(
       (selectedCard) =>
@@ -265,7 +270,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
 
             {/* CURRENT PLAYER */}
             <div className="current-player mt-10 flex flex-col items-center">
-              {gameState.context.currentPlayerIndex === bottomPlayerIdx && (
+              {isCurrentPlayerFocused && (
                 <code className="badge badge-info">It's your turn!</code>
               )}
               {gameState.context.players[thisPlayerIndex] && (
@@ -273,9 +278,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                   <div
                     className={twMerge([
                       "m-4 grid min-h-40 grid-rows-2 justify-items-center gap-1 overflow-x-auto rounded-lg p-4",
-                      thisPlayerIndex === gameState.context.currentPlayerIndex
-                        ? "bg-white/40"
-                        : "bg-white/10",
+                      isCurrentPlayerFocused ? "bg-white/40" : "bg-white/10",
                     ])}
                   >
                     {gameState.context.players[thisPlayerIndex].hand.map(
