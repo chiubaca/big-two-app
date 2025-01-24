@@ -191,6 +191,11 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                   );
                 })}
               </div>
+              {gameState.context.players[top]?.name && (
+                <code className="absolute pt-2 opacity-30">
+                  {gameState.context.players[top].name}
+                </code>
+              )}
             </div>
 
             {/* LEFT PLAYER */}
@@ -218,6 +223,11 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                   );
                 })}
               </div>
+              {gameState.context.players[left]?.name && (
+                <code className="-bottom-4 absolute z-10 pt-28 text-xs opacity-30">
+                  {gameState.context.players[left].name}
+                </code>
+              )}
             </div>
 
             {/* RIGHT PLAYER */}
@@ -246,6 +256,11 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                   );
                 })}
               </div>
+              {gameState.context.players[right]?.name && (
+                <code className="-bottom-4 absolute z-10 pt-28 text-xs opacity-30">
+                  {gameState.context.players[right].name}
+                </code>
+              )}
             </div>
 
             {/* CURRENT PLAYER */}
