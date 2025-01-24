@@ -302,7 +302,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
               {isCurrentPlayerFocused && (
                 <code className="badge badge-info">It's your turn!</code>
               )}
-              {gameState.context.players[thisPlayerIndex] && (
+              {gameState.context.players[thisPlayerIndex] ? (
                 <div className="w-full ">
                   <div
                     className={twMerge([
@@ -341,6 +341,8 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                     )}
                   </div>
                 </div>
+              ) : (
+                <div className="m-4 grid min-h-40 w-11/12 rounded-lg bg-white/10 " />
               )}
             </div>
           </div>
