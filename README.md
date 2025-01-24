@@ -51,3 +51,4 @@ fly deploy
 - [Astro](https://astro.build/)
 - [React](https://react.dev/)
 - [SQLite + Drizzle](https://orm.drizzle.team/docs/get-started-sqlite)
+- [Better Auth](https://www.better-auth.com/)
