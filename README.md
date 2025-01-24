@@ -1,13 +1,12 @@
 <div align="center">
 
-<h1>♦️♣️ Lets Play Big Two ♥️♠️</h1>
+  <h1>♦️♣️ Lets Play Big Two ♥️♠️</h1>
+  
+  <p>A multiplayer big two game.</p> 
+  
+  🚧 Currently under development, there is still a few things <a href="/TODO.md">to do</a> for v1 🚧
+</div>
 
-<p>A multiplayer big two game.</p> 
-
-
-🚧 Currently under development, there is still a few things [to do](TODO.md) for v1 🚧
-
----
 
 ## Local development
 
