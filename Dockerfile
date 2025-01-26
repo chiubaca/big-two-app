@@ -6,6 +6,21 @@ FROM node:${NODE_VERSION}-slim as base
 
 LABEL fly_launch_runtime="Astro"
 
+# Install sqlite3 CLI and lazysql dependencies
+RUN apt-get update -qq && \
+    apt-get install --no-install-recommends -y sqlite3 git ca-certificates wget && \
+    wget https://go.dev/dl/go1.22.0.linux-amd64.tar.gz && \
+    tar -C /usr/local -xzf go1.22.0.linux-amd64.tar.gz && \
+    export PATH=$PATH:/usr/local/go/bin && \
+    go install github.com/jorgerojas26/lazysql@latest && \
+    mv /root/go/bin/lazysql /usr/local/bin/ && \
+    apt-get remove -y git wget && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/* /root/go go1.22.0.linux-amd64.tar.gz
+
+# Add Go binary directory to PATH
+ENV PATH="/usr/local/go/bin:${PATH}"
+
 # Astro app lives here
 WORKDIR /app
 
@@ -26,7 +41,6 @@ RUN npm ci --include=dev
 
 # Copy application code
 COPY . .
-
 
 # Build application
 RUN npm run build

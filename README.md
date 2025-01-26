@@ -7,22 +7,21 @@
   🚧 Currently under development, there is still a few things <a href="/TODO.md">to do</a> for v1 🚧
 </div>
 
-
 ## Local development
 
-Install deps
+Install deps:
 
 ```
 npm i
 ```
 
-Setup db tables
+Setup db tables:
 
 ```
 npm run db:migrate
 ```
 
-Start dev server
+Start dev server:
 
 ```
 npm run dev
@@ -36,7 +35,7 @@ All DB schemas can be found at `/drizzle/schemas`. During development iterations
 
 This application its currently run as a single VM instance on fly.io. Due to way real-time is implemented it can only be scaled vertically! This is a deliberate design decision to keep this whole application self contained on a single node for portability. In theory we could run this on VPS somewhere too!
 
-To manually deploy this app run
+To manually deploy this app run:
 
 ```
 fly deploy
@@ -45,6 +44,28 @@ fly deploy
 ## Screenshots
 
 ...
+
+## Production operations
+
+ssh into the fly VM:
+
+```
+fly ssh console
+```
+
+if the machine is not run:
+
+```
+fly machine start
+```
+
+[lazysql](https://github.com/jorgerojas26/lazysql) is preinstalled to make db management easier.
+
+To make DB changes run:
+
+```
+lazysql db/store.db
+```
 
 ## Technologies used
 
