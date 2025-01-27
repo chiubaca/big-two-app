@@ -1,5 +1,5 @@
 import type { Card } from "@chiubaca/big-two-utils";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import {
   GameRoomContext,
   GameRoomProvider,
@@ -11,6 +11,7 @@ import { PlayingCard } from "../components/PlayingCard";
 import { detectHandType } from "~libs/helpers/gameStateMachine";
 import { honoClient } from "~libs/hono-actions";
 import { makePlayerOrder } from "../helpers/makePlayerOrder";
+import { playSound } from "~libs/audio";
 
 import texture from "./noisy-texture.png";
 import { twMerge } from "tailwind-merge";
@@ -90,9 +91,24 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
   const isCurrentPlayerFocused =
     gameState.context.currentPlayerIndex === bottomPlayerIdx &&
     (gameState.value === "NEXT_PLAYER_TURN" ||
+      gameState.value === "ROUND_FIRST_MOVE" ||
       gameState.value === "PLAY_NEW_ROUND");
 
+  const hasPlayerWon =
+    gameState.value === "GAME_END" &&
+    gameState.context.winner?.id === currentUserId;
+
+  useEffect(() => {
+    if (isCurrentPlayerFocused) {
+      playSound("NEXT_TURN");
+    }
+    if (hasPlayerWon) {
+      playSound("WIN");
+    }
+  }, [isCurrentPlayerFocused, hasPlayerWon]);
+
   const toggleSelectedCard = (card: Card) => {
+    playSound("SELECT");
     const isCardSelected = selectedCards.some(
       (selectedCard) =>
         selectedCard.suit === card.suit && selectedCard.value === card.value
@@ -108,10 +124,6 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
       setSelectedCards([...selectedCards, card]);
     }
   };
-
-  const hasPlayerWon =
-    gameState.value === "GAME_END" &&
-    gameState.context.winner?.id === currentUserId;
 
   return (
     <>
