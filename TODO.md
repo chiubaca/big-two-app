@@ -2,7 +2,8 @@
 
 ## v1
 
-- [X] configure to be a [PWA](https://web.dev/articles/install-criteria)
+- [x] configure to be a [PWA](https://web.dev/articles/install-criteria)
+- [x] configure sound fx
 - [ ] creator of a room should be able to delete rename a room
 - [ ] show room name when in a game room
 - [ ] make join room button disabled when game is in progress
