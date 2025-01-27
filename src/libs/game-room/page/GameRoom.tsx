@@ -327,9 +327,9 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
             <div className="current-player mt-10 flex flex-col items-center">
               {isCurrentPlayerFocused && (
                 <code className="badge badge-info">
-                  It's your turn
-                  {gameState.value === "PLAY_NEW_ROUND" &&
-                    " and you won that round!"}
+                  {gameState.value === "PLAY_NEW_ROUND"
+                    ? " You won that round!"
+                    : " It's your turn"}
                 </code>
               )}
               {gameState.context.players[thisPlayerIndex] ? (
