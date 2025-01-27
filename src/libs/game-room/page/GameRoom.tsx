@@ -135,14 +135,18 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
   return (
     <>
       <main className="wood-floor flex h-svh flex-col justify-between text-white">
-        <nav className="flex items-center justify-between p-3">
+        <nav className="flex items-center justify-between p-3 ">
           <a className="btn btn-ghost text-xl" href="/">
             ← 🏠 Home
           </a>
-          <div className="flex gap-3 pr-1">
+          <div className="flex items-center gap-3 pr-1">
             {!isThisPlayerInRoom && (
               <button
-                className="btn btn-primary"
+                className={twMerge([
+                  "btn btn-primary",
+                  gameState.value !== "WAITING_FOR_PLAYERS" &&
+                    "cursor-not-allowed border-black bg-slate-300 text-sm hover:bg-slate-300 active:bg-slate-300",
+                ])}
                 type="button"
                 onClick={async () =>
                   await honoClient.api.joinGame.$post({
@@ -150,9 +154,12 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                   })
                 }
               >
-                Join room
+                {gameState.value === "WAITING_FOR_PLAYERS"
+                  ? "Join room"
+                  : "Game in progress.."}
               </button>
             )}
+
             {isThisPlayerTheCreator && (
               <button
                 className="btn btn-sm bg-red-500"
