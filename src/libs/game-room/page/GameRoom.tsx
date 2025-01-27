@@ -42,6 +42,13 @@ export const GameRoom = ({
 
 const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
+  const [guardMessage, setGuardMessage] = useState<
+    | {
+        key: string;
+        message: string;
+      }
+    | undefined
+  >(undefined);
 
   const handType = detectHandType(selectedCards);
   const isValidPlay = Boolean(handType);
@@ -312,7 +319,11 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
             {/* CURRENT PLAYER */}
             <div className="current-player mt-10 flex flex-col items-center">
               {isCurrentPlayerFocused && (
-                <code className="badge badge-info">It's your turn!</code>
+                <code className="badge badge-info">
+                  It's your turn
+                  {gameState.value === "PLAY_NEW_ROUND" &&
+                    " and you won that round!"}
+                </code>
               )}
               {gameState.context.players[thisPlayerIndex] ? (
                 <div className="w-full ">
@@ -371,12 +382,20 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
               disabled={!isCurrentPlayerTurn || !isValidPlay}
               onClick={async () => {
                 setSelectedCards([]);
-                await honoClient.api.playTurn.$post({
+                const resp = await honoClient.api.playTurn.$post({
                   json: {
                     roomId,
                     cards: selectedCards,
                   },
                 });
+                const json = await resp.json();
+
+                if (json.message) {
+                  setGuardMessage({
+                    key: Date.now().toString(),
+                    message: json.message || "",
+                  });
+                }
               }}
             >
               {selectedCardsToPlayText}
@@ -394,6 +413,19 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
           </div>
         </div>
       </main>
+
+      {/* toast notification */}
+      {guardMessage && (
+        <div
+          key={guardMessage.key}
+          className=" toast toast-center toast-middle pointer-events-none z-50 animate-fade-out uppercase "
+        >
+          <div className="alert alert-warn">
+            <code>{guardMessage.message}</code>
+          </div>
+        </div>
+      )}
+
       {gameState.value === "GAME_END" && (
         <dialog open id="my_modal_1" className="modal">
           <div className="modal-box text-slate-900">

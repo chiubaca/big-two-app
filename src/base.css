@@ -2,3 +2,22 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes fadeOut {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@layer utilities {
+  .animate-fade-out {
+    animation: fadeOut 0.7s ease-in forwards;
+    animation-delay: 2.3s;
+  }
+  .transition-all-ease {
+    transition: all 0.3s ease-in-out;
+  }
+}

@@ -123,6 +123,7 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
 
         await db.insert(gameRoom).values({
           roomName,
+
           creatorId: user.id,
           gameState: gameStateSnapshot,
         });
@@ -263,7 +264,7 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         const { user } = c.get("locals");
 
         if (!user) {
-          return c.json({ error: "Unauthorized" }, 401);
+          return c.json({ ok: false, message: "Unauthorized" }, 401);
         }
 
         const { gameState } = (
@@ -293,7 +294,13 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
             .where(eq(gameRoom.id, roomId));
 
           emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
-          return c.text("player played the first move");
+          return c.json(
+            {
+              ok: true,
+              message: gameStateSnapshot.context.guardMessage,
+            },
+            201
+          );
         }
 
         if (gameState.value === "PLAY_NEW_ROUND") {
@@ -314,7 +321,13 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
             .where(eq(gameRoom.id, roomId));
 
           emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
-          return c.text("player played the new round first move");
+          return c.json(
+            {
+              ok: true,
+              message: gameStateSnapshot.context.guardMessage,
+            },
+            201
+          );
         }
 
         console.log(`🟢 User ${user?.name} playing cards in room ${roomId}`);
@@ -332,7 +345,13 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
           .where(eq(gameRoom.id, roomId));
 
         emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
-        return c.text("player played next move");
+        return c.json(
+          {
+            ok: true,
+            message: gameStateSnapshot.context.guardMessage,
+          },
+          201
+        );
       }
     )
     .post(

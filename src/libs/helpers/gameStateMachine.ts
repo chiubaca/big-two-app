@@ -28,6 +28,12 @@ export function rotatePlayerIndex(args: {
   return updatedPlayerIndex;
 }
 
+const mapRoundModeToGuardMessage: Record<RoundMode, string> = {
+  combo: "you must play a combo",
+  pairs: "you must play pairs",
+  single: "you must play a single card",
+};
+
 export function updatePlayersHands({
   currentHand,
   cardsToRemove,
@@ -115,6 +121,7 @@ export interface GameContext {
   cardPile: Card[][];
   consecutivePasses: number;
   winner?: Player;
+  guardMessage?: string;
 }
 
 export const makeBigTwoGameMachine = () =>
@@ -197,6 +204,7 @@ export const makeBigTwoGameMachine = () =>
         context.consecutivePasses = 0;
         context.currentPlayerIndex = updatedPlayerIndex;
         context.cardPile.push(cardsPlayed);
+        context.guardMessage = undefined;
       },
       resetGame: ({ context }) => {
         context.players = context.players.map((player) => {
@@ -206,11 +214,13 @@ export const makeBigTwoGameMachine = () =>
             name: player.name,
           };
         });
+
         context.currentPlayerIndex = 0;
         context.roundMode = null;
         context.cardPile = [];
         context.consecutivePasses = 0;
         context.winner = undefined;
+        context.guardMessage = undefined;
       },
       passTurn: ({ context, event }) => {
         if (event.type !== "PASS_TURN") {
@@ -222,7 +232,7 @@ export const makeBigTwoGameMachine = () =>
           currentPlayerIndex: context.currentPlayerIndex,
           totalPlayers: context.players.length - 1, // start from 0
         });
-
+        context.guardMessage = undefined;
         context.consecutivePasses += 1;
         context.currentPlayerIndex = updatedPlayerIndex;
       },
@@ -296,11 +306,15 @@ export const makeBigTwoGameMachine = () =>
         const handType = detectHandType(event.cards);
         if (handType === null) {
           console.warn("🚨 invalid hand was played");
+          context.guardMessage = "invalid hand was played";
           return false;
         }
 
         if (handType !== context.roundMode) {
           console.warn("🚨 hand type does not match round mode");
+          context.guardMessage = context.roundMode
+            ? mapRoundModeToGuardMessage[context.roundMode]
+            : "Round mode is not set";
           return false;
         }
 
@@ -318,6 +332,7 @@ export const makeBigTwoGameMachine = () =>
           })
         ) {
           console.warn("🚨 played hand is not bigger than last cards on pile");
+          context.guardMessage = "Not big enough!";
           return false;
         }
 
