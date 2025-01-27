@@ -1,78 +1,83 @@
-## lets plays big two customer privacy notice
+# Privacy Policy for Let's Play Big Two
 
-This privacy notice tells you what to expect us to do with your personal information.
+Effective Date: 27th January 2025
 
-## Contact details
+## Introduction
 
-### Email
+Welcome to **Let's Play Big Two**! Your privacy is important to us, and we are committed to protecting your personal information. This Privacy Policy explains how we collect, use, and safeguard your data when you play our game.
 
-alexchiu11@gmail.com
+By using **Let's Play Big Two**, you agree to the terms outlined in this Privacy Policy.
 
-## What information we collect, use, and why
+---
 
-We collect or use the following information for **research or archiving purposes**:
+## Information We Collect
 
-- Names and contact details
+### 1. Information You Provide
 
-## Lawful bases
+- **Account Information**: If you create an account, we may collect your username, email address, and password.
+- **Gameplay Data**: Information about your gameplay sessions, including scores, rankings, and game history.
+- **Contact Information**: When you reach out to us for support or feedback, we may collect your name, email address, and the details of your inquiry.
 
-Our lawful bases for collecting or using personal information for **research or archiving purposes** are:
+### 2. Automatically Collected Information
 
-- Legitimate interest:
+- **Device Information**: We may collect details about your device, such as its type, operating system, and browser.
+- **Usage Data**: Data about how you interact with the game, such as time spent playing, game interactions, and in-app preferences.
+- **Cookies**: We use cookies to enhance your experience and provide functionality like remembering your settings.
 
-- - to collect and share images
+---
 
-## Where we get personal information from
+## How We Use Your Information
 
-- People directly
+We use the collected information to:
 
-## How long we keep information
+1. Provide and improve the gameplay experience.
+2. Maintain and enhance the game’s security and performance.
+3. Respond to customer support inquiries.
+4. Send you updates, promotions, or notifications about the game (only if you opt-in).
 
-We keep personal information for the running of the service. No maximum age is set.
+---
 
-[https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/data-protection-principles/a-guide-to-the-data-protection-principles/the-principles/storage-limitation#archiving](https://ico.org.uk/for-organisations/uk-gdpr-guidance-and-resources/data-protection-principles/a-guide-to-the-data-protection-principles/the-principles/storage-limitation#archiving)
+## How We Share Your Information
 
-## Your data protection rights
+We do not sell your personal information. However, we may share it in the following situations:
 
-Under data protection law, you have rights including:
+- **Service Providers**: With trusted partners who help us operate and improve the game (e.g., hosting, analytics).
+- **Legal Obligations**: If required to comply with legal processes or protect our rights and the safety of our users.
 
-**Your right of access** - You have the right to ask us for copies of your personal data.
+---
 
-**Your right to rectification** - You have the right to ask us to rectify personal data you think is inaccurate. You also have the right to ask us to complete information you think is incomplete.
+## Data Security
 
-**Your right to erasure** - You have the right to ask us to erase your personal data in certain circumstances.
+We implement industry-standard security measures to protect your data. However, no online service can be completely secure. Please use the game responsibly and keep your login credentials confidential.
 
-**Your right to restriction of processing** - You have the right to ask us to restrict the processing of your personal data in certain circumstances.
+---
 
-**Your right to object to processing** - You have the right to object to the processing of your personal data in certain circumstances.
+## Your Rights and Choices
 
-**Your right to data portability** - You have the right to ask that we transfer the personal data you gave us to another organisation, or to you, in certain circumstances.
+- **Access and Correction**: You can request access to your data or ask us to correct inaccuracies.
+- **Opt-out**: You may opt-out of promotional emails or certain data collection features.
+- **Delete Data**: You can request that we delete your data, subject to legal and operational constraints.
 
-**Your right to withdraw consent** – When we use consent as our lawful basis you have the right to withdraw your consent.
+To exercise these rights, please contact us at **alexchiu11@gmail.com**.
 
-You don’t usually need to pay a fee to exercise your rights. If you make a request, we have one calendar month to respond to you.
+---
 
-To make a data protection rights request, please contact us using the contact details at the top of this privacy notice.
+## Children’s Privacy
 
-### How to complain
+**Let's Play Big Two** is not intended for children under the age of 13. We do not knowingly collect personal information from children. If you believe a child has provided us with their data, please contact us, and we will take steps to delete it.
 
-If you have any concerns about our use of your personal data, you can make a complaint to us using the contact details at the top of this privacy notice.
+---
 
-If you remain unhappy with how we’ve used your data after raising a complaint with us, you can also complain to the ICO.
+## Changes to This Privacy Policy
 
-The ICO’s address:
+We may update this Privacy Policy from time to time. The most recent version will always be available within the game or on our website. Continued use of the game after changes constitutes acceptance of the updated Privacy Policy.
 
-Information Commissioner’s Office  
-Wycliffe House  
-Water Lane  
-Wilmslow  
-Cheshire  
-SK9 5AF
+---
 
-Helpline number: 0303 123 1113
+## Contact Us
 
-Website: [https://www.ico.org.uk/make-a-complaint](https://ico.org.uk/make-a-complaint/ "Make a complaint")
+If you have any questions about this Privacy Policy, please contact us at:
 
-## Last updated
+**Email**: alexchiu11@gmail.com
 
-27 January 2025
+Thank you for playing **Let's Play Big Two**!
