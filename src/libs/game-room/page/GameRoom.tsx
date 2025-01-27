@@ -408,7 +408,12 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
               {selectedCardsToPlayText}
             </button>
             <button
-              disabled={!isCurrentPlayerTurn}
+              disabled={
+                !isCurrentPlayerTurn ||
+                gameState.value === "ROUND_FIRST_MOVE" ||
+                gameState.value === "PLAY_NEW_ROUND" ||
+                gameState.value === "WAITING_FOR_PLAYERS"
+              }
               type="button"
               className={`btn btn-secondary btn-sm ml-2 ${isCurrentPlayerTurn ? "btn-secondary" : "btn-disabled"}`}
               onClick={() =>
