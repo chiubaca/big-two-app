@@ -6,6 +6,7 @@
 - [x] configure sound fx
 - [x] feedback for bad hand played
 - [x] make join room button disabled when game is in progress
+- [x] privacy policy
 - [ ] show room name when in a game room
 
 ## v2
