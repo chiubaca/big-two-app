@@ -16,6 +16,7 @@ import { eq } from "drizzle-orm";
 
 import type TypedEmitter from "typed-emitter";
 import type { Card } from "@chiubaca/big-two-utils";
+import { user } from "drizzle/schemas/auth-schema";
 declare module "hono" {
   interface ContextVariableMap {
     locals: APIContext["locals"];
@@ -426,6 +427,35 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
 
         emitter.emit(`gameStateUpdated:${roomId}`, gameStateSnapshot);
         return c.text("game state forcefully updated");
+      }
+    )
+    .post(
+      "updateUserName",
+      zValidator(
+        "json",
+        z.object({
+          name: z.string(),
+        })
+      ),
+      async (c) => {
+        const { user: currentUser } = c.get("locals");
+        const { name } = c.req.valid("json");
+
+        if (!currentUser) {
+          return c.json({ ok: false, message: "Unauthorized" }, 401);
+        }
+        try {
+          const res = await db
+            .update(user)
+            .set({ name })
+            .where(eq(user.id, currentUser.id));
+          console.log("🚀 ~ res:", res);
+
+          return c.json({ ok: true, message: "username udpated" }, 201);
+        } catch (error) {
+          console.log("🚀 ~ error:", error);
+          return c.json({ ok: false, message: "server error" }, 500);
+        }
       }
     );
 

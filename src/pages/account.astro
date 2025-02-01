@@ -1,0 +1,29 @@
+---
+import { authClient } from "~libs/auth/auth-clients";
+import { Account } from "~libs/auth/pages/Account";
+import Footer from "../components/Footer.astro";
+import { ClientRouter } from "astro:transitions";
+
+const user = Astro.locals.user;
+
+// Redirect if not logged in
+if (!user) {
+  return Astro.redirect("/");
+}
+---
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="viewport" content="width=device-width" />
+  <meta name="generator" content={Astro.generator} />
+  <meta name="theme-color" content="#000000" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+  <title>Lets play, Big Two ♠ | account</title>
+  <ClientRouter />
+</head>
+
+<Account currentUsername={user.name} client:load />
+
+<Footer />
