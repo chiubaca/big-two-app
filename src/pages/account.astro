@@ -1,6 +1,6 @@
 ---
 import { authClient } from "~libs/auth/auth-clients";
-import { Account } from "~libs/auth/pages/Account";
+import { Account as AccountPage } from "~libs/auth/pages/Account";
 import Footer from "../components/Footer.astro";
 import { ClientRouter } from "astro:transitions";
 
@@ -24,6 +24,6 @@ if (!user) {
   <ClientRouter />
 </head>
 
-<Account currentUsername={user.name} client:load />
+<AccountPage currentUsername={user.name} client:load />
 
 <Footer />
