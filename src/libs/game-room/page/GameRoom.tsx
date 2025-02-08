@@ -108,6 +108,15 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
   useEffect(() => {
     if (isCurrentPlayerFocused) {
       playSound("NEXT_TURN");
+      if (Notification.permission === "granted") {
+        new Notification("It's your turn!");
+      } else if (Notification.permission !== "denied") {
+        Notification.requestPermission().then((permission) => {
+          if (permission === "granted") {
+            new Notification("It's your turn!");
+          }
+        });
+      }
     }
     if (hasPlayerWon) {
       playSound("WIN");
