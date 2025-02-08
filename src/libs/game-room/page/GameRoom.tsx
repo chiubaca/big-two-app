@@ -40,18 +40,6 @@ export const GameRoom = ({
   );
 };
 
-const requestNotificationPermission = async () => {
-  if (!("Notification" in window)) {
-    console.log("notification api not available");
-    return;
-  }
-
-  if (Notification.permission !== "granted") {
-    await Notification.requestPermission();
-    console.log("Notifications API granted");
-  }
-};
-
 const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const [guardMessage, setGuardMessage] = useState<
@@ -118,24 +106,8 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
     gameState.context.winner?.id === currentUserId;
 
   useEffect(() => {
-    requestNotificationPermission();
-  }, []);
-
-  useEffect(() => {
     if (isCurrentPlayerFocused) {
       playSound("NEXT_TURN");
-
-      // Show notification when it's player's turn - with additional safety check
-      if (
-        typeof window !== "undefined" &&
-        "Notification" in window &&
-        Notification.permission === "granted"
-      ) {
-        new Notification("Big Two", {
-          body: "It's your turn!",
-        });
-        console.log("notif!");
-      }
     }
     if (hasPlayerWon) {
       playSound("WIN");
