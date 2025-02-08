@@ -42,11 +42,13 @@ export const GameRoom = ({
 
 const requestNotificationPermission = async () => {
   if (!("Notification" in window)) {
+    console.log("notification api not available");
     return;
   }
 
   if (Notification.permission !== "granted") {
     await Notification.requestPermission();
+    console.log("Notifications API granted");
   }
 };
 
@@ -131,8 +133,8 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
       ) {
         new Notification("Big Two", {
           body: "It's your turn!",
-          icon: "/favicon.ico",
         });
+        console.log("notif!");
       }
     }
     if (hasPlayerWon) {
