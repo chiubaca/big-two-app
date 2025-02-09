@@ -171,6 +171,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                 Reset game
               </button>
             )}
+            <NotificationToggle />
           </div>
         </nav>
 
@@ -573,5 +574,52 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
       `
       }</style>
     </>
+  );
+};
+
+const NotificationToggle = () => {
+  const [isNotificationEnabled, setIsNotificationEnabled] = useState<
+    boolean | null
+  >(null);
+
+  useEffect(() => {
+    if (!("Notification" in window)) {
+      // alert("Notifications not supported on this device ");
+      return;
+    }
+
+    if (!isNotificationEnabled) {
+      setIsNotificationEnabled(
+        Boolean(window.Notification.permission === "granted")
+      );
+    }
+  }, [isNotificationEnabled]);
+
+  const toggleNotification = () => {
+    if (!("Notification" in window)) {
+      alert("Notifications not supported on this device. Sorry!");
+      return;
+    }
+
+    if (!(window.Notification.permission === "granted")) {
+      window.Notification.requestPermission().then((permission) => {
+        if (permission === "denied" || permission === "default") {
+          setIsNotificationEnabled(false);
+          alert(
+            "Notifications are disabled on this device. Update permissions in your browser settings to fix this."
+          );
+        }
+
+        setIsNotificationEnabled(true);
+        new Notification("Notifications are enabled!");
+      });
+    }
+    new Notification("Notifications are enabled!");
+  };
+
+  return (
+    <button type="button" onClick={toggleNotification}>
+      {isNotificationEnabled ? "🔔" : "🔕"}
+    </button>
   );
 };
