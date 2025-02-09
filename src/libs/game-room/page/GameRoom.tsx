@@ -618,7 +618,11 @@ const NotificationToggle = () => {
   };
 
   return (
-    <button type="button" onClick={toggleNotification}>
+    <button
+      className="btn btn-ghost"
+      type="button"
+      onClick={toggleNotification}
+    >
       {isNotificationEnabled ? "🔔" : "🔕"}
     </button>
   );
