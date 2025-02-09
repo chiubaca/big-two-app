@@ -53,8 +53,10 @@ if (!roomRecord) {
 
   // Check initial notification permission
   if ("Notification" in window) {
-    toggleButton.textContent =
-      Notification.permission === "granted" ? "🔔" : "🔕";
+    if (toggleButton) {
+      toggleButton.textContent =
+        Notification.permission === "granted" ? "🔔" : "🔕";
+    }
   }
 
   // Register service worker
