@@ -107,8 +107,8 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
 
   useEffect(() => {
     if (isCurrentPlayerFocused) {
+      playSound("NEXT_TURN");
       if (!("Notification" in window) || !("serviceWorker" in navigator)) {
-        playSound("NEXT_TURN");
         return;
       }
 
