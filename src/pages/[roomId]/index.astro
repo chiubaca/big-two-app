@@ -43,3 +43,45 @@ if (!roomRecord) {
   creatorId={roomRecord.creatorId}
   client:load
 />
+
+<button id="notificationToggle" class="btn btn-ghost fixed bottom-10 right-10">
+  🔕
+</button>
+
+<script>
+  const toggleButton = document.getElementById("notificationToggle");
+
+  // Check initial notification permission
+  if ("Notification" in window) {
+    toggleButton.textContent =
+      Notification.permission === "granted" ? "🔔" : "🔕";
+  }
+
+  // Register service worker
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("/sw.js").catch((err) => {
+      console.error("Service worker registration failed:", err);
+    });
+  }
+
+  // Handle notification toggle
+  toggleButton?.addEventListener("click", async () => {
+    if (!("Notification" in window)) {
+      alert("This browser does not support notifications");
+      return;
+    }
+
+    // Request permission if not granted
+    if (Notification.permission !== "granted") {
+      const permission = await Notification.requestPermission();
+      toggleButton.textContent = permission === "granted" ? "🔔" : "🔕";
+      if (permission !== "granted") return;
+    }
+
+    // Show notification using service worker
+    const sw = await navigator.serviceWorker.ready;
+    await sw.showNotification("Big Two", {
+      body: "Notifications enabled!",
+    });
+  });
+</script>
