@@ -108,15 +108,19 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
   useEffect(() => {
     if (isCurrentPlayerFocused) {
       playSound("NEXT_TURN");
+
       if (!("Notification" in window) || !("serviceWorker" in navigator)) {
         return;
       }
 
-      navigator.serviceWorker.ready.then((sw) => {
-        sw.showNotification("Lets Play Big Two", {
-          body: "Its your turn!",
+      // Only show notification if app is not active
+      if (document.hidden) {
+        navigator.serviceWorker.ready.then((sw) => {
+          sw.showNotification("Lets Play Big Two", {
+            body: "Its your turn!",
+          });
         });
-      });
+      }
     }
     if (hasPlayerWon) {
       playSound("WIN");
