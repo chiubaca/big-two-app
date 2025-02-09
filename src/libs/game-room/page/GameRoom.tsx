@@ -118,6 +118,8 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
         navigator.serviceWorker.ready.then((sw) => {
           sw.showNotification("Lets Play Big Two", {
             body: "Its your turn!",
+            // requireInteraction: true,
+            data: { url: window.location.href }, // Store the URL to navigate to
           });
         });
       }
