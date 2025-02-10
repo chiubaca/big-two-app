@@ -1,8 +1,12 @@
-[{
-      "relation": ["delegate_permission/common.handle_all_urls"],
-      "target": {
-        "namespace": "android_app",
-        "package_name": "big_two.twa",
-        "sha256_cert_fingerprints": ["3B:94:84:3A:5F:7D:53:C5:93:70:C9:6A:D8:1D:B1:2D:CD:86:1B:1F:88:A9:38:55:A4:E1:98:3D:14:27:F9:7D"]
-      }
-    }]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "big_two.twa",
+      "sha256_cert_fingerprints": [
+        "3B:21:65:FE:8D:FE:12:37:F5:9E:EE:C2:72:63:F5:E5:8B:1F:5E:EC:22:0F:05:D6:33:DF:84:BD:54:FE:74:5A"
+      ]
+    }
+  }
+]
