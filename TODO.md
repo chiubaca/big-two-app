@@ -8,6 +8,8 @@
 - [x] make join room button disabled when game is in progress
 - [x] privacy policy
 - [ ] show room name when in a game room
+- [ ] setup sentry
+- [ ] setup feedback form
 
 ## v2
 
