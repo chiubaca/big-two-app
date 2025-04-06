@@ -11,12 +11,20 @@ import {
 } from "~libs/helpers/gameStateMachine";
 import { createActor, type Snapshot } from "xstate";
 import { db } from "~libs/drizzle-orm/db";
-import { gameRoom } from "drizzle/schemas/schema";
+import { gameRoom, pushSubscription } from "drizzle/schemas/schema";
 import { eq } from "drizzle-orm";
 
 import type TypedEmitter from "typed-emitter";
 import type { Card } from "@chiubaca/big-two-utils";
 import { user } from "drizzle/schemas/auth-schema";
+import webpush from "web-push";
+
+// Configure web-push with your VAPID keys
+webpush.setVapidDetails(
+  "mailto:alexchiu11@gmail.com",
+  import.meta.env.PUBLIC_VAPID_KEY || "",
+  import.meta.env.VAPID_PRIVATE_KEY || ""
+);
 declare module "hono" {
   interface ContextVariableMap {
     locals: APIContext["locals"];
@@ -65,7 +73,9 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
       const roomId = c.req.param("roomId");
       const { user } = c.get("locals");
 
-      console.log(`🔵 User ${user?.name} connected to room ${roomId}`);
+      if (!user) return;
+
+      console.log(`🔵 User ${user.name} connected to room ${roomId}`);
 
       return streamSSE(c, async (stream) => {
         let running = true;
@@ -73,6 +83,16 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
         const gameStateUpdatedListener = (
           gameState: BigTwoGameMachineSnapshot
         ) => {
+          const currentPlayerTurn =
+            gameState.context.players[gameState.context.currentPlayerIndex];
+
+          if (currentPlayerTurn.id === user.id) {
+            sendTurnNotification({
+              gameRoomId: roomId,
+              playerId: user.id,
+            });
+          }
+
           stream.writeSSE({
             event: `gameStateUpdated:${roomId}`,
             data: JSON.stringify(gameState),
@@ -457,6 +477,40 @@ const createHonoApp = (astroLocals: APIContext["locals"]) => {
           return c.json({ ok: false, message: "server error" }, 500);
         }
       }
+    )
+    .post(
+      "enablePushSubscription",
+      zValidator(
+        "json",
+        z.object({
+          endpoint: z.string(),
+          expirationTime: z.number().nullable(),
+          keys: z.object({
+            p256dh: z.string(),
+            auth: z.string(),
+          }),
+        })
+      ),
+      async (c) => {
+        const subscription = c.req.valid("json");
+        const { user } = c.get("locals");
+
+        if (!user) {
+          return c.json({ error: "Unauthorized" }, 401);
+        }
+
+        try {
+          await db.insert(pushSubscription).values({
+            userId: user.id,
+            subscriptionJSON: subscription,
+          });
+
+          return c.json({ status: "success" });
+        } catch (error) {
+          console.error("Error saving push subscription:", error);
+          return c.json({ error: "Failed to save subscription" }, 500);
+        }
+      }
     );
 
   return app;
@@ -468,3 +522,51 @@ export const ALL: APIRoute = (context) => {
 };
 
 export type AppType = ReturnType<typeof createHonoApp>;
+
+async function sendTurnNotification({
+  playerId,
+  gameRoomId,
+}: {
+  playerId: string;
+  gameRoomId: string;
+}) {
+  try {
+    // Get the player's subscriptions
+    const subscriptions = await db
+      .select()
+      .from(pushSubscription)
+      .where(eq(pushSubscription.userId, playerId));
+
+    if (!subscriptions.length) {
+      console.log(`No push subscriptions found for player ${playerId}`);
+      return;
+    }
+
+    // Send push notification to all player's devices
+    const notificationPayload = JSON.stringify({
+      title: "It's Your Turn!",
+      body: "Your turn to play in Big Two",
+      url: `/${gameRoomId}`,
+    });
+
+    const sendPromises = subscriptions.map((subscription) => {
+      const { id, subscriptionJSON, userId } = subscription;
+
+      return webpush.sendNotification(
+        {
+          endpoint: subscriptionJSON.endpoint || "",
+          keys: {
+            p256dh: subscriptionJSON.keys?.p256dh || "",
+            auth: subscriptionJSON.keys?.auth || "",
+          },
+        },
+        notificationPayload
+      );
+    });
+
+    await Promise.all(sendPromises);
+    console.log(`Sent turn notifications to player ${playerId}`);
+  } catch (error) {
+    console.error("Error sending push notification:", error);
+  }
+}

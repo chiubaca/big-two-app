@@ -15,6 +15,13 @@
       "when": 1736947513067,
       "tag": "0001_broken_centennial",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1742415549415,
+      "tag": "0002_naive_the_hand",
+      "breakpoints": true
     }
   ]
 }

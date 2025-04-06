@@ -38,6 +38,7 @@
     "tailwind-merge": "^2.6.0",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.3",
+    "web-push": "^3.6.7",
     "xstate": "^5.19.2"
   },
   "devDependencies": {
@@ -45,6 +46,7 @@
     "@flydotio/dockerfile": "^0.5.9",
     "@types/better-sqlite3": "^7.6.12",
     "@types/node": "^22.10.5",
+    "@types/web-push": "^3.6.4",
     "@vite-pwa/assets-generator": "^0.2.6",
     "daisyui": "^4.12.14",
     "typed-emitter": "^2.1.0",

@@ -16,6 +16,8 @@ import { playSound } from "~libs/audio";
 import texture from "./noisy-texture.png";
 import { twMerge } from "tailwind-merge";
 import { Confetti } from "~libs/confetti";
+import { subscribeToPushNotifications } from "../helpers/subscribeToPushNotifications";
+import { SettingsModal } from "../components/settings/SettingsModal";
 
 interface GameRoomProps extends InitialGameRoomContextProps {
   roomName: string;
@@ -106,28 +108,10 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
     gameState.context.winner?.id === currentUserId;
 
   useEffect(() => {
-    if (isCurrentPlayerFocused) {
-      playSound("NEXT_TURN");
-
-      if (!("Notification" in window) || !("serviceWorker" in navigator)) {
-        return;
-      }
-
-      // Only show notification if app is not active
-      if (document.hidden) {
-        navigator.serviceWorker.ready.then((sw) => {
-          sw.showNotification("Lets Play Big Two", {
-            body: "Its your turn!",
-            // requireInteraction: true,
-            data: { url: window.location.href }, // Store the URL to navigate to
-          });
-        });
-      }
-    }
     if (hasPlayerWon) {
       playSound("WIN");
     }
-  }, [isCurrentPlayerFocused, hasPlayerWon]);
+  }, [hasPlayerWon]);
 
   const toggleSelectedCard = (card: Card) => {
     playSound("SELECT");
@@ -186,6 +170,7 @@ const Game = ({ creatorId }: { roomName: string; creatorId: string }) => {
                 Reset game
               </button>
             )}
+            <SettingsModal />
           </div>
         </nav>
 

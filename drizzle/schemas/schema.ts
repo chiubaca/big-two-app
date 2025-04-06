@@ -21,8 +21,15 @@ export const gameRoom = sqliteTable("game_room", {
     .notNull(),
 });
 
-// export type User = typeof users.$inferSelect;
-// export type NewUser = typeof users.$inferInsert;
-
-// export type Idea = typeof ideas.$inferSelect;
-// export type NewIdea = typeof ideas.$inferInsert;
+export const pushSubscription = sqliteTable("push_subscription", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => createId())
+    .notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id),
+  subscriptionJSON: blob("subscription_json", { mode: "json" })
+    .$type<PushSubscriptionJSON>()
+    .notNull(),
+});
