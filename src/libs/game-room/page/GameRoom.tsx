@@ -1,23 +1,22 @@
+import { twMerge } from "tailwind-merge";
 import type { Card } from "@chiubaca/big-two-utils";
 import { useContext, useState, useEffect } from "react";
+
+import { playSound } from "~libs/audio";
+import { Confetti } from "~libs/confetti";
+import { honoClient } from "~libs/hono-actions";
+import { detectHandType } from "~libs/helpers/gameStateMachine";
+
+import texture from "./noisy-texture.png";
+import { PlayingCard } from "../components/PlayingCard";
+import { makePlayerOrder } from "../helpers/makePlayerOrder";
+import { SettingsModal } from "../components/settings/SettingsModal";
 import {
   GameRoomContext,
   GameRoomProvider,
   type InitialGameRoomContextProps,
 } from "./GameRoom.context";
-
 import "../../../base.css";
-import { PlayingCard } from "../components/PlayingCard";
-import { detectHandType } from "~libs/helpers/gameStateMachine";
-import { honoClient } from "~libs/hono-actions";
-import { makePlayerOrder } from "../helpers/makePlayerOrder";
-import { playSound } from "~libs/audio";
-
-import texture from "./noisy-texture.png";
-import { twMerge } from "tailwind-merge";
-import { Confetti } from "~libs/confetti";
-import { subscribeToPushNotifications } from "../helpers/subscribeToPushNotifications";
-import { SettingsModal } from "../components/settings/SettingsModal";
 
 interface GameRoomProps extends InitialGameRoomContextProps {
   roomName: string;
