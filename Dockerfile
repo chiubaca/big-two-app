@@ -24,9 +24,18 @@ ENV PATH="/usr/local/go/bin:${PATH}"
 # Astro app lives here
 WORKDIR /app
 
-# Set production environment
+# Set PUBLIC production environment variables
 ENV NODE_ENV="production"
 ENV PUBLIC_BASE_URL="https://big-two.fly.dev"
+ENV PUBLIC_VAPID_KEY="BD6k74fq6RuDhlenC2JVHVUA9FF6ubj5APkUqPi-IhR64VHqYmt1U-zbP_EzEJHNEZfo5BZsjPa80DG2fXmQapk"
+
+# Define build arguments for private keys
+ARG VAPID_PRIVATE_KEY
+ARG BETTER_AUTH_SECRET
+
+# Set environment variables using build arguments
+ENV VAPID_PRIVATE_KEY=${VAPID_PRIVATE_KEY}
+ENV BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
 
 # Throw-away build stage to reduce size of final image
 FROM base as build
