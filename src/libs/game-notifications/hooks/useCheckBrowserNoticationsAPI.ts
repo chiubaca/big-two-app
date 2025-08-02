@@ -1,17 +1,10 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { subscribeToPushNotifications } from "~libs/game-room/helpers/subscribeToPushNotifications";
 
-export const NotificationSetting = () => {
-  // TODO seperate settings for enabling browser and push notifications
-
+export const useCheckBrowserNotificationsAPI = () => {
   const [notificationStatus, setNotificationStatus] = useState<
     "not-supported" | "not-enabled" | "enabled" | "loading"
   >("loading"); // Start with "loading" while determining the initial state
-
-  console.log(
-    "🚀 ~ ToggleNotificationsButton ~ notificationStatus:",
-    notificationStatus
-  );
 
   useEffect(() => {
     const checkNotificationStatus = async () => {
@@ -31,7 +24,7 @@ export const NotificationSetting = () => {
     checkNotificationStatus();
   }, []);
 
-  const enableNotifications = async () => {
+  const enableBrowserNotifications = async () => {
     try {
       setNotificationStatus("loading");
 
@@ -52,40 +45,14 @@ export const NotificationSetting = () => {
     }
   };
 
-  const disableNotifications = () => {
+  const disableBrowserNotifications = () => {
     // TODO, this doesnt do anything right now, we need to block on the backend when this is pressed
     setNotificationStatus("not-enabled");
   };
 
-  if (notificationStatus === "loading") {
-    return <p>⚠️ Please allow browser notifications...</p>;
-  }
-
-  return (
-    <>
-      {notificationStatus === "enabled" ? (
-        <p className="text-green-500">
-          Browser notifications have been enabled for this game
-          <button
-            className="btn btn-sm"
-            type="button"
-            onClick={disableNotifications}
-          >
-            🔕 Disable notifications
-          </button>
-        </p>
-      ) : (
-        <p className="text-red-500">
-          Browser notifications have been disabled for this game,{" "}
-          <button
-            className="btn btn-sm"
-            type="button"
-            onClick={() => enableNotifications()}
-          >
-            🔔 Enable notification
-          </button>
-        </p>
-      )}
-    </>
-  );
+  return {
+    notificationStatus,
+    enableBrowserNotifications,
+    disableBrowserNotifications,
+  };
 };

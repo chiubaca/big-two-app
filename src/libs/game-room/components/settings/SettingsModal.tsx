@@ -1,4 +1,4 @@
-import { NotificationSetting } from "./NotificationsSetting";
+import { NotificationSetting } from "../../../game-notifications/components/NotificationsSetting";
 
 export const SettingsModal = () => {
   return (
@@ -19,7 +19,6 @@ export const SettingsModal = () => {
         <div className="modal-box text-black">
           <h3 className="pb-2 font-bold text-lg">Settings</h3>
 
-          <h4 className="font-bold">Notifications</h4>
           <NotificationSetting />
 
           <div className="modal-action">
