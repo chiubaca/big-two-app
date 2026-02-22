@@ -1,6 +1,4 @@
 import clsx from "clsx";
-import { useState, useEffect } from "react";
-import { subscribeToPushNotifications } from "~libs/game-room/helpers/subscribeToPushNotifications";
 import { useCheckBrowserNotificationsAPI } from "../hooks/useCheckBrowserNoticationsAPI";
 
 export const NotificationSetting = () => {
@@ -9,51 +7,58 @@ export const NotificationSetting = () => {
     disableBrowserNotifications,
     enableBrowserNotifications,
   } = useCheckBrowserNotificationsAPI();
-  console.log(
-    "🔍 ~  ~ src/libs/game-notifications/components/NotificationsSetting.tsx:6 ~ notificationStatus:",
-    notificationStatus
-  );
 
   if (notificationStatus === "loading") {
-    return "loading...";
+    return (
+      <div className="flex items-center justify-center py-4">
+        <span className="loading loading-dots loading-md text-casino-emeraldLight" />
+      </div>
+    );
   }
 
   return (
-    <fieldset className="fieldset w-xs rounded-box border border-base-300 bg-base-200 ">
-      <legend className="fieldset-legend ml-3 text-lg">Notifications</legend>
-      <div className="p-5">
-        {/* biome-ignore lint/nursery/useSortedClasses: <explanation> */}
-        <p className="text-red-500 pb-2">
-          Allow browser notification for to enable in-game notifications.
-        </p>
-        <div className="flex flex-col flex-wrap items-center gap-1">
-          <button
-            className={clsx(
-              "btn btn-sm",
-              notificationStatus === "enabled" && "btn-disabled"
-            )}
-            aria-disabled={notificationStatus === "enabled" ? "false" : "true"}
-            type="button"
-            onClick={enableBrowserNotifications}
-          >
-            {notificationStatus === "enabled"
-              ? "Browser notifications enabled 🙌🏼"
-              : "Enable browser notifications"}
-          </button>
-          <span> ⬇︎ </span>
-          <button
-            className={clsx([
-              "btn btn-sm",
-              notificationStatus !== "enabled" && "btn-disabled",
-            ])}
-            aria-disabled={notificationStatus !== "enabled" ? "false" : "true"}
-            type="button"
-            onClick={() => console.log("enable game notificaitons")}
-          >
-            🔔 Enable in-games notifications
-          </button>
+    <div className="bg-casino-black/30 rounded-xl p-4 border border-casino-emerald/10">
+      <h4 className="text-casino-cream/70 text-sm uppercase tracking-wide mb-4">
+        Notifications
+      </h4>
+      <p className="text-casino-cream/50 text-sm pb-4">
+        Allow browser notifications to enable in-game alerts.
+      </p>
+      <div className="flex flex-col gap-3">
+        <button
+          className={clsx(
+            "btn btn-sm transition-all",
+            notificationStatus === "enabled"
+              ? "bg-casino-emerald/30 text-casino-cream/70 border-casino-emerald/50 cursor-default"
+              : "bg-casino-emerald text-casino-cream hover:bg-casino-emeraldLight hover:shadow-emerald border-none",
+          )}
+          aria-disabled={notificationStatus === "enabled" ? "false" : "true"}
+          type="button"
+          onClick={enableBrowserNotifications}
+        >
+          {notificationStatus === "enabled"
+            ? "Browser notifications enabled"
+            : "Enable browser notifications"}
+        </button>
+        <div className="flex items-center justify-center">
+          <div className="h-px w-8 bg-casino-emerald/20" />
+          <span className="text-casino-emerald/30 mx-2">↓</span>
+          <div className="h-px w-8 bg-casino-emerald/20" />
         </div>
+        <button
+          className={clsx([
+            "btn btn-sm transition-all",
+            notificationStatus !== "enabled"
+              ? "bg-casino-charcoal/50 text-casino-cream/30 border-casino-emerald/10 cursor-not-allowed"
+              : "bg-casino-charcoal text-casino-cream border-casino-emerald/30 hover:bg-casino-charcoal/80 hover:border-casino-emerald/50",
+          ])}
+          aria-disabled={notificationStatus !== "enabled" ? "false" : "true"}
+          type="button"
+          onClick={() => console.log("enable game notificaitons")}
+        >
+          Enable in-game notifications
+        </button>
       </div>
-    </fieldset>
+    </div>
   );
 };

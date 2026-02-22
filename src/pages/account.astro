@@ -12,18 +12,34 @@ if (!user) {
 }
 ---
 
-<head>
-  <meta charset="utf-8" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="manifest" href="/manifest.json" />
-  <meta name="viewport" content="width=device-width" />
-  <meta name="generator" content={Astro.generator} />
-  <meta name="theme-color" content="#000000" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
-  <title>Lets play, Big Two ♠ | account</title>
-  <ClientRouter />
-</head>
-
-<AccountPage currentUsername={user.name} client:load />
-
-<Footer />
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.json" />
+    <meta name="viewport" content="width=device-width" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#0a0a0f" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+    <title>Account | Big Two</title>
+    <ClientRouter />
+  </head>
+  <body class="min-h-screen bg-gradient-to-b from-casino-black to-casino-navy">
+    <nav class="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-casino-black/80 border-b border-casino-emerald/30">
+      <div class="container mx-auto px-4 max-w-2xl">
+        <div class="navbar min-h-16">
+          <div class="flex-1">
+            <a href="/" class="flex items-center gap-2 text-casino-emeraldLight font-display text-xl">
+              <span>♠</span>
+              <span>Big Two</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </nav>
+    <main class="container mx-auto px-4 max-w-md pt-24 pb-20">
+      <AccountPage currentUsername={user.name} client:load />
+    </main>
+    <Footer />
+  </body>
+</html>
